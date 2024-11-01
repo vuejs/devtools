@@ -66,6 +66,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./pages/IntervalUpdate.vue'),
     name: 'interval-update',
   },
+  {
+    path: '/prop-mutation',
+    component: () => import('./pages/PropMutation.vue'),
+    name: 'prop-mutation',
+  },
 ]
 
 const router = createRouter({

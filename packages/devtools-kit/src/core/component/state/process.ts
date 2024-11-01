@@ -70,6 +70,7 @@ function processProps(instance: VueAppInstance) {
       type: 'props',
       key: camelizeKey,
       value: returnError(() => instance.props[key]),
+      editable: true,
       meta: propDefinition
         ? {
             type: propDefinition.type ? getPropType(propDefinition.type) : 'any',

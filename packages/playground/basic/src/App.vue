@@ -26,6 +26,12 @@
           /hey/123123
         </span>
       </RouterLink>
+      |
+      <RouterLink to="/prop-mutation">
+        <span>
+          Prop mutation
+        </span>
+      </RouterLink>
     </div>
   </div>
 </template>
