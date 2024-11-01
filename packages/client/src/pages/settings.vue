@@ -86,6 +86,9 @@ const minimizePanelInteractiveLabel = computed(() => {
   const option = minimizePanelInteractiveOptions.find(i => i.value === minimizePanelInteractive.value)
   return `${option?.label ?? 'Select...'}`
 })
+
+const { openImportDialog } = useImportDevtoolsClientState()
+const { exportDevtoolsClientState } = useExportDevtoolsClientState()
 </script>
 
 <template>
@@ -212,6 +215,20 @@ const minimizePanelInteractiveLabel = computed(() => {
             </div>
           </VueCard>
         </template>
+
+        <h3 mt2 text-lg>
+          Data
+        </h3>
+        <div flex="~ gap-2 wrap">
+          <VueButton outlined @click="() => exportDevtoolsClientState()">
+            <div i-ph-export />
+            Export Settings
+          </VueButton>
+          <VueButton outlined @click="() => openImportDialog()">
+            <div i-ph-download-simple />
+            Import Settings
+          </VueButton>
+        </div>
 
         <h3 mt2 text-lg>
           Debug
