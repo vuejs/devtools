@@ -159,7 +159,7 @@ onUnmounted(() => {
         </div>
       </Pane>
       <Pane size="60">
-        <div h-full select-none overflow-scroll class="no-scrollbar">
+        <div h-full overflow-scroll class="no-scrollbar">
           <RootStateViewer v-if="selected" class="p3" :data="state" node-id="" inspector-id="router" expanded-state-id="routes-state" />
           <Empty v-else>
             No Data

@@ -134,7 +134,7 @@ function toggleRecordingState() {
             </div>
           </Pane>
           <Pane size="60">
-            <div h-full select-none overflow-scroll class="no-scrollbar">
+            <div h-full overflow-scroll class="no-scrollbar">
               <RootStateViewer class="p3" :data="displayedInfo" node-id="" inspector-id="" :disable-edit="true" expanded-state-id="timeline-state" />
             </div>
           </Pane>

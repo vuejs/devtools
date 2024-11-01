@@ -231,7 +231,7 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
-            <RootStateViewer v-if="selected && !emptyState" :data="displayState" :node-id="selected" :inspector-id="inspectorId" expanded-state-id="custom-inspector-state" class="no-scrollbar flex-1 select-none overflow-scroll" />
+            <RootStateViewer v-if="selected && !emptyState" :data="displayState" :node-id="selected" :inspector-id="inspectorId" expanded-state-id="custom-inspector-state" class="no-scrollbar flex-1 overflow-scroll" />
             <Empty v-else>
               No Data
             </Empty>

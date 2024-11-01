@@ -344,7 +344,7 @@ function toggleApp(id: string) {
               <i v-if="activeTreeNodeFilePath" v-tooltip.bottom="'Open in Editor'" class="i-carbon-launch h-4 w-4 cursor-pointer hover:(op-70)" @click="openInEditor" />
             </div>
           </div>
-          <RootStateViewer class="no-scrollbar flex-1 select-none overflow-scroll" :data="displayState" :node-id="activeComponentId" :inspector-id="inspectorId" expanded-state-id="component-state" />
+          <RootStateViewer class="no-scrollbar flex-1 overflow-scroll" :data="displayState" :node-id="activeComponentId" :inspector-id="inspectorId" expanded-state-id="component-state" />
         </div>
         <ComponentRenderCode v-if="componentRenderCodeVisible && componentRenderCode" :code="componentRenderCode" @close="closeComponentRenderCode" />
       </Pane>
