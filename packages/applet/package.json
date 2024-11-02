@@ -35,7 +35,7 @@
     "@vue/devtools-ui": "workspace:^",
     "lodash-es": "^4.17.21",
     "perfect-debounce": "^1.0.0",
-    "shiki": "^1.22.0",
+    "shiki": "^1.22.2",
     "splitpanes": "^3.1.5",
     "vue-virtual-scroller": "2.0.0-beta.8"
   },

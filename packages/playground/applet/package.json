@@ -7,11 +7,11 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@iconify/json": "^2.2.262",
+    "@iconify/json": "^2.2.266",
     "@tresjs/core": "^4.3.1",
-    "@vueuse/core": "^11.1.0",
-    "pinia": "^2.2.4",
-    "three": "^0.169.0",
+    "@vueuse/core": "^11.2.0",
+    "pinia": "^2.2.5",
+    "three": "^0.170.0",
     "unplugin-auto-import": "^0.18.3",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
@@ -23,11 +23,11 @@
     "@vue/devtools-core": "workspace:*",
     "@vue/devtools-kit": "workspace:*",
     "@vue/devtools-shared": "workspace:*",
-    "sass-embedded": "^1.80.5",
+    "sass-embedded": "^1.80.6",
     "serve": "^14.2.4",
     "typescript": "^5.6.3",
-    "unocss": "^0.63.4",
-    "vite": "^5.4.9",
+    "unocss": "^0.63.6",
+    "vite": "^5.4.10",
     "vite-plugin-inspect": "^0.8.7",
     "vite-plugin-vue-devtools": "workspace:*"
   }
