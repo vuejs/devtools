@@ -29,6 +29,6 @@
     "rfdc": "^1.4.1"
   },
   "devDependencies": {
-    "@types/node": "^20.16.14"
+    "@types/node": "^20.17.5"
   }
 }
