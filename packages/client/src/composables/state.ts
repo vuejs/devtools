@@ -1,6 +1,8 @@
 import type { RemovableRef } from '@vueuse/core'
+import { showVueNotification } from '@vue/devtools-ui'
 import type { GraphSettings } from './graph'
 import type { TabSettings } from './state-tab'
+import { downloadFile, readFileAsText } from '~/utils'
 
 interface DevtoolsClientState {
   isFirstVisit: boolean
@@ -65,4 +67,48 @@ watch(() => devtoolsClientState.value.splitScreen.enabled, (enabled, o) => {
     devtoolsClientState.value.splitScreen.size = [50, 50]
   }
 })
+
+const DEVTOOLS_STATE_KEY = '__VUE_DEVTOOLS_CLIENT_STATE__'
+
+export function useExportDevtoolsClientState() {
+  return {
+    exportDevtoolsClientState: () => {
+      const blob = new Blob([
+        JSON.stringify({ [DEVTOOLS_STATE_KEY]: devtoolsClientState.value }, null, 2),
+      ], { type: 'application/json' })
+      downloadFile(blob, 'vue-devtools-client-state.json')
+    },
+  }
+}
+
+export function useImportDevtoolsClientState() {
+  const { open, onChange } = useFileDialog({ accept: '.json', multiple: false })
+
+  onChange((fileList) => {
+    const jsonFile = fileList?.[0]
+    if (!jsonFile)
+      return
+    readFileAsText(jsonFile)
+      .then((file) => {
+        const data = JSON.parse(file as string)[DEVTOOLS_STATE_KEY]
+        if (!data)
+          throw new Error('Invalid file')
+        devtoolsClientState.value = data
+        showVueNotification({
+          message: 'Import successful',
+          type: 'success',
+        })
+      })
+      .catch(() => {
+        showVueNotification({
+          type: 'error',
+          message: 'Invalid file',
+        })
+      })
+  })
+
+  return {
+    openImportDialog: open,
+  }
+}
 // #endregion
