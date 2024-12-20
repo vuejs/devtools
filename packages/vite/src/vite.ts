@@ -84,6 +84,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
   const vueDevtoolsPath = getVueDevtoolsPath()
   const inspect = Inspect({
     silent: true,
+    embedded: true,
   })
 
   const pluginOptions = mergeOptions(options ?? {})
