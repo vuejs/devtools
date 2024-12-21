@@ -2,7 +2,7 @@ import type { Component, App as VueAppType } from 'vue'
 import { createApp, h } from 'vue'
 import App from './App.vue'
 
-let app: VueAppType
+let app: VueAppType | null = null
 function createDevToolsContainer(App: Component) {
   const CONTAINER_ID = '__vue-devtools-container__'
   const el = document.createElement('div')
@@ -25,15 +25,15 @@ const config = { childList: true, attributes: false }
 const observer = new MutationObserver(callback)
 observer.observe(targetNode, config)
 
-let init = false
+let isInitialized = false
 function callback(mutationsList, observer) {
   for (const mutation of mutationsList) {
-    if (mutation.type === 'childList' && init === false) {
+    if (mutation.type === 'childList' && isInitialized === false) {
       if (app) {
         app.unmount()
       }
       createDevToolsContainer(App)
-      init = true
+      isInitialized = true
       observer.disconnect()
     }
   }
