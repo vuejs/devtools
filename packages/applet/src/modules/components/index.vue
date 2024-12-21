@@ -215,21 +215,54 @@ onUnmounted(() => {
   rpc.functions.off(DevToolsMessagingEvents.INSPECTOR_TREE_UPDATED, onInspectorTreeUpdated)
 })
 
-function inspectComponentInspector() {
+// #region toggle app
+const devtoolsState = useDevToolsState()
+const appRecords = computed(() => devtoolsState.appRecords.value.map(app => ({
+  label: app.name + (app.version ? ` (${app.version})` : ''),
+  value: app.id,
+})))
+
+const normalizedAppRecords = computed(() => appRecords.value.map(app => ({
+  label: app.label,
+  id: app.value,
+})))
+
+const activeAppRecordId = ref(devtoolsState.activeAppRecordId.value)
+watchEffect(() => {
+  activeAppRecordId.value = devtoolsState.activeAppRecordId.value
+})
+
+async function toggleApp(id: string) {
+  await rpc.value.toggleApp(id)
+  activeComponentId.value = ''
+  await getComponentsInspectorTree()
+}
+// #endregion
+
+async function inspectComponentInspector() {
   inspectComponentTipVisible.value = true
   emit('onInspectComponentStart')
-  rpc.value.inspectComponentInspector().then((_data) => {
-    const data = JSON.parse(_data! as unknown as string)
+
+  try {
+    const data = JSON.parse(await rpc.value.inspectComponentInspector())
+
+    const appId = data.id.split(':')[0]
+    if (activeAppRecordId.value !== data.appId) {
+      await toggleApp(appId)
+    }
+
     activeComponentId.value = data.id
-    if (!expandedTreeNodes.value.includes(data.id))
+    if (!expandedTreeNodes.value.includes(data.id)) {
       expandedTreeNodes.value.push(data.id)
+    }
 
     expandedTreeNodes.value = [...new Set([...expandedTreeNodes.value, ...getTargetLinkedNodes(treeNodeLinkedList.value, data.id)])]
     scrollToActiveTreeNode()
-  }).finally(() => {
+  }
+  finally {
     inspectComponentTipVisible.value = false
     emit('onInspectComponentEnd')
-  })
+  }
 }
 
 function cancelInspectComponentInspector() {
@@ -280,32 +313,6 @@ function closeComponentRenderCode() {
   componentRenderCode.value = ''
   componentRenderCodeVisible.value = false
 }
-
-// #region toggle app
-const devtoolsState = useDevToolsState()
-const appRecords = computed(() => devtoolsState.appRecords.value.map(app => ({
-  label: app.name + (app.version ? ` (${app.version})` : ''),
-  value: app.id,
-})))
-
-const normalizedAppRecords = computed(() => appRecords.value.map(app => ({
-  label: app.label,
-  id: app.value,
-})))
-
-const activeAppRecordId = ref(devtoolsState.activeAppRecordId.value)
-watchEffect(() => {
-  activeAppRecordId.value = devtoolsState.activeAppRecordId.value
-})
-
-function toggleApp(id: string) {
-  rpc.value.toggleApp(id).then(() => {
-    activeComponentId.value = ''
-    getComponentsInspectorTree()
-  })
-}
-
-// #endregion
 </script>
 
 <template>

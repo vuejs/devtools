@@ -3,7 +3,7 @@ import type { ComponentHighLighterOptions, ScrollToComponentOptions } from './ty
 import { activeAppRecord } from '../../ctx'
 import { getComponentBoundingRect } from '../component/state/bounding-rect'
 import { getRootElementsFromComponentInstance } from '../component/tree/el'
-import { getComponentId, getComponentInstance, getInstanceName } from '../component/utils'
+import { getComponentInstance, getInstanceName, getUniqueComponentId } from '../component/utils'
 
 export type * from './types'
 
@@ -180,14 +180,8 @@ function selectComponentFn(e: MouseEvent, cb) {
   e.preventDefault()
   e.stopPropagation()
   if (inspectInstance) {
-    const app = activeAppRecord.value?.app as unknown as VueAppInstance
-    getComponentId({
-      app,
-      uid: app.uid,
-      instance: inspectInstance,
-    }).then((id) => {
-      cb(id)
-    })
+    const uniqueComponentId = getUniqueComponentId(inspectInstance)
+    cb(uniqueComponentId)
   }
 }
 
