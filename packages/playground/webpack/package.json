@@ -23,8 +23,8 @@
     "@vue/cli-service": "~5.0.8",
     "@vue/devtools": "workspace:*",
     "@vue/devtools-api": "workspace:*",
-    "eslint": "^9.15.0",
-    "eslint-plugin-vue": "^9.31.0"
+    "eslint": "^9.17.0",
+    "eslint-plugin-vue": "^9.32.0"
   },
   "eslintConfig": {
     "env": {

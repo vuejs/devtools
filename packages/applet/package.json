@@ -35,14 +35,14 @@
     "@vue/devtools-ui": "workspace:^",
     "lodash-es": "^4.17.21",
     "perfect-debounce": "^1.0.0",
-    "shiki": "^1.24.0",
+    "shiki": "^1.24.4",
     "splitpanes": "^3.1.5",
     "vue-virtual-scroller": "2.0.0-beta.8"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
     "unplugin-vue": "^5.2.1",
-    "vite-plugin-dts": "^4.3.0",
+    "vite-plugin-dts": "^4.4.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   }
