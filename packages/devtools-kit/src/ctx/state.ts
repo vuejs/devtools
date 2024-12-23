@@ -210,9 +210,9 @@ export function addCustomCommand(action: CustomCommand) {
     icon: resolveIcon(action.icon),
     children: action.children
       ? action.children.map((child: CustomCommand) => ({
-        ...child,
-        icon: resolveIcon(child.icon),
-      }))
+          ...child,
+          icon: resolveIcon(child.icon),
+        }))
       : undefined,
   })
   updateAllStates()
