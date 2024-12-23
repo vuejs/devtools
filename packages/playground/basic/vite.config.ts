@@ -4,7 +4,6 @@ import Unocss from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { defineConfig } from 'vite'
-import inspect from 'vite-plugin-inspect'
 import VueDevTools from 'vite-plugin-vue-devtools'
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -30,7 +29,6 @@ export default defineConfig({
       ],
       resolvers: [ElementPlusResolver()],
     }),
-    inspect(),
   ],
   server: {
     port: 3000,
