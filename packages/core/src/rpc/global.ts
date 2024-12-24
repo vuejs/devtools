@@ -122,8 +122,8 @@ export const functions = {
     if (inspector)
       await inspector.enable()
   },
-  async toggleApp(id: string) {
-    return devtools.ctx.api.toggleApp(id)
+  async toggleApp(id: string, options?: { inspectingComponent?: boolean }) {
+    return devtools.ctx.api.toggleApp(id, options)
   },
   updatePluginSettings(pluginId: string, key: string, value: string) {
     return devtools.ctx.api.updatePluginSettings(pluginId, key, value)

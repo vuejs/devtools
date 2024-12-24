@@ -40,9 +40,13 @@ export function removeRegisteredPluginApp(app: App) {
   target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.delete(app)
 }
 
-export function registerDevToolsPlugin(app: App) {
-  if (target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.has(app) || devtoolsState.highPerfModeEnabled)
+export function registerDevToolsPlugin(app: App, options?: { inspectingComponent?: boolean }) {
+  if (target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.has(app)) {
     return
+  }
+  if (devtoolsState.highPerfModeEnabled && !options?.inspectingComponent) {
+    return
+  }
 
   target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.add(app)
 

@@ -102,7 +102,7 @@ export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevTool
     // get vue inspector
     getVueInspector: getComponentInspector,
     // toggle app
-    toggleApp(id: string) {
+    toggleApp(id: string, options?: { inspectingComponent?: boolean }) {
       const appRecord = devtoolsAppRecords.value.find(record => record.id === id)
 
       if (appRecord) {
@@ -110,7 +110,7 @@ export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevTool
         setActiveAppRecord(appRecord)
         normalizeRouterInfo(appRecord, activeAppRecord)
         callInspectorUpdatedHook()
-        registerDevToolsPlugin(appRecord.app)
+        registerDevToolsPlugin(appRecord.app, options)
       }
     },
     // inspect dom

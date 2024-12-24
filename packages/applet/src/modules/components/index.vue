@@ -232,8 +232,8 @@ watchEffect(() => {
   activeAppRecordId.value = devtoolsState.activeAppRecordId.value
 })
 
-async function toggleApp(id: string) {
-  await rpc.value.toggleApp(id)
+async function toggleApp(id: string, options: { inspectingComponent?: boolean } = {}) {
+  await rpc.value.toggleApp(id, options)
   activeComponentId.value = ''
   await getComponentsInspectorTree()
 }
@@ -248,7 +248,7 @@ async function inspectComponentInspector() {
 
     const appId = data.id.split(':')[0]
     if (activeAppRecordId.value !== data.appId) {
-      await toggleApp(appId)
+      await toggleApp(appId, { inspectingComponent: true })
     }
 
     activeComponentId.value = data.id
