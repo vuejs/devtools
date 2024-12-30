@@ -119,7 +119,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
         const devtoolsUrl = url.endsWith('/') ? `${url}__devtools__/` : `${url}/__devtools__/`
         console.log(`  ${green('➜')}  ${bold('Vue DevTools')}: ${green(`Open ${colorUrl(`${devtoolsUrl}`)} as a separate window`)}`)
       }
-      console.log(`  ${green('➜')}  ${bold('Vue DevTools')}: ${green(`Press ${yellow(keys)} in App to toggle the Vue DevTools`)}\n`)
+      console.log(`  ${green('➜')}  ${bold('Vue DevTools')}: ${green(`Press ${yellow(keys)} in App to toggle the Vue DevTools`)}`)
     }
   }
 
