@@ -2,7 +2,8 @@
 import type { CustomInspectorNode, CustomInspectorState } from '@vue/devtools-kit'
 import { DevToolsMessagingEvents, rpc } from '@vue/devtools-core'
 import { parse } from '@vue/devtools-kit'
-import { until } from '@vueuse/core'
+import { VueInput } from '@vue/devtools-ui'
+import { until, useToggle, watchDebounced } from '@vueuse/core'
 import { Pane, Splitpanes } from 'splitpanes'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import DevToolsHeader from '~/components/basic/DevToolsHeader.vue'
@@ -21,6 +22,8 @@ const customInspectState = useCustomInspectorState()
 const inspectorId = computed(() => customInspectState.value.id!)
 
 const selected = ref('')
+const filterKey = ref('')
+const [filtered, toggleFiltered] = useToggle(true)
 const tree = ref<CustomInspectorNode[]>([])
 const treeNodeLinkedList = computed(() => tree.value?.length ? dfs(tree.value?.[0]) : [])
 const flattenedTreeNodes = computed(() => flattenTreeNodes(tree.value))
@@ -92,8 +95,8 @@ watch(selected, () => {
   getRoutesState(selected.value)
 })
 
-const getRoutesInspectorTree = () => {
-  rpc.value.getInspectorTree({ inspectorId: inspectorId.value, filter: '' }).then((_data) => {
+const getRoutesInspectorTree = async (filter = '') => {
+  await rpc.value.getInspectorTree({ inspectorId: inspectorId.value, filter }).then((_data) => {
     const data = parse(_data!)
     tree.value = data
     if (!selected.value && data.length) {
@@ -145,6 +148,18 @@ onUnmounted(() => {
   rpc.functions.off(DevToolsMessagingEvents.INSPECTOR_TREE_UPDATED, onInspectorTreeUpdated)
   rpc.functions.off(DevToolsMessagingEvents.INSPECTOR_STATE_UPDATED, onInspectorStateUpdated)
 })
+
+function search(v: string) {
+  const value = v.trim().toLowerCase()
+  toggleFiltered()
+  getRoutesInspectorTree(value).then(() => {
+    toggleFiltered()
+  })
+}
+
+watchDebounced(filterKey, (v) => {
+  search(v)
+}, { debounce: 300 })
 </script>
 
 <template>
@@ -155,12 +170,22 @@ onUnmounted(() => {
     <Splitpanes class="flex-1 overflow-auto">
       <Pane border="r base" size="40" h-full>
         <div h-full select-none overflow-scroll p2 class="no-scrollbar">
+          <div class="pb2">
+            <VueInput
+              v-model="filterKey" placeholder="Search routes"
+              :loading="!filtered"
+              :loading-debounce-time="250" class="text-3.5"
+            />
+          </div>
           <ComponentTree v-model="selected" :data="tree" />
         </div>
       </Pane>
       <Pane size="60">
         <div h-full overflow-scroll class="no-scrollbar">
-          <RootStateViewer v-if="selected" class="p3" :data="state" node-id="" inspector-id="router" expanded-state-id="routes-state" />
+          <RootStateViewer
+            v-if="selected" class="p3" :data="state" node-id="" inspector-id="router"
+            expanded-state-id="routes-state"
+          />
           <Empty v-else>
             No Data
           </Empty>
