@@ -62,6 +62,6 @@
     "@types/node": "^22.10.1",
     "fast-glob": "^3.3.2",
     "image-meta": "^0.2.1",
-    "pathe": "^1.1.2"
+    "pathe": "^2.0.2"
   }
 }

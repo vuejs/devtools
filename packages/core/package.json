@@ -34,7 +34,7 @@
     "@vue/devtools-shared": "workspace:^",
     "mitt": "^3.0.1",
     "nanoid": "^5.0.9",
-    "pathe": "^1.1.2",
+    "pathe": "^2.0.2",
     "vite-hot-client": "^0.2.4"
   },
   "devDependencies": {
