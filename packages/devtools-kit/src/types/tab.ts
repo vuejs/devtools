@@ -6,7 +6,7 @@ type TabCategory =
   | 'modules'
   | 'advanced'
 
-export type ModuleView = ModuleIframeView | ModuleVNodeView
+export type ModuleView = ModuleIframeView | ModuleVNodeView | ModuleSFCView
 
 export interface ModuleIframeView {
   /**
@@ -34,6 +34,17 @@ export interface ModuleVNodeView {
    * Send vnode to the client, they must be static and serializable
    */
   vnode: VNode
+}
+
+export interface ModuleSFCView {
+  /**
+   * SFC view
+   */
+  type: 'sfc'
+  /**
+   * SFC component
+   */
+  sfc: string
 }
 
 export interface CustomTab {

@@ -41,7 +41,8 @@
     "vis-network": "^9.1.9",
     "vite-hot-client": "^0.2.4",
     "vue-router": "^4.5.0",
-    "vue-virtual-scroller": "2.0.0-beta.8"
+    "vue-virtual-scroller": "2.0.0-beta.8",
+    "vue3-sfc-loader": "^0.9.5"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.277",
