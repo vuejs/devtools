@@ -65,6 +65,7 @@
     "play:multi-app": "turbo dev --filter=./packages/playground/multi-app",
     "play:webpack": "turbo dev --filter=./packages/playground/webpack",
     "play:options-api": "turbo dev --filter=./packages/playground/options-api",
+    "play:plugin-sfc": "turbo dev --filter=./packages/playground/plugin-sfc",
     "docs": "pnpm -C docs run docs:dev",
     "docs:build": "pnpm -C docs run docs:build",
     "zip": "tsx ./scripts/extension-zip.ts",

@@ -708,6 +708,31 @@ importers:
         specifier: workspace:*
         version: link:../../vite
 
+  packages/playground/plugin-sfc:
+    dependencies:
+      vue:
+        specifier: ^3.5.13
+        version: 3.5.13(typescript@5.7.2)
+    devDependencies:
+      '@vitejs/plugin-vue':
+        specifier: ^5.2.1
+        version: 5.2.1(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(sass-embedded@1.83.1)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.2))
+      '@vue/devtools':
+        specifier: workspace:^
+        version: link:../../devtools
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
+      vite:
+        specifier: ^6.0.1
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(sass-embedded@1.83.1)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vite-plugin-inspect:
+        specifier: 0.8.9
+        version: 0.8.9(rollup@4.29.2)(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(sass-embedded@1.83.1)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
+      vite-plugin-vue-devtools:
+        specifier: workspace:*
+        version: link:../../vite
+
   packages/playground/ui:
     dependencies:
       '@unocss/reset':
