@@ -21,11 +21,7 @@ const options = {
   },
 }
 
-const RemoteSFC = defineAsyncComponent(() => {
-  const res = loadModule(`${props.name}.vue`, options)
-  console.log(res)
-  return res
-})
+const RemoteSFC = defineAsyncComponent(() => loadModule(`${props.name}.vue`, options))
 </script>
 
 <template>
