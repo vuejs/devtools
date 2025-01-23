@@ -83,9 +83,10 @@ const SFC = /* vue */ `
 `
 
 addCustomTab({
-  name: 'plugin_count',
+  name: 'plugin-count',
   title: 'Plugin Count',
   icon: 'baseline-exposure-plus-1',
+  // SFC view
   view: {
     type: 'sfc',
     sfc: SFC,
