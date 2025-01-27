@@ -24,13 +24,13 @@
     "@vue/devtools-kit": "workspace:*",
     "@vue/devtools-shared": "workspace:^",
     "@vue/devtools-ui": "workspace:*",
-    "@vueuse/core": "^12.0.0"
+    "@vueuse/core": "^12.5.0"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.277",
-    "@types/node": "^22.10.1",
+    "@iconify/json": "^2.2.299",
+    "@types/node": "^22.10.10",
     "@vitejs/plugin-vue": "^5.2.1",
-    "sass-embedded": "^1.81.0",
+    "sass-embedded": "^1.83.4",
     "vite": "^6.0.1",
     "vue": "^3.5.13"
   }

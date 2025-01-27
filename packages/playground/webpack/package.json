@@ -12,19 +12,19 @@
     "dev": "vue-cli-service serve"
   },
   "dependencies": {
-    "core-js": "^3.39.0",
+    "core-js": "^3.40.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/eslint-parser": "^7.25.9",
+    "@babel/core": "^7.26.7",
+    "@babel/eslint-parser": "^7.26.5",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
     "@vue/devtools": "workspace:*",
     "@vue/devtools-api": "workspace:*",
-    "eslint": "^9.15.0",
-    "eslint-plugin-vue": "^9.31.0"
+    "eslint": "^9.19.0",
+    "eslint-plugin-vue": "^9.32.0"
   },
   "eslintConfig": {
     "env": {

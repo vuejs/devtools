@@ -7,28 +7,28 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@iconify/json": "^2.2.277",
-    "@tresjs/core": "^4.3.1",
-    "@vueuse/core": "^12.0.0",
-    "pinia": "^2.2.7",
-    "three": "^0.170.0",
-    "unplugin-auto-import": "^0.18.6",
+    "@iconify/json": "^2.2.299",
+    "@tresjs/core": "^4.3.2",
+    "@vueuse/core": "^12.5.0",
+    "pinia": "^2.3.1",
+    "three": "^0.172.0",
+    "unplugin-auto-import": "^0.19.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@types/three": "^0.170.0",
+    "@types/three": "^0.172.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/devtools-applet": "workspace:*",
     "@vue/devtools-core": "workspace:*",
     "@vue/devtools-kit": "workspace:*",
     "@vue/devtools-shared": "workspace:*",
-    "sass-embedded": "^1.81.0",
+    "sass-embedded": "^1.83.4",
     "serve": "^14.2.4",
-    "typescript": "^5.7.2",
-    "unocss": "^0.64.1",
+    "typescript": "^5.7.3",
+    "unocss": "^0.65.4",
     "vite": "^6.0.1",
-    "vite-plugin-inspect": "0.8.9",
+    "vite-plugin-inspect": "0.10.6",
     "vite-plugin-vue-devtools": "workspace:*"
   }
 }

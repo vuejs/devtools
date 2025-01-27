@@ -53,14 +53,14 @@
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
-    "execa": "^9.5.1",
+    "execa": "^9.5.2",
     "sirv": "^3.0.0",
-    "vite-plugin-inspect": "0.8.9",
+    "vite-plugin-inspect": "0.10.6",
     "vite-plugin-vue-inspector": "^5.3.1"
   },
   "devDependencies": {
-    "@types/node": "^22.10.1",
-    "fast-glob": "^3.3.2",
+    "@types/node": "^22.10.10",
+    "fast-glob": "^3.3.3",
     "image-meta": "^0.2.1",
     "pathe": "^2.0.2"
   }
