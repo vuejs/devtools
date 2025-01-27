@@ -50,7 +50,7 @@ function setRpcClientToGlobal<R, L>(rpc: BirpcReturn<R, L>) {
   target.__VUE_DEVTOOLS_KIT_RPC_CLIENT__ = rpc
 }
 
-export function setRpcServerToGlobal<R, L >(rpc: BirpcGroup<R, L>) {
+export function setRpcServerToGlobal<R, L>(rpc: BirpcGroup<R, L>) {
   target.__VUE_DEVTOOLS_KIT_RPC_SERVER__ = rpc
 }
 
@@ -66,7 +66,7 @@ export function setViteRpcClientToGlobal<R, L>(rpc: BirpcReturn<R, L>) {
   target.__VUE_DEVTOOLS_KIT_VITE_RPC_CLIENT__ = rpc
 }
 
-export function setViteRpcServerToGlobal<R, L >(rpc: BirpcGroup<R, L>) {
+export function setViteRpcServerToGlobal<R, L>(rpc: BirpcGroup<R, L>) {
   target.__VUE_DEVTOOLS_KIT_VITE_RPC_SERVER__ = rpc
 }
 
