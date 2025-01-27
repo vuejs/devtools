@@ -99,7 +99,7 @@ function processState(instance: VueAppInstance) {
   const props = type?.props
   const getters
     = type.vuex
-    && type.vuex.getters
+      && type.vuex.getters
   const computedDefs = type.computed
 
   const data = {
