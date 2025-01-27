@@ -44,21 +44,21 @@
   },
   "dependencies": {
     "@vue/devtools-shared": "workspace:*",
-    "@vueuse/components": "^12.0.0",
-    "@vueuse/core": "^12.0.0",
-    "@vueuse/integrations": "^12.0.0",
+    "@vueuse/components": "^12.5.0",
+    "@vueuse/core": "^12.5.0",
+    "@vueuse/integrations": "^12.5.0",
     "colord": "^2.9.3",
-    "focus-trap": "^7.6.2"
+    "focus-trap": "^7.6.4"
   },
   "devDependencies": {
     "@histoire/plugin-vue": "^0.17.17",
-    "@iconify-json/ic": "^1.2.1",
-    "@types/node": "^22.10.1",
-    "@unocss/reset": "^0.64.1",
+    "@iconify-json/ic": "^1.2.2",
+    "@types/node": "^22.10.10",
+    "@unocss/reset": "^0.65.4",
     "@vitejs/plugin-vue": "^5.2.1",
     "floating-vue": "5.2.2",
     "histoire": "^0.17.17",
-    "unocss": "^0.64.1",
-    "vite-plugin-dts": "^4.3.0"
+    "unocss": "^0.65.4",
+    "vite-plugin-dts": "^4.5.0"
   }
 }
