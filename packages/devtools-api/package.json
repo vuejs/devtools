@@ -1,6 +1,7 @@
 {
   "name": "@vue/devtools-api",
   "type": "module",
+  "sideEffects": false,
   "version": "7.7.1",
   "author": "webfansplz",
   "license": "MIT",
