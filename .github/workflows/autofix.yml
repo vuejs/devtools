@@ -21,7 +21,9 @@ jobs:
           node-version: lts/*
 
       - name: Install pnpm
-        run: corepack enable pnpm
+        # https://github.com/nitrojs/nitro/pull/3060
+        # https://github.com/nodejs/corepack/pull/614
+        run: npm i -g --force corepack && corepack enable pnpm
 
       - name: Setup
         run: npm i -g @antfu/ni

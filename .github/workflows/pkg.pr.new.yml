@@ -18,7 +18,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - run: corepack enable
+      # https://github.com/nitrojs/nitro/pull/3060
+      # https://github.com/nodejs/corepack/pull/614
+      - run: npm i -g --force corepack && corepack enable pnpm
 
       - name: Set node
         uses: actions/setup-node@v4
