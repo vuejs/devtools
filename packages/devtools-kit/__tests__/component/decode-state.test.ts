@@ -1,3 +1,5 @@
+import { getObjectDetails } from '../../src/core/component/state/custom'
+
 function omitKeysOnCustom(obj: { _custom: { [key: string]: unknown } } | undefined, keys: string[]) {
   return obj == null ? obj : { _custom: Object.fromEntries(Object.entries(obj._custom).filter(([key]) => !keys.includes(key))) }
 }
@@ -68,6 +70,7 @@ it.each([
     () => {
       const bar = computed(() => '1')
       const a = toRef(() => bar.value)
+      a.value
       return a
     },
     {
@@ -83,6 +86,7 @@ it.each([
     () => {
       const bar = reactive({ value: '1' })
       const a = toRef(bar, 'value')
+      a.value
       return a
     },
     {
@@ -98,6 +102,7 @@ it.each([
     () => {
       const bar = reactive({ value: '1', value2: '2' })
       const a = toRefs(bar)
+      a.value.value
       return a.value
     },
     {
@@ -109,5 +114,5 @@ it.each([
     },
   ],
 ])('should getObjectDetail by passing %s state', (_, state, expected) => {
-  // expect(omitKeysOnCustom(getObjectDetails(state()), ['tooltipText'])).toEqual(expected)
+  expect(omitKeysOnCustom(getObjectDetails(state()), ['tooltipText'])).toEqual(expected)
 })
