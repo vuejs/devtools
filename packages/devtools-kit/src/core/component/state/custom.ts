@@ -219,8 +219,8 @@ export function getHTMLElementDetails(value: HTMLElement) {
 }
 
 /**
- * - ObjectRefImpl, toRef({ foo: 'foo' }, 'foo'), `value` is the actual value
- * - GetterRefImpl, toRef(() => state.foo), `value` is the actual value
+ * - ObjectRefImpl, toRef({ foo: 'foo' }, 'foo'), `_value` is the actual value, (since 3.5.0)
+ * - GetterRefImpl, toRef(() => state.foo), `_value` is the actual value, (since 3.5.0)
  * - RefImpl, ref('foo') / computed(() => 'foo'), `_value` is the actual value
  */
 function tryGetRefValue(ref: { _value?: unknown } | { value?: unknown }) {
