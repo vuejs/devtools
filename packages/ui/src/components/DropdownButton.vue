@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ComputedGetter } from 'vue'
 import type { ButtonProps } from './Button.vue'
-import { VClosePopper as vClosePopper } from 'floating-vue'
+import { vClosePopper } from 'floating-vue'
 import { inject } from 'vue'
 import VueButton from './Button.vue'
 
