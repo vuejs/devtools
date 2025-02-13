@@ -23,7 +23,7 @@ export class StateEditor {
       const section = sections.shift()!
       if (object instanceof Map)
         object = object.get(section) as Recordable
-      if (object instanceof Set)
+      else if (object instanceof Set)
         object = Array.from(object.values())[section] as Recordable
       else object = object[section] as Recordable
       if (this.refEditor.isRef(object))
