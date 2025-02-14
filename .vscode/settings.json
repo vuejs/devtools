@@ -1,10 +1,5 @@
 {
   "eslint.useFlatConfig": true,
-  "eslint.options": {
-    "flags": [
-      "unstable_ts_config"
-    ]
-  },
   "prettier.enable": false,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
