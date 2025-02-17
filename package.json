@@ -92,7 +92,7 @@
     "cross-env": "^7.0.3",
     "degit": "^2.8.4",
     "eslint": "^9.20.1",
-    "eslint-plugin-format": "^0.1.2",
+    "eslint-plugin-format": "^1.0.1",
     "eslint-vitest-rule-tester": "^0.6.1",
     "execa": "^9.5.1",
     "fast-glob": "^3.3.2",
