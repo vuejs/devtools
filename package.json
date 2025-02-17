@@ -97,7 +97,7 @@
     "execa": "^9.5.1",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
-    "jsdom": "^25.0.1",
+    "jsdom": "^26.0.0",
     "lint-staged": "^15.2.10",
     "npm-run-all2": "^7.0.1",
     "picocolors": "^1.1.1",
