@@ -88,7 +88,7 @@
     "@vue/devtools-kit": "workspace:^",
     "@vue/test-utils": "^2.4.6",
     "archiver": "^7.0.1",
-    "bumpp": "^9.8.1",
+    "bumpp": "^10.0.3",
     "cross-env": "^7.0.3",
     "degit": "^2.8.4",
     "eslint": "^9.20.1",
