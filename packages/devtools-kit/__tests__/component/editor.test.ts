@@ -176,5 +176,20 @@ describe('editor: StateEditor.set', () => {
       stateEditor.set(target, path, '', defaultCallback)
       expect(target).toEqual(new Map([['bar', 'baz']]))
     })
+
+    it('modify nested value in map', () => {
+      const target = { foo: new Map([['bar', {
+        baz: 1,
+      }]]) }
+      const state = { newKey: '', type: '', value: 2 }
+      const path = ['foo', 'bar', 'baz']
+      const defaultCallback = stateEditor.createDefaultSetCallback(state)
+      stateEditor.set(target, path, 2, defaultCallback)
+      expect(target).toEqual({
+        foo: new Map([['bar', {
+          baz: 2,
+        }]]),
+      })
+    })
   })
 })
