@@ -119,6 +119,16 @@
     "vitest": "^3.0.6",
     "vue": "^3.5.13"
   },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "core-js"
+    ],
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild",
+      "vue-demi"
+    ]
+  },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
   },
