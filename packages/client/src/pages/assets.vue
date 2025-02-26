@@ -44,7 +44,7 @@ const filtered = computed(() => {
 const byFolders = computed(() => {
   const result: Record<string, AssetInfo[]> = {}
   for (const asset of filtered.value) {
-    const folder = `${asset.path.split('/').slice(0, -1).join('/')}/`
+    const folder = `${asset.relativePath.split('/').slice(0, -1).join('/')}/`
     if (!result[folder])
       result[folder] = []
     result[folder].push(asset)
@@ -71,7 +71,7 @@ const byTree = computed(() => {
   }
 
   filtered.value.forEach((file) => {
-    const pathParts = file.path.split('/').filter(part => part !== '')
+    const pathParts = file.relativePath.split('/').filter(part => part !== '')
     addToTree(root, pathParts, file)
   })
 

@@ -26,7 +26,21 @@ function detect(win: Window) {
       return
     }
 
-    // 2. check Vue
+    // 2. check VitePress
+    // @ts-expect-error types
+    const vitePressDetected = !!(window.__VITEPRESS__)
+    if (vitePressDetected) {
+      sendMessage({
+        devtoolsEnabled: window.__VUE_DEVTOOLS_GLOBAL_HOOK__ && window.__VUE_DEVTOOLS_GLOBAL_HOOK__.enabled,
+        vueDetected: true,
+        vitePressDetected: true,
+        vitePluginDetected: !!window.__VUE_DEVTOOLS_VITE_PLUGIN_DETECTED__,
+        vitePluginClientUrl: window.__VUE_DEVTOOLS_VITE_PLUGIN_CLIENT_URL__,
+      })
+      return
+    }
+
+    // 3. check Vue
     // @ts-expect-error types
     const vueDetected = !!(window.__VUE__)
     if (vueDetected) {

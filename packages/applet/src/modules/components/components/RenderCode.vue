@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CodeBlock from '~/components/basic/CodeBlock.vue'
+import { VueCodeBlock } from '@vue/devtools-ui'
 
 defineProps<{
   code: string
@@ -19,7 +19,7 @@ function close() {
       <i class="i-carbon-close cursor-pointer hover:op80" @click="close" />
     </div>
     <div class="flex-1 overflow-scroll text-3.5">
-      <CodeBlock :code="code" lang="javascript" />
+      <VueCodeBlock :code="code" lang="javascript" />
     </div>
   </div>
 </template>

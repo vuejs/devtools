@@ -1,7 +1,8 @@
 import '@unocss/reset/tailwind.css'
-import 'floating-vue/dist/style.css'
-import { getViteClient } from 'vite-hot-client'
+import 'uno.css'
+import '@vue/devtools-ui/style.css'
 
+import { getViteClient } from 'vite-hot-client'
 import { isInChromePanel, isInSeparateWindow } from '@vue/devtools-shared'
 import { VueDevToolsVuePlugin, createViteClientRpc, functions, rpc } from '@vue/devtools-core'
 import { createRpcClient, setViteClientContext } from '@vue/devtools-kit'
@@ -22,7 +23,6 @@ import CustomTabView from '~/pages/custom-tab-view.vue'
 import CustomInspectorTabView from '~/pages/custom-inspector-tab-view.vue'
 import WaitForConnection from '~/components/WaitForConnection.vue'
 
-import 'uno.css'
 import '~/assets/styles/main.css'
 
 const routes = [

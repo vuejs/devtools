@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { BuiltinLanguage } from 'shiki'
 import type { CodeSnippet } from '@vue/devtools-core'
-import { VueButton } from '@vue/devtools-ui'
+import { VueButton, VueCodeBlock } from '@vue/devtools-ui'
 
 const props = defineProps<{
   codeSnippets: CodeSnippet[]
@@ -38,7 +38,7 @@ watchEffect(() => {
     </div>
 
     <template v-if="selected">
-      <CodeBlock
+      <VueCodeBlock
         :code="selected.code"
         :lang="selectedLang"
         :lines="false"

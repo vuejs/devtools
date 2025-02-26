@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-ui",
   "type": "module",
-  "version": "7.3.5",
+  "version": "7.3.6",
   "author": "webfansplz",
   "license": "MIT",
   "exports": {
@@ -11,6 +11,7 @@
       "require": "./dist/index.cjs"
     },
     "./style.css": "./dist/style.css",
+    "./uno.css": "./dist/uno.css",
     "./theme": {
       "types": "./dist/types/theme/index.d.ts",
       "import": "./dist/theme.js",
@@ -32,6 +33,7 @@
   "peerDependencies": {
     "@unocss/reset": ">=0.50.0-0",
     "floating-vue": ">=2.0.0-0",
+    "shiki": ">=1.10.0",
     "unocss": ">=0.50.0-0",
     "vue": ">=3.0.0-0"
   },

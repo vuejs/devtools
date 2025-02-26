@@ -18,6 +18,7 @@ import Overlay from './Overlay.vue'
 import Notification from './Notification.vue'
 import Tooltip from './Tooltip.vue'
 import IcIcon from './IcIcon.vue'
+import CodeBlock from './CodeBlock.vue'
 
 export {
   Badge as VueBadge,
@@ -40,6 +41,7 @@ export {
   Notification as VueNotification,
   Tooltip as VueTooltip,
   IcIcon as VueIcIcon,
+  CodeBlock as VueCodeBlock,
 }
 
 export type * from './Button.vue'
@@ -61,3 +63,5 @@ export type * from './Drawer.vue'
 export type * from './Overlay.vue'
 export type * from './Notification.vue'
 export type * from './Tooltip.vue'
+export type * from './IcIcon.vue'
+export type * from './CodeBlock.vue'

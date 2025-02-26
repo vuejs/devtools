@@ -2,14 +2,17 @@
 // This components requires to run in DevTools to render correctly
 import { computed, nextTick } from 'vue'
 import type { BuiltinLanguage } from 'shiki'
+import { renderCodeHighlight } from '../composables/shiki'
+
+export interface VueCodeBlockProps {
+  code: string
+  lang?: BuiltinLanguage | 'text'
+  lines?: boolean
+  transformRendered?: (code: string) => string
+}
 
 const props = withDefaults(
-  defineProps<{
-    code: string
-    lang?: BuiltinLanguage | 'text'
-    lines?: boolean
-    transformRendered?: (code: string) => string
-  }>(),
+  defineProps<VueCodeBlockProps>(),
   {
     lines: true,
   },
@@ -45,19 +48,31 @@ const rendered = computed(() => {
   </template>
 </template>
 
-<style>
-.code-block-lines .shiki code {
-  counter-reset: step;
-  counter-increment: step calc(var(--start, 1) - 1);
-}
-.code-block-lines .shiki code .line::before {
-  content: counter(step);
-  counter-increment: step;
-  width: 2.5rem;
-  padding-right: 0.5rem;
-  margin-right: 0.5rem;
-  display: inline-block;
-  text-align: right;
-  --at-apply: 'text-truegray:50';
+<style lang="postcss">
+.code-block-lines {
+  .shiki {
+    code {
+      counter-reset: step;
+      counter-increment: step calc(var(--start, 1) - 1);
+
+      .line {
+        &::before {
+          content: counter(step);
+          counter-increment: step;
+          width: 2.5rem;
+          padding-right: 0.5rem;
+          margin-right: 0.5rem;
+          display: inline-block;
+          text-align: right;
+          --at-apply: 'text-truegray:50';
+        }
+      }
+    }
+  }
+  pre {
+    &:focus-visible {
+      outline: none;
+    }
+  }
 }
 </style>

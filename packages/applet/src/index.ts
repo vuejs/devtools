@@ -1,7 +1,7 @@
 import 'uno.css'
 import '@unocss/reset/tailwind.css'
 import './styles/base.css'
-import 'floating-vue/dist/style.css'
+import '@vue/devtools-ui/style.css'
 
 export * from './modules/pinia'
 export * from './modules/components'

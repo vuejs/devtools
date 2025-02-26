@@ -5,6 +5,7 @@ import '@unocss/reset/tailwind.css'
 import 'uno.css'
 
 import { vTooltip } from 'floating-vue'
+import 'floating-vue/dist/style.css'
 
 export * from './components'
 export * from './composables'

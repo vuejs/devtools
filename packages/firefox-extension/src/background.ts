@@ -88,7 +88,12 @@ chrome.runtime.onConnect.addListener((port) => {
 
 chrome.runtime.onMessage.addListener((req, sender) => {
   if (sender.tab && req.vueDetected) {
-    const suffix = req.nuxtDetected ? '.nuxt' : ''
+    let suffix = ''
+
+    if (req.nuxtDetected)
+      suffix = '.nuxt'
+    else if (req.vitePressDetected)
+      suffix = '.vitepress'
 
     chrome.browserAction.setIcon({
       tabId: sender.tab.id,

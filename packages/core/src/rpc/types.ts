@@ -6,6 +6,7 @@ export interface AssetInfo {
   path: string
   type: AssetType
   publicPath: string
+  relativePath: string
   filePath: string
   size: number
   mtime: number

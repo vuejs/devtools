@@ -2,6 +2,7 @@ import { resolve } from 'node:path'
 import Vue from '@vitejs/plugin-vue'
 import Unocss from 'unocss/vite'
 import Dts from 'vite-plugin-dts'
+import { dependencies, peerDependencies } from './package.json'
 
 const argv = process.argv.slice(2)
 const enableWatch = argv.includes('--watch')
@@ -26,7 +27,7 @@ export default {
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ['vue'],
+      external: [...Object.keys(peerDependencies), ...Object.keys(dependencies)],
       output: {
         assetFileNames: 'index.[ext]',
         globals: {
