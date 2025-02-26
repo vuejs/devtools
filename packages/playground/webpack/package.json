@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "core-js": "^3.40.0",
-    "vue": "^3.5.13"
+    "vue": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",

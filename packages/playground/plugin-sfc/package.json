@@ -7,14 +7,14 @@
     "dev": "vite"
   },
   "dependencies": {
-    "vue": "^3.5.13"
+    "vue": "catalog:"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "catalog:",
     "@vue/devtools": "workspace:^",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.1",
-    "vite-plugin-inspect": "0.8.9",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-inspect": "catalog:",
     "vite-plugin-vue-devtools": "workspace:*"
   }
 }
