@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { Placement } from 'floating-vue'
 import { placements } from 'floating-vue'
+import { ref } from 'vue'
 import { VueIcon, VueInput } from '../src'
 import Dropdown from '../src/components/Dropdown.vue'
 import DropdownButton from '../src/components/DropdownButton.vue'

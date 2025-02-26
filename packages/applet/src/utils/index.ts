@@ -1,3 +1,3 @@
+export * from './color'
 export * from './date'
 export * from './search'
-export * from './color'

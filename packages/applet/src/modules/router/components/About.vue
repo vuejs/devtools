@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import DevToolsLogo from './DevToolsLogo.vue'
 import { useVirtualRouter } from '~/composables/virtual-router'
+import DevToolsLogo from './DevToolsLogo.vue'
 
 const virtualRouter = useVirtualRouter()
 </script>

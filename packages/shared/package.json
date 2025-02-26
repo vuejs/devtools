@@ -1,13 +1,13 @@
 {
   "name": "@vue/devtools-shared",
   "type": "module",
-  "version": "7.3.6",
+  "version": "7.7.2",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
     "directory": "packages/shared",
     "type": "git",
-    "url": "git+https://github.com/vuejs/devtools-next.git"
+    "url": "git+https://github.com/vuejs/devtools.git"
   },
   "exports": {
     ".": {
@@ -29,6 +29,6 @@
     "rfdc": "^1.4.1"
   },
   "devDependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "^22.13.4"
   }
 }

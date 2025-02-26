@@ -20,6 +20,7 @@ onViteRpcConnected(() => {
 
 const container = ref<HTMLDivElement>()
 const networkRef = shallowRef<Network>()
+const showStabilizingModal = ref(false)
 
 function mountNetwork() {
   const node = container.value!
@@ -33,6 +34,14 @@ function mountNetwork() {
   network.on('selectNode', (options) => {
     updateGraphDrawerData(options.nodes[0])
     toggleGraphDrawer(true)
+  })
+
+  network.on('startStabilizing', () => {
+    if (devtoolsClientState.value.reduceMotion)
+      showStabilizingModal.value = true
+  })
+  network.on('stabilized', () => {
+    showStabilizingModal.value = false
   })
 
   network.on('deselectNode', () => {
@@ -61,8 +70,15 @@ const navbarRef = ref<HTMLElement>()
 <template>
   <div flex="~ col" relative h-full of-hidden panel-grids class="graph-body">
     <GraphNavbar ref="navbarRef" />
-    <div ref="container" class="absolute h-full w-full" />
-    <GraphFileType />
-    <GraphDrawer :top="navbarRef" />
+    <div class="relative flex-1">
+      <div ref="container" class="absolute inset-0" />
+      <div v-if="showStabilizingModal" class="absolute inset-0 flex select-none items-center justify-center bg-base text-base">
+        <div class="flex items-center space-x-2">
+          <span>Stabilizing...</span>
+        </div>
+      </div>
+      <GraphFileType />
+      <GraphDrawer :top="navbarRef" />
+    </div>
   </div>
 </template>

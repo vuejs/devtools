@@ -1,9 +1,9 @@
 import type { VueAppInstance } from '../../types'
-import { getComponentId, getComponentInstance, getInstanceName } from '../component/utils'
-import { activeAppRecord } from '../../ctx'
-import { getRootElementsFromComponentInstance } from '../component/tree/el'
-import { getComponentBoundingRect } from '../component/state/bounding-rect'
 import type { ComponentHighLighterOptions, ScrollToComponentOptions } from './types'
+import { activeAppRecord } from '../../ctx'
+import { getComponentBoundingRect } from '../component/state/bounding-rect'
+import { getRootElementsFromComponentInstance } from '../component/tree/el'
+import { getComponentInstance, getInstanceName, getUniqueComponentId } from '../component/utils'
 
 export type * from './types'
 
@@ -145,6 +145,8 @@ export function toggleComponentHighLighter(options: ComponentHighLighterOptions)
 
 export function highlight(instance: VueAppInstance) {
   const bounds = getComponentBoundingRect(instance)
+  if (!bounds.width && !bounds.height)
+    return
   const name = getInstanceName(instance)
   const container = getContainerElement()
   container ? update({ bounds, name }) : create({ bounds, name })
@@ -178,14 +180,8 @@ function selectComponentFn(e: MouseEvent, cb) {
   e.preventDefault()
   e.stopPropagation()
   if (inspectInstance) {
-    const app = activeAppRecord.value?.app as unknown as VueAppInstance
-    getComponentId({
-      app,
-      uid: app.uid,
-      instance: inspectInstance,
-    }).then((id) => {
-      cb(id)
-    })
+    const uniqueComponentId = getUniqueComponentId(inspectInstance)
+    cb(uniqueComponentId)
   }
 }
 

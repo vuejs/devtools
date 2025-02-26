@@ -18,6 +18,7 @@ interface DevtoolsClientState {
   interactionCloseOnOutsideClick: boolean
   showPanel: boolean
   minimizePanelInteractive: number
+  reduceMotion: boolean
 }
 
 function clientStateFactory(): DevtoolsClientState {
@@ -45,6 +46,7 @@ function clientStateFactory(): DevtoolsClientState {
     interactionCloseOnOutsideClick: false,
     showPanel: true,
     minimizePanelInteractive: 5000,
+    reduceMotion: false,
   }
 }
 
@@ -66,3 +68,9 @@ watch(() => devtoolsClientState.value.splitScreen.enabled, (enabled, o) => {
   }
 })
 // #endregion
+
+const preferredMotion = usePreferredReducedMotion()
+
+watch(preferredMotion, (value) => {
+  devtoolsClientState.value.reduceMotion = value === 'reduce'
+}, { immediate: true })

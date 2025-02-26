@@ -11,8 +11,8 @@ And you are using `vite-plugin-html`, please make sure register `vite-plugin-vue
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite'
-import vueDevTools from 'vite-plugin-vue-devtools'
 import { createHtmlPlugin } from 'vite-plugin-html'
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
   plugins: [

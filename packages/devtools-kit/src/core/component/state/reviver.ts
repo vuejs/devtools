@@ -1,6 +1,6 @@
 import { target } from '@vue/devtools-shared'
 import { activeAppRecord } from '../../../ctx'
-import { INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, specialTypeRE, symbolRE } from './constants'
+import { INFINITY, NAN, NEGATIVE_INFINITY, specialTypeRE, symbolRE, UNDEFINED } from './constants'
 
 export function reviveSet(val) {
   const result = new Set()

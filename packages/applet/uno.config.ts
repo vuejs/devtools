@@ -1,5 +1,5 @@
-import { defineConfig, mergeConfigs, presetAttributify, presetIcons, presetTypography, presetUno, transformerDirectives, transformerVariantGroup } from 'unocss'
 import { unoConfig } from '@vue/devtools-ui/theme'
+import { defineConfig, mergeConfigs, presetAttributify, presetIcons, presetTypography, presetUno, transformerDirectives, transformerVariantGroup } from 'unocss'
 
 export default defineConfig(mergeConfigs([unoConfig, {
   transformers: [transformerVariantGroup(), transformerDirectives()],
@@ -38,8 +38,8 @@ export default defineConfig(mergeConfigs([unoConfig, {
   ],
   shortcuts: [{
     // general
-    'bg-base': 'bg-white dark:bg-black',
-    'text-base': 'text-black dark:text-white',
+    'bg-base': 'bg-white dark:bg-#121212',
+    'text-base': 'text-black dark:text-#dfe0e2',
     'bg-active': 'bg-gray:5',
     'border-base': 'border-gray/20',
     'transition-base': 'transition-all duration-200',
@@ -47,10 +47,10 @@ export default defineConfig(mergeConfigs([unoConfig, {
     // selective list
     'selectable-item': 'flex items-center px-2 py-1 rounded cursor-pointer hover:bg-primary-200 dark:(hover:bg-gray-800) @active:(text-white bg-primary-600 hover:(text-white bg-primary-600))',
 
-    'code-block': 'dark:bg-[#121212] bg-white',
+    'code-block': 'dark:bg-#121212 bg-white',
 
     // state
-    'string-state-type': 'text-#e74c3c dark:(text-#c41a16)',
+    'string-state-type': 'text-#e74c3c dark:(text-#FFB980)',
     'literal-state-type': 'text-#03c dark:(text-#997fff)',
     'boolean-state-type': 'text-#27ae60 dark:(text-#abebc6)',
     'null-state-type': 'text-#999',

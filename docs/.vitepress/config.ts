@@ -1,12 +1,12 @@
 import type { DefaultTheme } from 'vitepress'
 import { defineConfig } from 'vitepress'
-import { version } from '../../package.json'
 import vite from './vite.config'
 
 const GETTING_STARTED: DefaultTheme.NavItemWithLink[] = [
   { text: 'Introduction', link: '/getting-started/introduction' },
   { text: 'Installation', link: '/getting-started/installation' },
   { text: 'Features', link: '/getting-started/features' },
+  { text: 'Open in editor', link: '/getting-started/open-in-editor' },
 ]
 
 const GUIDES: DefaultTheme.NavItemWithLink[] = [
@@ -16,6 +16,7 @@ const GUIDES: DefaultTheme.NavItemWithLink[] = [
 ]
 
 const HELP: DefaultTheme.NavItemWithLink[] = [
+  { text: 'Migration Guide', link: '/guide/migration' },
   { text: 'Contributing', link: '/help/contributing' },
   { text: 'FAQ', link: '/help/faq' },
   { text: 'Troubleshooting', link: '/help/troubleshooting' },
@@ -26,7 +27,7 @@ const PLUGINS: DefaultTheme.NavItemWithLink[] = [
 ]
 
 // const VERSIONS: DefaultTheme.NavItemWithLink[] = [
-//   { text: `v${version} (current)`, link: 'https://github.com/vuejs/devtools-next/releases' },
+//   { text: `v${version} (current)`, link: 'https://github.com/vuejs/devtools/releases' },
 // ]
 
 // https://vitepress.dev/reference/site-config
@@ -59,10 +60,12 @@ export default defineConfig({
         ],
       },
       {
-        // text: `v${version}`,
-        // items: VERSIONS,
-        text: `v${version} (current)`,
-        link: 'https://github.com/vuejs/devtools-next/releases',
+        text: 'Migration Guide',
+        link: '/guide/migration',
+      },
+      {
+        text: '💚️ Sponsor',
+        link: 'https://github.com/sponsors/webfansplz',
       },
       {
         text: 'Playground',
@@ -114,7 +117,7 @@ export default defineConfig({
     ),
 
     editLink: {
-      pattern: 'https://github.com/vuejs/devtools-next/edit/main/docs/:path',
+      pattern: 'https://github.com/vuejs/devtools/edit/main/docs/:path',
       text: 'Suggest changes to this page',
     },
     search: {
@@ -122,7 +125,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/devtools-next' },
+      { icon: 'github', link: 'https://github.com/vuejs/devtools' },
     ],
 
     footer: {

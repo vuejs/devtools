@@ -1,8 +1,8 @@
 import type { ModuleInfo } from '@vue/devtools-core'
-import { DataSet } from 'vis-network/standalone'
 import type { Edge, Node, Options } from 'vis-network'
 import { deepClone } from '@vue/devtools-shared'
 import { useDevToolsColorMode } from '@vue/devtools-ui'
+import { DataSet } from 'vis-network/standalone'
 
 // #region file types
 export const fileTypes = {
@@ -227,8 +227,8 @@ function updateGraph() {
 }
 
 function recursivelyGetNodeByDep(node: SearcherNode[]) {
-  const allNodes = new Map</* fullId */string, Node>()
-  const allEdges = new Map</* from-to */string, Edge>()
+  const allNodes = new Map<string, Node>()
+  const allEdges = new Map<string, Edge>()
   node.forEach((n) => {
     n = deepClone(n)
     // to highlight current searched node

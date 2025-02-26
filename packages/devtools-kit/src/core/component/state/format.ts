@@ -1,8 +1,8 @@
-import { InspectorCustomState, InspectorState, customTypeEnums } from '../types'
-import { INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, rawTypeRE, specialTypeRE } from './constants'
+import { customTypeEnums, InspectorCustomState, InspectorState } from '../types'
+import { INFINITY, NAN, NEGATIVE_INFINITY, rawTypeRE, specialTypeRE, UNDEFINED } from './constants'
 import { isPlainObject } from './is'
-import { escape, internalStateTokenToString, replaceStringToToken, replaceTokenToString } from './util'
 import { reviver } from './reviver'
+import { escape, internalStateTokenToString, replaceStringToToken, replaceTokenToString } from './util'
 
 export function getInspectorStateValueType(value, raw = true) {
   const type = typeof value
@@ -96,13 +96,12 @@ export function formatInspectorStateValue(value, quotes = false, options?: {
 }
 
 function escapeString(value: string) {
-  return escape(value).replace(/ /g, '&nbsp;')
-    .replace(/\n/g, '<span>\\n</span>')
+  return escape(value).replace(/ /g, '&nbsp;').replace(/\n/g, '<span>\\n</span>')
 }
 
 export function getRaw(value: InspectorState['value']): {
   value: object | string | number | boolean | null
-  inherit: {} | { abstract: true }
+  inherit: Record<string, any> | { abstract: true }
   customType?: customTypeEnums
 } {
   let customType: customTypeEnums

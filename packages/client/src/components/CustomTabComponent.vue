@@ -39,6 +39,9 @@ watch(() => tabName.value, () => {
   <template v-else-if="tab?.view?.type === 'vnode'">
     <Component :is="tab.view.vnode" />
   </template>
+  <template v-else-if="tab?.view?.type === 'sfc'">
+    <SFCView :sfc="tab.view.sfc" :name="tab.name" />
+  </template>
   <template v-else>
     <div>
       <NCard flex="~ col" h-full items-center justify-center>

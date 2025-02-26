@@ -1,29 +1,33 @@
 import type { SuspenseBoundary, VNode } from 'vue'
+import type { DevToolsPluginAPI } from '../../../api'
 import type { ComponentTreeNode, VueAppInstance } from '../../../types'
-import { getAppRecord, getInstanceName, getRenderKey, getUniqueComponentId, isBeingDestroyed, isFragment } from '../utils'
+import type { ComponentFilter } from './filter'
 // import { devtoolsAppRecords, devtoolsContext } from '../../../state'
 import { activeAppRecord } from '../../../ctx'
+import { getAppRecord, getInstanceName, getRenderKey, getUniqueComponentId, isBeingDestroyed, isFragment } from '../utils'
 import { getRootElementsFromComponentInstance } from './el'
-import type { ComponentFilter } from './filter'
 import { createComponentFilter } from './filter'
 
 interface ComponentWalkerOptions {
   filterText?: string
   maxDepth: number | null
   recursively: boolean
+  api: InstanceType<typeof DevToolsPluginAPI>
 }
 
 export class ComponentWalker {
   maxDepth: number | null
   recursively: boolean
   componentFilter: InstanceType<typeof ComponentFilter>
+  api: InstanceType<typeof DevToolsPluginAPI>
   // Dedupe instances (Some instances may be both on a component and on a child abstract/functional component)
   private captureIds: Map<string, undefined> = new Map()
   constructor(options: ComponentWalkerOptions) {
-    const { filterText = '', maxDepth, recursively } = options
+    const { filterText = '', maxDepth, recursively, api } = options
     this.componentFilter = createComponentFilter(filterText)
     this.maxDepth = maxDepth
     this.recursively = recursively
+    this.api = api
   }
 
   public getComponentTree(instance: VueAppInstance): Promise<ComponentTreeNode[]> {
@@ -157,13 +161,12 @@ export class ComponentWalker {
       this.mark(instance, true)
     }
 
-    // @TODO: impl
-    // devtoolsContext.api.visitComponentTree({
-    //   treeNode,
-    //   componentInstance: instance,
-    //   app: instance.appContext.app,
-    //   filter: this.componentFilter.filter,
-    // })
+    this.api.visitComponentTree({
+      treeNode,
+      componentInstance: instance,
+      app: instance.appContext.app,
+      filter: this.componentFilter.filter,
+    })
     return treeNode
   }
 

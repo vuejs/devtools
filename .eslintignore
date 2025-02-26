@@ -1,9 +1,0 @@
-dist
-node_modules
-ci.yml
-release.yml
-**.svg
-packages/chrome-extension/overlay/*
-packages/vite/src/overlay/*
-packages/chrome-extension/client/*
-eslint.config.js

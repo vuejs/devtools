@@ -1,4 +1,3 @@
-import { createHooks } from 'hookable'
 import type {
   App,
   ComponentInstance,
@@ -14,12 +13,14 @@ import type {
   TimelineEventOptions,
   TimelineLayerOptions,
 } from '../types'
+import { createHooks } from 'hookable'
+import { debounce } from 'perfect-debounce'
 import { highlight, unhighlight } from '../core/component-highlighter'
 import { getComponentBoundingRect } from '../core/component/state/bounding-rect'
 import { getInstanceName } from '../core/component/utils'
 import { addInspector, getInspector } from './inspector'
+import { activeAppRecord, DevToolsState, devtoolsState } from './state'
 import { addTimelineLayer } from './timeline'
-import { DevToolsState, activeAppRecord } from './state'
 
 // v6 plugin api hooks
 export enum DevToolsV6PluginAPIHookKeys {
@@ -236,9 +237,8 @@ export function createDevToolsCtxHooks() {
     addInspector(inspector, plugin.descriptor)
   })
 
-  // send inspector tree
-  hooks.hook(DevToolsContextHookKeys.SEND_INSPECTOR_TREE, async ({ inspectorId, plugin }) => {
-    if (!inspectorId || !plugin?.descriptor?.app)
+  const debounceSendInspectorTree = debounce(async ({ inspectorId, plugin }) => {
+    if (!inspectorId || !plugin?.descriptor?.app || devtoolsState.highPerfModeEnabled)
       return
 
     // 1. get inspector
@@ -251,6 +251,7 @@ export function createDevToolsCtxHooks() {
       filter: inspector?.treeFilter || '',
       rootNodes: [],
     }
+
     await new Promise<void>((resolve) => {
       // @ts-expect-error hookable
       hooks.callHookWith(async (callbacks) => {
@@ -266,11 +267,13 @@ export function createDevToolsCtxHooks() {
         rootNodes: _payload.rootNodes,
       })))
     }, DevToolsMessagingHookKeys.SEND_INSPECTOR_TREE_TO_CLIENT)
-  })
+  }, 120)
 
-  // send inspector state
-  hooks.hook(DevToolsContextHookKeys.SEND_INSPECTOR_STATE, async ({ inspectorId, plugin }) => {
-    if (!inspectorId || !plugin?.descriptor?.app)
+  // send inspector tree
+  hooks.hook(DevToolsContextHookKeys.SEND_INSPECTOR_TREE, debounceSendInspectorTree)
+
+  const debounceSendInspectorState = debounce(async ({ inspectorId, plugin }) => {
+    if (!inspectorId || !plugin?.descriptor?.app || devtoolsState.highPerfModeEnabled)
       return
 
     // 1. get inspector
@@ -305,7 +308,10 @@ export function createDevToolsCtxHooks() {
         state: _payload.state,
       })))
     }, DevToolsMessagingHookKeys.SEND_INSPECTOR_STATE_TO_CLIENT)
-  })
+  }, 120)
+
+  // send inspector state
+  hooks.hook(DevToolsContextHookKeys.SEND_INSPECTOR_STATE, debounceSendInspectorState)
 
   // select inspector node
   hooks.hook(DevToolsContextHookKeys.CUSTOM_INSPECTOR_SELECT_NODE, ({ inspectorId, nodeId, plugin }) => {
@@ -329,6 +335,9 @@ export function createDevToolsCtxHooks() {
 
   // add timeline event
   hooks.hook(DevToolsContextHookKeys.TIMELINE_EVENT_ADDED, ({ options, plugin }) => {
+    const internalLayerIds = ['performance', 'component-event', 'keyboard', 'mouse']
+    if (devtoolsState.highPerfModeEnabled || (!devtoolsState.timelineLayersState?.[plugin.descriptor.id] && !internalLayerIds.includes(options.layerId)))
+      return
     // @ts-expect-error hookable
     hooks.callHookWith(async (callbacks) => {
       await Promise.all(callbacks.map(cb => cb(options)))

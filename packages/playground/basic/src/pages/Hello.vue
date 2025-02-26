@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useAppStore } from '../stores'
 import DynamicApp from '../components/DynamicApp.vue'
+import { useAppStore } from '../stores'
 
 const app = useAppStore()
 </script>

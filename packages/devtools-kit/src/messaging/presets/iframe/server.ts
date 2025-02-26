@@ -1,6 +1,6 @@
-import SuperJSON from 'superjson'
-
 import { isBrowser } from '@vue/devtools-shared'
+
+import SuperJSON from 'superjson'
 import { MergeableChannelOptions } from '../../types'
 import { __DEVTOOLS_KIT_IFRAME_MESSAGING_EVENT_KEY, getIframeServerContext } from './context'
 

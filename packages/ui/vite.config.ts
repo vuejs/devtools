@@ -2,10 +2,10 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
 import { HstVue } from '@histoire/plugin-vue'
+import vue from '@vitejs/plugin-vue'
 import unocss from 'unocss/vite'
+import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 import { dependencies, peerDependencies } from './package.json'
 

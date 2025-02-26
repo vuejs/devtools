@@ -5,8 +5,8 @@
     </h2>
   </div>
   <p id="contributors" class="mt-5 text-center">
-    <a href="https://github.com/vuejs/devtools-next/graphs/contributors">
-      <img src="https://contrib.rocks/image?repo=vuejs/devtools-next">
+    <a href="https://github.com/vuejs/devtools/graphs/contributors">
+      <img src="https://contrib.rocks/image?repo=vuejs/devtools">
     </a>
   </p>
 </template>

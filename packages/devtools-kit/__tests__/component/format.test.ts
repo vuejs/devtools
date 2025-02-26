@@ -1,5 +1,5 @@
-import * as format from '../../src/core/component/state/format'
 import { INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED } from '../../src/core/component/state/constants'
+import * as format from '../../src/core/component/state/format'
 
 import { customTypeEnums } from '../../src/core/component/types'
 

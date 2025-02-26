@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { toValue } from '@vueuse/core'
-import { VueTooltip } from '@vue/devtools-ui'
 import type { ModuleBuiltinTab } from '~/types'
+import { VueTooltip } from '@vue/devtools-ui'
+import { toValue } from '@vueuse/core'
+import { RouterLink } from 'vue-router'
 
 const props = withDefaults(
   defineProps<{

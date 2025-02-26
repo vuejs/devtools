@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { isDark as getIsDark, toggleDark } from 'histoire/client'
 import { computed } from 'vue'
-import DarkToggle from '../src/components/DarkToggle.vue'
 import Button from '../src/components/Button.vue'
+import DarkToggle from '../src/components/DarkToggle.vue'
 import Icon from '../src/components/Icon.vue'
 
 const dark = computed({
@@ -17,7 +17,7 @@ const dark = computed({
 <template>
   <Story>
     <Variant title="With Animation">
-      <DarkToggle v-model:isDark="dark">
+      <DarkToggle v-model:is-dark="dark">
         <template #default="{ toggle, isDark }">
           <Button
             @click="(e) => {
@@ -30,7 +30,7 @@ const dark = computed({
       </DarkToggle>
     </Variant>
     <Variant title="No Animation">
-      <DarkToggle v-model:isDark="dark" :animation="false">
+      <DarkToggle v-model:is-dark="dark" :animation="false">
         <template #default="{ toggle, isDark }">
           <Button
             @click="(e) => {

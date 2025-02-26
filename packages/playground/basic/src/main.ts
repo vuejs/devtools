@@ -1,18 +1,18 @@
-import { createPinia } from 'pinia'
 import type { RouteRecordRaw } from 'vue-router'
-import { createRouter, createWebHistory } from 'vue-router'
 import { VueQueryPlugin } from '@tanstack/vue-query'
-import { addCustomCommand } from '@vue/devtools-api'
-
+import { addCustomCommand } from '@vue/devtools'
 import ElementPlus from 'element-plus'
-import store from './stores/vuexStore'
+import { createPinia } from 'pinia'
 
+import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
-import 'element-plus/dist/index.css'
-import Home from './pages/Home.vue'
+
 import Hey from './pages/Hey.vue'
-import VueQuery from './pages/VueQuery.vue'
+import Home from './pages/Home.vue'
 import VeeValidate from './pages/VeeValidate.vue'
+import VueQuery from './pages/VueQuery.vue'
+import store from './stores/vuexStore'
+import 'element-plus/dist/index.css'
 import './style.css'
 import 'uno.css'
 
@@ -21,6 +21,11 @@ const app = createApp(App)
 app.use(ElementPlus)
 
 // devtools.connect()
+
+// // @ts-expect-error skip type check
+// window.VUE_DEVTOOLS_CONFIG = {
+//   openInEditorHost: 'http://localhost:3000',
+// }
 
 const routes: RouteRecordRaw[] = [
   {
@@ -33,11 +38,13 @@ const routes: RouteRecordRaw[] = [
     path: '/hello',
     component: () => import('./pages/Hello.vue'),
     name: 'hello',
+    meta: { auth: 'admin', note: 'Hey! Manger' },
   },
   {
     path: '/hey/:id',
     component: Hey,
     name: 'hey',
+    meta: { auth: 'user', note: 'Hey!' },
   },
   {
     path: '/vue-query',
@@ -53,6 +60,16 @@ const routes: RouteRecordRaw[] = [
     path: '/circular-state',
     component: () => import('./pages/CircularState.vue'),
     name: 'circular-state',
+  },
+  {
+    path: '/interval-update',
+    component: () => import('./pages/IntervalUpdate.vue'),
+    name: 'interval-update',
+  },
+  {
+    path: '/prop-mutation',
+    component: () => import('./pages/PropMutation.vue'),
+    name: 'prop-mutation',
   },
 ]
 

@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-chrome-extension",
   "type": "module",
-  "version": "7.0.0-beta.3",
+  "version": "7.7.0",
   "private": true,
   "author": "webfansplz",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "@vue/devtools-shared": "workspace:^"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "catalog:",
-    "vue": "catalog:"
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vue": "^3.5.13"
   }
 }

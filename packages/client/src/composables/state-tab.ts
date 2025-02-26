@@ -1,10 +1,10 @@
-import type { MaybeRef } from 'vue'
 import type { CustomTab } from '@vue/devtools-kit'
-import { isInChromePanel, isInElectron } from '@vue/devtools-shared'
-import equal from 'fast-deep-equal'
-import { useDevToolsState } from '@vue/devtools-core'
-
+import type { MaybeRef } from 'vue'
 import type { ModuleBuiltinTab } from '~/types/tab'
+import { useDevToolsState } from '@vue/devtools-core'
+import { isInChromePanel, isInElectron } from '@vue/devtools-shared'
+
+import equal from 'fast-deep-equal'
 
 export interface TabSettings {
   hiddenTabCategories: string[]

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useTimeAgo } from '@vueuse/core'
 import type { AssetInfo, CodeSnippet } from '@vue/devtools-core'
 import { useDevToolsState, viteRpc } from '@vue/devtools-core'
-import { VueButton, VueIcon, vTooltip } from '@vue/devtools-ui'
+import { vTooltip, VueButton, VueIcon } from '@vue/devtools-ui'
+import { useTimeAgo } from '@vueuse/core'
 import { openInEditor } from '../../composables/open-in-editor'
 
 const props = defineProps<{
@@ -29,7 +29,6 @@ const textContent = computedAsync(async () => {
   if (asset.value.type !== 'text')
     return undefined
 
-  // eslint-disable-next-line no-unused-expressions
   textContentCounter.value
 
   const content = await viteRpc.value.getTextAssetContent(asset.value.filePath).then(res => res)

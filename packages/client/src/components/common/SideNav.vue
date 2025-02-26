@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { VueDropdown } from '@vue/devtools-ui'
 
+const emit = defineEmits(['toggleDevtoolsClientVisible'])
 const showDocking = ref(false)
 const showMoreTabs = ref(false)
 const panel = ref()
@@ -8,7 +9,6 @@ const buttonDocking = ref<HTMLButtonElement>()
 const buttonMoreTabs = ref<HTMLButtonElement>()
 const sidebarExpanded = computed(() => devtoolsClientState.value.expandSidebar)
 const sidebarScrollable = computed(() => devtoolsClientState.value.scrollableSidebar)
-
 const { enabledTabs, flattenedTabs } = useAllTabs()
 
 const ITEM_HEIGHT = 45
@@ -50,6 +50,17 @@ useResizeObserver(containerRef, () => {
   // This is a hack to force the dropdown to reposition itself
   dropdownDistance.value = dropdownDistance.value === 6 ? 6.01 : 6
 })
+
+const hostEnv = useHostEnv()
+useIntersectionObserver(
+  containerRef,
+  ([{ isIntersecting }]) => {
+    emit('toggleDevtoolsClientVisible', {
+      visible: isIntersecting,
+      host: hostEnv,
+    })
+  },
+)
 </script>
 
 <template>

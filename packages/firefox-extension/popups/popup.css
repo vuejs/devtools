@@ -45,3 +45,14 @@ a {
   margin-right: 24px;
   box-shadow: 0 0 15px rgb(0 0 0 / 10%);
 }
+
+.migration-guide {
+  width: 300px;
+  margin: 0;
+  padding: 0;
+}
+
+.migration-guide h2 {
+  padding: 8px 0;
+  margin: 0;
+}

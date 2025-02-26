@@ -28,4 +28,4 @@ export default defineConfig({
 
 ## Documentation
 
-Check out all the DevTools details at [devtools-next.vuejs.org](https://devtools-next.vuejs.org).
+Check out all the DevTools details at [devtools.vuejs.org](https://devtools.vuejs.org).

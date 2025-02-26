@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { VueButton, VueCard, VueDropdown, vTooltip } from '@vue/devtools-ui'
-import { CustomTab } from '@vue/devtools-kit'
 import { CustomInspector as CustomInspectorComponent } from '@vue/devtools-applet'
+import { CustomTab } from '@vue/devtools-kit'
+import { vTooltip, VueButton, VueCard, VueDropdown } from '@vue/devtools-ui'
 import { ModuleBuiltinTab } from '~/types'
 
 function close() {
@@ -14,6 +14,7 @@ const router = useRouter()
 const route = useRoute()
 const PageComponent = shallowRef()
 const customTabName = ref<string | null>(null)
+const customPluginId = ref<string | null>(null)
 const customTabType = ref<'custom-tab' | 'custom-inspector' | null>(null)
 
 function isMatchedWithRoute(tab?: typeof flattenedTabs['value'][number]) {
@@ -58,6 +59,7 @@ watch(
     }
     if ((tab as ModuleBuiltinTab).path.startsWith(CUSTOM_INSPECTOR_TAB_VIEW)) {
       customTabName.value = tab.name
+      customPluginId.value = tab.pluginId
       customTabType.value = 'custom-inspector'
       return
     }
@@ -108,7 +110,7 @@ const showGridPanel = ref(false)
     </div>
     <template v-if="customTabName && currentTab">
       <CustomTabComponent v-if="customTabType === 'custom-tab'" :tab="currentTab as CustomTab" class="h-[calc(100%-50px)]" iframe-inline of-auto />
-      <CustomInspectorComponent v-else :id="customTabName" />
+      <CustomInspectorComponent v-else-if="customPluginId" :id="customTabName" :plugin-id="customPluginId!" />
     </template>
     <div v-else-if="PageComponent && currentTab" of-auto class="h-[calc(100%-50px)]">
       <component :is="PageComponent" :key="`tab-${currentTab.name}`" />

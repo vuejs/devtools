@@ -1,13 +1,13 @@
 {
   "name": "@vue/devtools-core",
   "type": "module",
-  "version": "7.3.6",
+  "version": "7.7.2",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
     "directory": "packages/core",
     "type": "git",
-    "url": "git+https://github.com/vuejs/devtools-next.git"
+    "url": "git+https://github.com/vuejs/devtools.git"
   },
   "exports": {
     ".": {
@@ -32,12 +32,12 @@
   "dependencies": {
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
-    "mitt": "catalog:",
-    "nanoid": "^3.3.4",
-    "pathe": "catalog:",
-    "vite-hot-client": "catalog:"
+    "mitt": "^3.0.1",
+    "nanoid": "^5.1.0",
+    "pathe": "^2.0.3",
+    "vite-hot-client": "^2.0.4"
   },
   "devDependencies": {
-    "vue": "catalog:"
+    "vue": "^3.5.13"
   }
 }

@@ -16,7 +16,7 @@ const hostEnv = useHostEnv()
  */
 const enableFeatureSettings = hostEnv === 'iframe' || hostEnv === 'separate-window'
 
-const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar } = toRefs(toReactive(devtoolsClientState))
+const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar, reduceMotion } = toRefs(toReactive(devtoolsClientState))
 
 // #region settings
 const scaleOptions = [
@@ -163,7 +163,7 @@ const minimizePanelInteractiveLabel = computed(() => {
         </h3>
         <VueCard p4 flex="~ col gap-2">
           <div flex="~ gap2">
-            <VueDarkToggle v-slot="{ isDark, toggle }">
+            <VueDarkToggle v-slot="{ isDark, toggle }" :animation="!reduceMotion">
               <VueButton outlined type="primary" @click="toggle">
                 <div i-carbon-sun dark:i-carbon-moon translate-y--1px /> {{ isDark ? 'Dark' : 'Light' }}
               </VueButton>

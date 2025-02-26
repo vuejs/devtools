@@ -1,9 +1,9 @@
 <script setup lang="ts" generic="Value extends number | string, Label, M extends boolean">
-import { computed, useSlots } from 'vue'
-import { VClosePopper as vClosePopper } from 'floating-vue'
-import VueDropdown from './Dropdown.vue'
-import VueButton from './Button.vue'
 import type { ButtonProps } from './Button.vue'
+import { vClosePopper } from 'floating-vue'
+import { computed, useSlots } from 'vue'
+import VueButton from './Button.vue'
+import VueDropdown from './Dropdown.vue'
 
 const props = withDefaults(defineProps<{
   modelValue: M extends true ? Value[] : Value

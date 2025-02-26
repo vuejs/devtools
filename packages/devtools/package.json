@@ -1,13 +1,13 @@
 {
   "name": "@vue/devtools",
   "type": "module",
-  "version": "7.3.6",
+  "version": "7.7.2",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
     "directory": "packages/devtools",
     "type": "git",
-    "url": "git+https://github.com/vuejs/devtools-next.git"
+    "url": "git+https://github.com/vuejs/devtools.git"
   },
   "exports": {
     ".": {
@@ -36,8 +36,5 @@
   "dependencies": {
     "@vue/devtools-electron": "workspace:^",
     "@vue/devtools-kit": "workspace:^"
-  },
-  "publishConfig": {
-    "tag": "next"
   }
 }

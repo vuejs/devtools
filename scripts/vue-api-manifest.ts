@@ -1,8 +1,8 @@
-import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import degit from 'degit'
-import fse from 'fs-extra'
 import fg from 'fast-glob'
+import fse from 'fs-extra'
 import { RegexExtra } from 'regex-extra'
 
 const dir = fileURLToPath(new URL('../clones/vue-docs', import.meta.url))

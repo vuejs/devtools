@@ -1,6 +1,6 @@
-import { isBrowser, target } from '@vue/devtools-shared'
 import { functions } from '@vue/devtools-core'
 import { createRpcServer, setElectronServerContext } from '@vue/devtools-kit'
+import { isBrowser, target } from '@vue/devtools-shared'
 import { devtools } from '../../devtools-kit/src/index'
 
 export function init(io) {

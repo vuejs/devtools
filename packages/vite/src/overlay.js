@@ -1,6 +1,6 @@
-import vueDevToolsOptions from 'virtual:vue-devtools-options'
 import { functions, setDevToolsClientUrl } from '@vue/devtools-core'
 import { addCustomTab, createRpcServer, devtools, setDevToolsEnv, setOpenInEditorBaseUrl, toggleComponentInspectorEnabled } from '@vue/devtools-kit'
+import vueDevToolsOptions from 'virtual:vue-devtools-options'
 
 function normalizeUrl(url) {
   return new URL(`${vueDevToolsOptions.base || '/'}${url}`, import.meta.url).toString()

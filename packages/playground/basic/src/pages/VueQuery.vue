@@ -2,8 +2,8 @@
 import { defineComponent, ref } from 'vue'
 // import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
 
-import Posts from '../components/Posts.vue'
 import Post from '../components/Post.vue'
+import Posts from '../components/Posts.vue'
 
 export default defineComponent({
   name: 'App',

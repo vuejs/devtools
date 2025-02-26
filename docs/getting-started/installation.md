@@ -9,7 +9,7 @@ There are multiple options to add this tool to your projects, ensuring that it f
 ## Notice
 
 :::warning Compatibility Note
-The DevTools is only compatible with Vue 3. If you are still using Vue2, use [vue-devtools](https://devtools.vuejs.org/) instead.
+The DevTools is only compatible with Vue 3. If you are still using Vue2, use [vue-devtools](https://devtools-v6.vuejs.org/) instead.
 :::
 
 :::tip Recommendation

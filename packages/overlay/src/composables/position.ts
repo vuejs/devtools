@@ -1,6 +1,6 @@
-import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
 import type { CSSProperties, Ref } from 'vue'
 import { useEventListener, useScreenSafeArea, useWindowSize } from '@vueuse/core'
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
 import { clamp, pixelToNumber } from '../utils'
 import { useFrameState } from './state'
 
@@ -152,7 +152,7 @@ export function usePosition(panelEl: Ref<HTMLElement | undefined>) {
   const anchorStyle = computed(() => ({ left: `${anchorPos.value.left}px`, top: `${anchorPos.value.top}px` }))
 
   const iframeStyle = computed(() => {
-    // eslint-disable-next-line no-unused-expressions, no-sequences
+    // eslint-disable-next-line no-sequences
     mousePosition.x, mousePosition.y
 
     const halfHeight = (panelEl.value?.clientHeight || 0) / 2

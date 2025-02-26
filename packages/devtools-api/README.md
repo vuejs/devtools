@@ -4,4 +4,4 @@
 
 ## Getting Started
 
-Please follow the documentation at [devtools-next.vuejs.org](https://devtools-next.vuejs.org/plugins/api).
+Please follow the documentation at [devtools.vuejs.org](https://devtools.vuejs.org/plugins/api).

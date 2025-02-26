@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VueButton, useDevToolsColorMode } from '@vue/devtools-ui'
+import { useDevToolsColorMode, VueButton } from '@vue/devtools-ui'
 
 useDevToolsColorMode()
 

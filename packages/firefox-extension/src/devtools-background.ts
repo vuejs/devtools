@@ -23,8 +23,11 @@ function createPanelOnVueDetected() {
         'icons/128.png',
         'devtools-panel.html',
         (panel) => {
-          panel.onShown.addListener((window) => {
-
+          panel.onShown.addListener(() => {
+            chrome.devtools.inspectedWindow.eval(`window.__VUE_DEVTOOLS_UPDATE_CLIENT_DETECTED__({ chrome: true })`)
+          })
+          panel.onHidden.addListener(() => {
+            chrome.devtools.inspectedWindow.eval(`window.__VUE_DEVTOOLS_UPDATE_CLIENT_DETECTED__({ chrome: false })`)
           })
         },
       )

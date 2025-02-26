@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
-import { Pane, Splitpanes } from 'splitpanes'
+import type { CustomInspectorNode, CustomInspectorState } from '@vue/devtools-kit'
 import { DevToolsMessagingEvents, rpc } from '@vue/devtools-core'
 import { parse } from '@vue/devtools-kit'
-import type { CustomInspectorNode, CustomInspectorState } from '@vue/devtools-kit'
-import { until } from '@vueuse/core'
-import Navbar from '~/components/basic/Navbar.vue'
+import { VueInput } from '@vue/devtools-ui'
+import { until, useToggle, watchDebounced } from '@vueuse/core'
+import { Pane, Splitpanes } from 'splitpanes'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import DevToolsHeader from '~/components/basic/DevToolsHeader.vue'
 import Empty from '~/components/basic/Empty.vue'
+import Navbar from '~/components/basic/Navbar.vue'
 import RootStateViewer from '~/components/state/RootStateViewer.vue'
-import { createExpandedContext } from '~/composables/toggle-expanded'
-import { useCustomInspectorState } from '~/composables/custom-inspector-state'
 import ComponentTree from '~/components/tree/TreeViewer.vue'
+import { useCustomInspectorState } from '~/composables/custom-inspector-state'
+import { createExpandedContext } from '~/composables/toggle-expanded'
 
 const { expanded: expandedTreeNodes } = createExpandedContext()
 const { expanded: expandedStateNodes } = createExpandedContext('routes-state')
@@ -21,6 +22,8 @@ const customInspectState = useCustomInspectorState()
 const inspectorId = computed(() => customInspectState.value.id!)
 
 const selected = ref('')
+const filterKey = ref('')
+const [filtered, toggleFiltered] = useToggle(true)
 const tree = ref<CustomInspectorNode[]>([])
 const treeNodeLinkedList = computed(() => tree.value?.length ? dfs(tree.value?.[0]) : [])
 const flattenedTreeNodes = computed(() => flattenTreeNodes(tree.value))
@@ -92,8 +95,8 @@ watch(selected, () => {
   getRoutesState(selected.value)
 })
 
-const getRoutesInspectorTree = () => {
-  rpc.value.getInspectorTree({ inspectorId: inspectorId.value, filter: '' }).then((_data) => {
+const getRoutesInspectorTree = async (filter = '') => {
+  await rpc.value.getInspectorTree({ inspectorId: inspectorId.value, filter }).then((_data) => {
     const data = parse(_data!)
     tree.value = data
     if (!selected.value && data.length) {
@@ -104,7 +107,9 @@ const getRoutesInspectorTree = () => {
   })
 }
 
-until(inspectorId).toBeTruthy().then(getRoutesInspectorTree)
+until(inspectorId).toBeTruthy().then(() => {
+  getRoutesInspectorTree()
+})
 
 function onInspectorTreeUpdated(_data: string) {
   const data = parse(_data) as {
@@ -145,6 +150,18 @@ onUnmounted(() => {
   rpc.functions.off(DevToolsMessagingEvents.INSPECTOR_TREE_UPDATED, onInspectorTreeUpdated)
   rpc.functions.off(DevToolsMessagingEvents.INSPECTOR_STATE_UPDATED, onInspectorStateUpdated)
 })
+
+function search(v: string) {
+  const value = v.trim().toLowerCase()
+  toggleFiltered()
+  getRoutesInspectorTree(value).then(() => {
+    toggleFiltered()
+  })
+}
+
+watchDebounced(filterKey, (v) => {
+  search(v)
+}, { debounce: 300 })
 </script>
 
 <template>
@@ -155,12 +172,22 @@ onUnmounted(() => {
     <Splitpanes class="flex-1 overflow-auto">
       <Pane border="r base" size="40" h-full>
         <div h-full select-none overflow-scroll p2 class="no-scrollbar">
+          <div class="pb2">
+            <VueInput
+              v-model="filterKey" placeholder="Search routes"
+              :loading="!filtered"
+              :loading-debounce-time="250" class="text-3.5"
+            />
+          </div>
           <ComponentTree v-model="selected" :data="tree" />
         </div>
       </Pane>
       <Pane size="60">
-        <div h-full select-none overflow-scroll class="no-scrollbar">
-          <RootStateViewer v-if="selected" class="p3" :data="state" node-id="" inspector-id="router" expanded-state-id="routes-state" />
+        <div h-full overflow-scroll class="no-scrollbar">
+          <RootStateViewer
+            v-if="selected" class="p3" :data="state" node-id="" inspector-id="router"
+            expanded-state-id="routes-state"
+          />
           <Empty v-else>
             No Data
           </Empty>

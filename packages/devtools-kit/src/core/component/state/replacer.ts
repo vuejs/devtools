@@ -1,9 +1,10 @@
+import { ensurePropertyExists } from '../utils'
 import { INFINITY, MAX_ARRAY_SIZE, MAX_STRING_SIZE, NAN, NEGATIVE_INFINITY, UNDEFINED } from './constants'
 import { getBigIntDetails, getComponentDefinitionDetails, getDateDetails, getFunctionDetails, getHTMLElementDetails, getInstanceDetails, getMapDetails, getObjectDetails, getRouterDetails, getSetDetails, getStoreDetails } from './custom'
 import { isVueInstance } from './is'
 import { sanitize } from './util'
 
-export type Replacer = (this: any, key: string | number, value: any, depth?: number, seenInstance?: Map</* instance */any, /* depth */number>) => any
+export type Replacer = (this: any, key: string | number, value: any, depth?: number, seenInstance?: Map<any, /* depth */number>) => any
 
 export function stringifyReplacer(key: string | number, _value: any, depth?: number, seenInstance?: Map<any, number>) {
   // fix vue warn for compilerOptions passing-options-to-vuecompiler-sfc
@@ -69,8 +70,7 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
     else if (proto === '[object Error]') {
       return `[native Error ${(val as Error).message}<>${(val as Error).stack}]`
     }
-    // @ts-expect-error skip type check
-    else if (val.state && val._vm) {
+    else if (ensurePropertyExists(val, 'state', true) && ensurePropertyExists(val, '_vm', true)) {
       return getStoreDetails(val)
     }
     else if (val.constructor && val.constructor.name === 'VueRouter') {
@@ -85,8 +85,7 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
       seenInstance?.set(val, depth!)
       return componentVal
     }
-    // @ts-expect-error skip type check
-    else if (typeof val.render === 'function') {
+    else if (ensurePropertyExists(val, 'render', true) && typeof val.render === 'function') {
       return getComponentDefinitionDetails(val)
     }
     else if (val.constructor && val.constructor.name === 'VNode') {
@@ -96,12 +95,10 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
     else if (typeof HTMLElement !== 'undefined' && val instanceof HTMLElement) {
       return getHTMLElementDetails(val)
     }
-    // @ts-expect-error skip type check
-    else if (val.constructor?.name === 'Store' && val._wrappedGetters) {
+    else if (val.constructor?.name === 'Store' && '_wrappedGetters' in val) {
       return '[object Store]'
     }
-    // @ts-expect-error skip type check
-    else if (val.currentRoute) {
+    else if (ensurePropertyExists(val, 'currentRoute', true)) {
       return '[object Router]'
     }
     const customDetails = getObjectDetails(val)

@@ -44,14 +44,14 @@ export const unoConfig = {
     '$ui-z-max-override': 'z-2147483647',
 
     // general
-    '$ui-bg-base': 'bg-white dark:bg-black',
+    '$ui-bg-base': 'bg-white dark:bg-#121212',
     '$ui-base': 'box-border font-inherit',
     '$ui-transition': 'transition-all duration-300 ease-in-out',
     '$ui-borderless': '!border-transparent !shadow-none',
     '$ui-base-br': 'rounded-3px',
     '$ui-border-base': 'border-gray/20',
-    '$ui-text': 'text-black dark:text-white',
-    '$ui-glass-effect': 'backdrop-blur-6 bg-white/80 dark:bg-black/90',
+    '$ui-text': 'text-black dark:text-#dfe0e2',
+    '$ui-glass-effect': 'backdrop-blur-6 bg-white/80 dark:bg-#3C3C3C/90',
   },
   rules: [
     ['$ui-font-inherit', { 'font-family': 'inherit' }],

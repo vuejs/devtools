@@ -1,5 +1,5 @@
-import { run } from '../../test-utils'
 import rule from '.'
+import { run } from '../../test-utils'
 
 run({
   name: 'no-vue-runtime-import',

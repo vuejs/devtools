@@ -1,7 +1,6 @@
-import { BirpcReturn, createBirpc, createBirpcGroup } from 'birpc'
 import type { BirpcGroup, BirpcOptions, ChannelOptions } from 'birpc'
 import { target } from '@vue/devtools-shared'
-import { MergeableChannelOptions } from './types'
+import { BirpcReturn, createBirpc, createBirpcGroup } from 'birpc'
 import {
   createBroadcastChannel,
   createElectronClientChannel,
@@ -15,17 +14,18 @@ import {
   createViteClientChannel,
   createViteServerChannel,
 } from './presets'
+import { MergeableChannelOptions } from './types'
 
 export type Presets = 'iframe' | 'electron' | 'vite' | 'broadcast' | 'extension'
 export {
+  getExtensionClientContext,
   setElectronClientContext,
-  setElectronServerContext,
   setElectronProxyContext,
+  setElectronServerContext,
+  setExtensionClientContext,
+  setIframeServerContext,
   setViteClientContext,
   setViteServerContext,
-  setIframeServerContext,
-  setExtensionClientContext,
-  getExtensionClientContext,
 } from './presets'
 export interface CreateRpcClientOptions<RemoteFunctions> {
   options?: BirpcOptions<RemoteFunctions>
@@ -50,7 +50,7 @@ function setRpcClientToGlobal<R, L>(rpc: BirpcReturn<R, L>) {
   target.__VUE_DEVTOOLS_KIT_RPC_CLIENT__ = rpc
 }
 
-export function setRpcServerToGlobal<R, L >(rpc: BirpcGroup<R, L>) {
+export function setRpcServerToGlobal<R, L>(rpc: BirpcGroup<R, L>) {
   target.__VUE_DEVTOOLS_KIT_RPC_SERVER__ = rpc
 }
 
@@ -66,7 +66,7 @@ export function setViteRpcClientToGlobal<R, L>(rpc: BirpcReturn<R, L>) {
   target.__VUE_DEVTOOLS_KIT_VITE_RPC_CLIENT__ = rpc
 }
 
-export function setViteRpcServerToGlobal<R, L >(rpc: BirpcGroup<R, L>) {
+export function setViteRpcServerToGlobal<R, L>(rpc: BirpcGroup<R, L>) {
   target.__VUE_DEVTOOLS_KIT_VITE_RPC_SERVER__ = rpc
 }
 

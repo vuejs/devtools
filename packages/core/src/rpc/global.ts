@@ -1,6 +1,6 @@
-import { DevToolsContextHookKeys, DevToolsMessagingHookKeys, devtools, devtoolsRouter, devtoolsRouterInfo, getActiveInspectors, getInspector, getInspectorActions, getInspectorInfo, getInspectorNodeActions, getRpcClient, getRpcServer, stringify, toggleClientConnected } from '@vue/devtools-kit'
-import { createHooks } from 'hookable'
 import type { DevToolsV6PluginAPIHookKeys, DevToolsV6PluginAPIHookPayloads, OpenInEditorOptions } from '@vue/devtools-kit'
+import { devtools, DevToolsContextHookKeys, DevToolsMessagingHookKeys, devtoolsRouter, devtoolsRouterInfo, getActiveInspectors, getInspector, getInspectorActions, getInspectorInfo, getInspectorNodeActions, getRpcClient, getRpcServer, stringify, toggleClientConnected, updateDevToolsClientDetected, updateTimelineLayersState } from '@vue/devtools-kit'
+import { createHooks } from 'hookable'
 
 const hooks = createHooks()
 
@@ -32,6 +32,7 @@ function getDevToolsState() {
       routerId: item.routerId,
     })),
     activeAppRecordId: state.activeAppRecordId,
+    timelineLayersState: state.timelineLayersState,
   }
 }
 
@@ -93,6 +94,9 @@ export const functions = {
   getInspectorActions(id: string) {
     return getInspectorActions(id)
   },
+  updateTimelineLayersState(state: Record<string, boolean>) {
+    return updateTimelineLayersState(state)
+  },
   callInspectorNodeAction(inspectorId: string, actionIndex: number, nodeId: string) {
     const nodeActions = getInspectorNodeActions(inspectorId)
     if (nodeActions?.length) {
@@ -118,8 +122,14 @@ export const functions = {
     if (inspector)
       await inspector.enable()
   },
-  async toggleApp(id: string) {
-    return devtools.ctx.api.toggleApp(id)
+  async toggleApp(id: string, options?: { inspectingComponent?: boolean }) {
+    return devtools.ctx.api.toggleApp(id, options)
+  },
+  updatePluginSettings(pluginId: string, key: string, value: string) {
+    return devtools.ctx.api.updatePluginSettings(pluginId, key, value)
+  },
+  getPluginSettings(pluginId: string) {
+    return devtools.ctx.api.getPluginSettings(pluginId)
   },
   getRouterInfo() {
     return devtoolsRouterInfo
@@ -130,7 +140,7 @@ export const functions = {
   getMatchedRoutes(path: string) {
     const c = console.warn
     console.warn = () => {}
-    const matched = devtoolsRouter.value?.resolve({
+    const matched = devtoolsRouter.value?.resolve?.({
       path: path || '/',
     }).matched ?? []
     console.warn = c
@@ -145,8 +155,14 @@ export const functions = {
   getInspectorInfo(id: string) {
     return getInspectorInfo(id)
   },
+  highlighComponent(uid: string) {
+    return devtools.ctx.hooks.callHook(DevToolsContextHookKeys.COMPONENT_HIGHLIGHT, { uid })
+  },
   unhighlight() {
-    devtools.ctx.hooks.callHook(DevToolsContextHookKeys.COMPONENT_UNHIGHLIGHT)
+    return devtools.ctx.hooks.callHook(DevToolsContextHookKeys.COMPONENT_UNHIGHLIGHT)
+  },
+  updateDevToolsClientDetected(params: Record<string, boolean>) {
+    updateDevToolsClientDetected(params)
   },
   // listen to devtools server events
   initDevToolsServerListener() {

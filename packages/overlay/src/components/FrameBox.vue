@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
-import { useEventListener } from '@vueuse/core'
 import { onRpcSeverReady, rpcServer } from '@vue/devtools-core'
+import { useEventListener } from '@vueuse/core'
+import { computed, ref, watchEffect } from 'vue'
 import { useFrameState } from '~/composables'
 import { PANEL_MAX, PANEL_MIN } from '~/constants'
 
@@ -32,6 +32,7 @@ onRpcSeverReady(() => {
         minimizePanelInactive: v.minimizePanelInteractive,
         closeOnOutsideClick: v.closeOnOutsideClick,
         preferShowFloatingPanel: v.showFloatingPanel,
+        reduceMotion: v.reduceMotion,
       })
     }
   })

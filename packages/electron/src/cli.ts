@@ -1,5 +1,5 @@
-import { execaSync } from 'execa'
 import electron from 'electron'
+import { execaSync } from 'execa'
 import { resolve } from 'pathe'
 
 const appPath = decodeURIComponent(resolve(new URL('../dist/app.cjs', import.meta.url).pathname))

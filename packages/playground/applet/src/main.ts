@@ -1,5 +1,5 @@
-import { createPinia } from 'pinia'
 import Tres from '@tresjs/core'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import './style.css'
 import 'uno.css'

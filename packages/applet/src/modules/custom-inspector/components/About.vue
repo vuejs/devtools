@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import DevToolsLogo from './DevToolsLogo.vue'
-import { useVirtualRouter } from '~/composables/virtual-router'
 import { useCustomInspectorState } from '~/composables/custom-inspector-state'
+import { useVirtualRouter } from '~/composables/virtual-router'
+import DevToolsLogo from './DevToolsLogo.vue'
 
 const virtualRouter = useVirtualRouter()
 const state = useCustomInspectorState()

@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { URL } from 'node:url'
-import { BrowserWindow, app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { init as initServer } from './server'
 
 initServer()

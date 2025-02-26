@@ -1,4 +1,4 @@
-export { createConnectionApp, disconnectDevToolsClient, reloadDevToolsClient, initDevTools } from './main'
+export { createConnectionApp, disconnectDevToolsClient, initDevTools, reloadDevToolsClient } from './main'
 
 export function reload() {
 

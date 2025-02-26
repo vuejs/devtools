@@ -1,5 +1,5 @@
-import { useLocalStorage } from '@vueuse/core'
 import type { DeepReadonly, Ref } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
 import { readonly } from 'vue'
 
 interface DevToolsFrameState {
@@ -14,6 +14,7 @@ interface DevToolsFrameState {
   closeOnOutsideClick: boolean
   minimizePanelInactive: number
   preferShowFloatingPanel: boolean
+  reduceMotion: boolean
 }
 
 export interface UseFrameStateReturn {
@@ -33,6 +34,7 @@ const state = useLocalStorage<DevToolsFrameState>('__vue-devtools-frame-state__'
   closeOnOutsideClick: false,
   minimizePanelInactive: 5000,
   preferShowFloatingPanel: true,
+  reduceMotion: false,
 })
 
 export function useFrameState(): UseFrameStateReturn {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Components as ComponentsPanel } from '@vue/devtools-applet'
-import '@vue/devtools-applet/style.css'
 import { rpc } from '@vue/devtools-core'
 import { openInEditor } from '../composables/open-in-editor'
+import '@vue/devtools-applet/style.css'
 
 function onInspectComponentStart() {
   rpc.value.emit('toggle-panel', false)

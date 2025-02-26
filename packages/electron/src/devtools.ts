@@ -1,7 +1,7 @@
-import io from 'socket.io-client/dist/socket.io.js'
-import ip from 'ip'
-import { createRpcClient, setElectronClientContext } from '@vue/devtools-kit'
 import { functions } from '@vue/devtools-core'
+import { createRpcClient, setElectronClientContext } from '@vue/devtools-kit'
+import ip from 'ip'
+import io from 'socket.io-client/dist/socket.io.js'
 import { createConnectionApp, initDevTools } from '../client/devtools-panel'
 
 const port = window.process.env.PORT || 8098

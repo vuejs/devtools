@@ -1,5 +1,5 @@
-import { createRpcServer } from '@vue/devtools-kit'
 import { functions } from '@vue/devtools-core'
+import { createRpcServer } from '@vue/devtools-kit'
 
 window.addEventListener('message', handshake)
 

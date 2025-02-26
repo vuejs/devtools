@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
 import type { VueNotificationOptions } from '../composables/notification'
+import { computed, onMounted, ref } from 'vue'
 
 type NotificationType = NonNullable<VueNotificationOptions['type']>
 

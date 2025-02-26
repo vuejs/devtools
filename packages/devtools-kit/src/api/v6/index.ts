@@ -1,10 +1,12 @@
 import type { DevtoolsContext } from '../../ctx'
 import type { App, ComponentBounds, ComponentInstance, CustomInspectorOptions, DevToolsPlugin, TimelineEventOptions, TimelineLayerOptions } from '../../types'
-import { DevToolsContextHookKeys, DevToolsV6PluginAPIHookKeys, DevToolsV6PluginAPIHooks } from '../../ctx/hook'
-import { devtoolsPluginBuffer } from '../../ctx/plugin'
+import { getPluginSettings, initPluginSettings } from '../../core/plugin/plugin-settings'
+
+import { devtoolsState } from '../../ctx'
+import { DevToolsContextHookKeys, DevToolsV6PluginAPIHookKeys, DevToolsV6PluginAPIHookPayloads, DevToolsV6PluginAPIHooks } from '../../ctx/hook'
+import { getActiveInspectors } from '../../ctx/inspector'
 import { devtoolsHooks } from '../../hook'
 import { DevToolsHooks } from '../../types'
-import { getActiveInspectors } from '../../ctx/inspector'
 
 export class DevToolsV6PluginAPI {
   private plugin: DevToolsPlugin
@@ -55,6 +57,9 @@ export class DevToolsV6PluginAPI {
 
   // component inspector
   notifyComponentUpdate(instance?: ComponentInstance) {
+    if (devtoolsState.highPerfModeEnabled) {
+      return
+    }
     const inspector = getActiveInspectors().find(i => i.packageName === this.plugin.descriptor.packageName)
     if (inspector?.id) {
       // @TODO: handler
@@ -78,13 +83,22 @@ export class DevToolsV6PluginAPI {
   // custom inspector
   addInspector(options: CustomInspectorOptions) {
     this.hooks.callHook(DevToolsContextHookKeys.ADD_INSPECTOR, { inspector: options, plugin: this.plugin })
+    if (this.plugin.descriptor.settings) {
+      initPluginSettings(options.id, this.plugin.descriptor.settings)
+    }
   }
 
   sendInspectorTree(inspectorId: string) {
+    if (devtoolsState.highPerfModeEnabled) {
+      return
+    }
     this.hooks.callHook(DevToolsContextHookKeys.SEND_INSPECTOR_TREE, { inspectorId, plugin: this.plugin })
   }
 
   sendInspectorState(inspectorId: string) {
+    if (devtoolsState.highPerfModeEnabled) {
+      return
+    }
     this.hooks.callHook(DevToolsContextHookKeys.SEND_INSPECTOR_STATE, { inspectorId, plugin: this.plugin })
   }
 
@@ -92,8 +106,15 @@ export class DevToolsV6PluginAPI {
     this.hooks.callHook(DevToolsContextHookKeys.CUSTOM_INSPECTOR_SELECT_NODE, { inspectorId, nodeId, plugin: this.plugin })
   }
 
+  visitComponentTree(payload: DevToolsV6PluginAPIHookPayloads[DevToolsV6PluginAPIHookKeys.VISIT_COMPONENT_TREE]) {
+    return this.hooks.callHook(DevToolsV6PluginAPIHookKeys.VISIT_COMPONENT_TREE, payload)
+  }
+
   // timeline
   now(): number {
+    if (devtoolsState.highPerfModeEnabled) {
+      return 0
+    }
     return Date.now()
   }
 
@@ -102,26 +123,15 @@ export class DevToolsV6PluginAPI {
   }
 
   addTimelineEvent(options: TimelineEventOptions) {
+    if (devtoolsState.highPerfModeEnabled) {
+      return
+    }
     this.hooks.callHook(DevToolsContextHookKeys.TIMELINE_EVENT_ADDED, { options, plugin: this.plugin })
   }
 
   // settings
   getSettings(pluginId?: string) {
-    function _getSettings(settings) {
-      const _settings = {}
-      Object.keys(settings!).forEach((key) => {
-        _settings[key] = settings![key].defaultValue
-      })
-
-      return _settings
-    }
-    if (pluginId) {
-      const item = devtoolsPluginBuffer.find(item => item[0].id === pluginId)?.[0] ?? null
-      return _getSettings(item?.settings) ?? _getSettings(this.plugin.descriptor.settings)
-    }
-    else {
-      return _getSettings(this.plugin.descriptor.settings)
-    }
+    return getPluginSettings((pluginId ?? this.plugin.descriptor.id)!, this.plugin.descriptor.settings)
   }
 
   // utilities

@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-overlay",
   "type": "module",
-  "version": "7.3.6",
+  "version": "7.7.2",
   "private": true,
   "author": "webfansplz",
   "license": "MIT",
@@ -24,14 +24,14 @@
     "@vue/devtools-kit": "workspace:*",
     "@vue/devtools-shared": "workspace:^",
     "@vue/devtools-ui": "workspace:*",
-    "@vueuse/core": "catalog:"
+    "@vueuse/core": "^12.7.0"
   },
   "devDependencies": {
-    "@iconify/json": "catalog:",
-    "@types/node": "catalog:",
-    "@vitejs/plugin-vue": "catalog:",
-    "sass": "catalog:",
-    "vite": "catalog:",
-    "vue": "catalog:"
+    "@iconify/json": "^2.2.308",
+    "@types/node": "^22.13.4",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "sass-embedded": "^1.85.0",
+    "vite": "^6.1.1",
+    "vue": "^3.5.13"
   }
 }

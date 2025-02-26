@@ -4,7 +4,7 @@ Plugins API for easier DevTools integrations.
 
 :::tip
 
-Since v7.3.0, we are fully compatible with the v6 plugin API. You can check out the [API documentation](https://devtools.vuejs.org/plugin/api-reference.html) here.
+Since v7.3.0, we are fully compatible with the v6 plugin API. You can check out the [API documentation](https://devtools-v6.vuejs.org/plugin/api-reference.html) here.
 :::
 
 ## Installation
@@ -49,6 +49,48 @@ addCustomTab({
     src: 'https://vueuse.org/',
   },
   category: 'advanced',
+})
+
+const SFC = /* vue */ `
+  <script setup lang="ts">
+  import { ref } from 'vue'
+
+  const count = ref(0)
+  </script>
+
+  <template>
+    <div class="h-full w-full flex flex-col items-center justify-center">
+      <div>
+        count is {{ count }}
+      </div>
+      <button class="btn" @click="count++">
+        increment
+      </button>
+    </div>
+  </template>
+
+  <style scoped>
+  .btn {
+    background-color: #4c51bf;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+  }
+  </style>
+`
+
+addCustomTab({
+  name: 'plugin-count',
+  title: 'Plugin Count',
+  icon: 'baseline-exposure-plus-1',
+  // SFC view
+  view: {
+    type: 'sfc',
+    sfc: SFC,
+  },
+  category: 'app',
 })
 ```
 

@@ -11,19 +11,19 @@
 ::: code-group
 
 ```sh [npm]
-$ npm add -g @vue/devtools@next
+$ npm add -g @vue/devtools
 ```
 
 ```sh [pnpm]
-$ pnpm add -g @vue/devtools@next
+$ pnpm add -g @vue/devtools
 ```
 
 ```sh [yarn]
-$ yarn global add @vue/devtools@next
+$ yarn global add @vue/devtools
 ```
 
 ```sh [bun]
-$ bun add -g @vue/devtools@next
+$ bun add -g @vue/devtools
 ```
 
 :::
@@ -33,19 +33,19 @@ $ bun add -g @vue/devtools@next
 ::: code-group
 
 ```sh [npm]
-$ npm add -D @vue/devtools@next
+$ npm add -D @vue/devtools
 ```
 
 ```sh [pnpm]
-$ pnpm add -D @vue/devtools@next
+$ pnpm add -D @vue/devtools
 ```
 
 ```sh [yarn]
-$ yarn add -D @vue/devtools@next
+$ yarn add -D @vue/devtools
 ```
 
 ```sh [bun]
-$ bun add -D @vue/devtools@next
+$ bun add -D @vue/devtools
 ```
 
 :::

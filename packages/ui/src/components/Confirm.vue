@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { watchEffect } from 'vue'
-import VueDialog from './Dialog.vue'
 import VueButton from './Button.vue'
+import VueDialog from './Dialog.vue'
 
 const props = withDefaults(defineProps<{
   modelValue: boolean

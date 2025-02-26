@@ -1,12 +1,15 @@
-import { inject, provide, ref } from 'vue'
 import type { InjectionKey, Ref } from 'vue'
+import { inject, provide, ref } from 'vue'
 
 type CustomInspectorState = Partial<{
   homepage: string
   id: string
+  pluginId: string
   label: string
   logo: string
   timelineLayerIds: string[]
+  treeFilterPlaceholder: string
+  stateFilterPlaceholder: string
 }>
 
 const VueDevToolsStateSymbol: InjectionKey<Ref<CustomInspectorState>> = Symbol.for('VueDevToolsCustomInspectorStateSymbol')

@@ -1,5 +1,5 @@
-import { defineConfig, mergeConfigs, presetAttributify, presetWebFonts } from 'unocss'
 import { unoConfig } from '@vue/devtools-ui/theme'
+import { defineConfig, mergeConfigs, presetAttributify, presetWebFonts } from 'unocss'
 
 export default defineConfig(mergeConfigs([unoConfig, {
   rules: [
@@ -51,8 +51,8 @@ export default defineConfig(mergeConfigs([unoConfig, {
   ],
   shortcuts: [{
     // general
-    'bg-base': 'bg-white dark:bg-[#121212]',
-    'text-base': 'text-black dark:text-white',
+    'bg-base': 'bg-white dark:bg-#121212',
+    'text-base': 'text-black dark:text-#dfe0e2',
     'bg-active': 'bg-gray:5',
     'border-base': 'border-gray/20',
     'navbar-base': 'border-b border-base h-50px',
@@ -61,11 +61,11 @@ export default defineConfig(mergeConfigs([unoConfig, {
     'x-divider': 'h-1px w-full bg-gray/15',
 
     // glass
-    'glass-effect': 'backdrop-blur-6 bg-white/80 dark:bg-[#121212]/90',
+    'glass-effect': 'backdrop-blur-6 bg-white/80 dark:bg-#121212/90',
     'navbar-glass': 'sticky z-10 top-0 glass-effect',
 
     // code
-    'code-block': 'dark:bg-[#121212] bg-white',
+    'code-block': 'dark:bg-#121212 bg-white',
 
     // panel grids
     'panel-grids': 'panel-grids-light dark:panel-grids-dark',
@@ -80,7 +80,7 @@ export default defineConfig(mergeConfigs([unoConfig, {
     'state-value': 'text-#444 dark:(text-#bdc6cf)',
     'state-value-label': 'text-gray-500',
     'state-value-literal': 'text-#03c dark:(text-#997fff)',
-    'state-value-string': 'text-#c41a16',
+    'state-value-string': 'text-#FFB980',
   }, [/^theme-card-(\w+)$/, $ => `p2 flex gap2 border border-base bg-base items-center rounded min-w-40 min-h-25 justify-center transition-all saturate-0 op50 shadow hover:(op100 bg-${$[1]}/10 text-${$[1]}6 saturate-100)`]],
   presets: [
     presetAttributify(),

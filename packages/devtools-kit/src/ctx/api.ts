@@ -1,18 +1,19 @@
-import type { HookKeys, Hookable } from 'hookable'
-import { target } from '@vue/devtools-shared'
+import type { Hookable, HookKeys } from 'hookable'
 import type { CustomInspectorState } from '../types'
-import { StateEditor } from '../core/component/state/editor'
-import { cancelInspectComponentHighLighter, inspectComponentHighLighter, scrollToComponent } from '../core/component-highlighter'
-import { getComponentInstance } from '../core/component/utils'
-import { getRootElementsFromComponentInstance } from '../core/component/tree/el'
-import { openInEditor } from '../core/open-in-editor'
-import { normalizeRouterInfo } from '../core/router'
-import { getComponentInspector } from '../core/component-inspector'
-import { registerDevToolsPlugin } from '../core/plugin'
 import type { DevToolsContextHooks, DevToolsMessagingHooks, DevToolsV6PluginAPIHookPayloads } from './hook'
+import { target } from '@vue/devtools-shared'
+import { cancelInspectComponentHighLighter, inspectComponentHighLighter, scrollToComponent } from '../core/component-highlighter'
+import { getComponentInspector } from '../core/component-inspector'
+import { StateEditor } from '../core/component/state/editor'
+import { getRootElementsFromComponentInstance } from '../core/component/tree/el'
+import { getComponentInstance } from '../core/component/utils'
+import { openInEditor } from '../core/open-in-editor'
+import { registerDevToolsPlugin } from '../core/plugin'
+import { getPluginSettings, getPluginSettingsOptions, setPluginSettings } from '../core/plugin/plugin-settings'
+import { normalizeRouterInfo } from '../core/router'
 import { DevToolsContextHookKeys, DevToolsV6PluginAPIHookKeys } from './hook'
-import { activeAppRecord, devtoolsAppRecords, setActiveAppRecord, setActiveAppRecordId } from './state'
 import { callInspectorUpdatedHook, getInspector } from './inspector'
+import { activeAppRecord, devtoolsAppRecords, setActiveAppRecord, setActiveAppRecordId } from './state'
 
 export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevToolsMessagingHooks, HookKeys<DevToolsContextHooks & DevToolsMessagingHooks>>) {
   return {
@@ -101,7 +102,7 @@ export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevTool
     // get vue inspector
     getVueInspector: getComponentInspector,
     // toggle app
-    toggleApp(id: string) {
+    toggleApp(id: string, options?: { inspectingComponent?: boolean }) {
       const appRecord = devtoolsAppRecords.value.find(record => record.id === id)
 
       if (appRecord) {
@@ -109,7 +110,7 @@ export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevTool
         setActiveAppRecord(appRecord)
         normalizeRouterInfo(appRecord, activeAppRecord)
         callInspectorUpdatedHook()
-        registerDevToolsPlugin(appRecord.app)
+        registerDevToolsPlugin(appRecord.app, options)
       }
     },
     // inspect dom
@@ -120,6 +121,15 @@ export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevTool
         if (el) {
           target.__VUE_DEVTOOLS_INSPECT_DOM_TARGET__ = el
         }
+      }
+    },
+    updatePluginSettings(pluginId: string, key: string, value: string) {
+      setPluginSettings(pluginId, key, value)
+    },
+    getPluginSettings(pluginId: string) {
+      return {
+        options: getPluginSettingsOptions(pluginId),
+        values: getPluginSettings(pluginId),
       }
     },
   }

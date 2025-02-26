@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { CommandItem } from '../composables/state-commands'
 import { VueIcon, VueInput, VueOverlay } from '@vue/devtools-ui'
 import Fuse from 'fuse.js'
-import type { CommandItem } from '../composables/state-commands'
 
 const show = ref(false)
 const search = ref('')

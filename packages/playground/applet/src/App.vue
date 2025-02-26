@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import '@vue/devtools-applet/style.css'
+import { Components } from '@vue/devtools-applet'
 import { DevToolsMessagingEvents, functions, onRpcConnected, rpc } from '@vue/devtools-core'
 import { createRpcClient } from '@vue/devtools-kit'
-import { Components } from '@vue/devtools-applet'
 import { useDark } from '@vueuse/core'
 import { useCounterStore } from './stores'
+import '@vue/devtools-applet/style.css'
 // import Tres from './components/Tres.vue'
 // import Hello from './components/Hello.vue'
 

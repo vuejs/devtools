@@ -1,5 +1,5 @@
-import { createApp, h } from 'vue'
 import type { Component } from 'vue'
+import { createApp, h } from 'vue'
 
 import App from './App.vue'
 

@@ -4,9 +4,9 @@ const $vmQueue: any[] = []
 // Expose instance data to window
 // Copied from https://github.com/vuejs/devtools/blob/f03590025b0b4910cf539531c91384be51a8f8fa/packages/app-backend-core/src/component.ts#L57-L72
 export function exposeInstanceToWindow(componentInstance: any) {
-  const win = window as any
-  if (typeof win === 'undefined')
+  if (typeof window === 'undefined')
     return
+  const win = window as any
 
   if (!componentInstance)
     return

@@ -14,9 +14,9 @@ const list = [
     link: '/guide/standalone',
   },
   {
-    name: 'Chrome Extension (Beta)',
+    name: 'Chrome Extension',
     logo: '/features/chrome-logo.svg',
-    link: 'https://chromewebstore.google.com/detail/vuejs-devtools-beta/ljjemllljcmogpfapbkkighbhhppjdbg?utm_source=ext_sidebar',
+    link: 'https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd?utm_source=ext_sidebar',
     blank: true,
   },
 ]

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { watchEffect } from 'vue'
 import type { CustomInspectorState } from '@vue/devtools-kit'
-import ChildStateViewer from './ChildStateViewer.vue'
+import { watchEffect } from 'vue'
 import ToggleExpanded from '~/components/basic/ToggleExpanded.vue'
-import { useToggleExpanded } from '~/composables/toggle-expanded'
 import { createStateEditorContext } from '~/composables/state-editor'
+import { useToggleExpanded } from '~/composables/toggle-expanded'
+import ChildStateViewer from './ChildStateViewer.vue'
 
 const props = withDefaults(defineProps<{
   data: Record<string, CustomInspectorState[]>
@@ -50,7 +50,7 @@ const { expanded, toggleExpanded } = useToggleExpanded(props.expandedStateId)
         />
         <!-- placeholder -->
         <span v-else pl5 />
-        <span font-state-field text-3.5>
+        <span font-state-field text-3.5 text-hex-a3a3a3>
           {{ key }}
         </span>
       </div>

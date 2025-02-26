@@ -1,9 +1,12 @@
-import { basename, classify } from '@vue/devtools-shared'
-import { Fragment } from '../../../shared/stub-vue'
 import type { AppRecord, VueAppInstance } from '../../../types'
+import { basename, classify } from '@vue/devtools-shared'
 
 function getComponentTypeName(options: VueAppInstance['type']) {
-  return options.name || options._componentTag || options.__VUE_DEVTOOLS_COMPONENT_GUSSED_NAME__ || options.__name
+  const name = options.name || options._componentTag || options.__VUE_DEVTOOLS_COMPONENT_GUSSED_NAME__ || options.__name
+  if (name === 'index' && options.__file?.endsWith('index.vue')) {
+    return ''
+  }
+  return name
 }
 
 function getComponentFileName(options: VueAppInstance['type']) {
@@ -52,14 +55,11 @@ export async function getComponentId(options: { app: VueAppInstance, uid: number
 
 export function isFragment(instance: VueAppInstance) {
   const subTreeType = instance.subTree?.type
-  // TODO: resolve static type, the subTree.children of static type will be a string instead of children like Fragment
-  // return subTreeType === Fragment || (
-  //   subTreeType === Static
-  //     // @ts-expect-error vue internal type
-  //     ? instance.subTree.staticCount > 1
-  //     : false
-  // )
-  return subTreeType === Fragment
+  const appRecord = getAppRecord(instance)
+  if (appRecord) {
+    return appRecord?.types?.Fragment === subTreeType
+  }
+  return false
 }
 
 export function isBeingDestroyed(instance: VueAppInstance) {
@@ -137,4 +137,13 @@ export function getComponentInstance(appRecord: AppRecord, instanceId: string | 
 
   // @TODO: find a better way to handle it
   return instance || appRecord.instanceMap.get(':root')
+}
+
+// #542, should use 'in' operator to check if the key exists in the object
+export function ensurePropertyExists<R = Record<string, unknown>>(obj: unknown, key: string, skipObjCheck = false): obj is R {
+  return skipObjCheck
+    ? key in (obj as object)
+    : typeof obj === 'object' && obj !== null
+      ? key in obj
+      : false
 }

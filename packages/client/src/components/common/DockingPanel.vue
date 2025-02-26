@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { VueButton, VueDarkToggle, VueIcon, VueSelect } from '@vue/devtools-ui'
 import { refreshCurrentPageData, rpc, useDevToolsState } from '@vue/devtools-core'
+import { VueButton, VueDarkToggle, VueIcon, VueSelect } from '@vue/devtools-ui'
 
 const router = useRouter()
 
@@ -13,6 +13,7 @@ const splitScreenEnabled = computed({
   get: () => devtoolsClientState.value.splitScreen.enabled,
   set: v => (devtoolsClientState.value.splitScreen.enabled = v),
 })
+const reduceMotion = computed(() => devtoolsClientState.value.reduceMotion)
 
 function refreshPage() {
   location.reload()
@@ -46,7 +47,7 @@ function toggleApp(id: string) {
 <template>
   <div>
     <div px3 py2 border="b base" flex="~ gap-2">
-      <VueDarkToggle>
+      <VueDarkToggle :animation="!reduceMotion">
         <template #default="{ isDark, toggle }">
           <VueButton outlined type="primary" @click="toggle">
             <div i-carbon-sun dark:i-carbon-moon translate-y--1px /> {{ isDark ? 'Dark' : 'Light' }}

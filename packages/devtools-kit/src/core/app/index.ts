@@ -1,5 +1,5 @@
-import slug from 'speakingurl'
 import { target } from '@vue/devtools-shared'
+import slug from 'speakingurl'
 import { AppRecord, VueAppInstance } from '../../types'
 
 const appRecordInfo = target.__VUE_DEVTOOLS_NEXT_APP_RECORD_INFO__ ??= {
@@ -46,7 +46,7 @@ function getAppRecordId(app: VueAppInstance['appContext']['app'], defaultId?: st
   return id
 }
 
-export function createAppRecord(app: VueAppInstance['appContext']['app']): AppRecord {
+export function createAppRecord(app: VueAppInstance['appContext']['app'], types: Record<string, string | symbol>): AppRecord {
   const rootInstance = getAppRootInstance(app)
   if (rootInstance) {
     appRecordInfo.id++
@@ -56,7 +56,9 @@ export function createAppRecord(app: VueAppInstance['appContext']['app']): AppRe
     const record: AppRecord = {
       id,
       name,
+      types,
       instanceMap: new Map(),
+      perfGroupIds: new Map(),
       rootInstance,
     }
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { computed, ref } from 'vue'
-import VueInput from './Input.vue'
 import VueIcon from './Icon.vue'
+import VueInput from './Input.vue'
 
 const props = withDefaults(defineProps<{
   modelValue: string

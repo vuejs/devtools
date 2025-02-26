@@ -1,5 +1,5 @@
-import { deepClone, isInChromePanel, isInElectron } from '@vue/devtools-shared'
 import type { ModuleBuiltinTab } from '~/types'
+import { deepClone, isInChromePanel, isInElectron } from '@vue/devtools-shared'
 
 // @unocss-include
 export const builtinTab: [string, ModuleBuiltinTab[]][] = [
@@ -24,6 +24,13 @@ export const builtinTab: [string, ModuleBuiltinTab[]][] = [
       order: -100,
       path: 'pages',
       title: 'Pages',
+    },
+    {
+      icon: 'i-carbon-roadmap',
+      name: 'Timeline',
+      order: -100,
+      path: 'timeline',
+      title: 'Timeline',
     },
     {
       icon: 'i-carbon-image-copy',

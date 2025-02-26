@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { hash } from 'ohash'
 import type { AssetInfo } from '@vue/devtools-core'
+import { hash } from 'ohash'
 
 const props = defineProps<{
   asset: AssetInfo

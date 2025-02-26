@@ -11,7 +11,20 @@ function detect(win: Window) {
   }
 
   function runDetect() {
-    // 1. check Nuxt
+    // 1. check Vue2
+    // @ts-expect-error skip type check
+    if (window.__VUE_DEVTOOLS_VUE2_APP_DETECTED__) {
+      sendMessage({
+        devtoolsEnabled: false,
+        vueDetected: false,
+        nuxtDetected: false,
+        vue2Detected: true,
+        vitePluginDetected: false,
+        vitePluginClientUrl: '',
+      })
+    }
+
+    // 2. check Nuxt
     // @ts-expect-error types
     const nuxtDetected = !!(window.__NUXT__)
 
@@ -26,7 +39,7 @@ function detect(win: Window) {
       return
     }
 
-    // 2. check VitePress
+    // 3. check VitePress
     // @ts-expect-error types
     const vitePressDetected = !!(window.__VITEPRESS__)
     if (vitePressDetected) {
@@ -40,7 +53,7 @@ function detect(win: Window) {
       return
     }
 
-    // 3. check Vue
+    // 4. check Vue
     // @ts-expect-error types
     const vueDetected = !!(window.__VUE__)
     if (vueDetected) {

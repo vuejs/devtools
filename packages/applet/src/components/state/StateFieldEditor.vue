@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, toRaw } from 'vue'
-import { VueButton, VueDropdown, VueDropdownButton, VueIcon, vTooltip } from '@vue/devtools-ui'
-import { DevToolsV6PluginAPIHookKeys, getRaw } from '@vue/devtools-kit'
 import type { CustomInspectorState, DevToolsV6PluginAPIHookPayloads } from '@vue/devtools-kit'
-import { rpc } from '@vue/devtools-core'
-import { useClipboard } from '@vueuse/core'
 import type { ButtonProps } from '@vue/devtools-ui'
-import { useStateEditorContext } from '~/composables/state-editor'
 import type { EditorAddNewPropType, EditorInputValidType } from '~/composables/state-editor'
+import { rpc } from '@vue/devtools-core'
+import { DevToolsV6PluginAPIHookKeys, getRaw } from '@vue/devtools-kit'
+import { vTooltip, VueButton, VueDropdown, VueDropdownButton, VueIcon } from '@vue/devtools-ui'
+import { useClipboard } from '@vueuse/core'
+import { computed, ref, toRaw } from 'vue'
+import { useStateEditorContext } from '~/composables/state-editor'
 
 const props = withDefaults(defineProps<{
   data: CustomInspectorState & { key?: string }

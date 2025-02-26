@@ -15,7 +15,7 @@ hero:
       link: /getting-started/features
     - theme: alt
       text: View on GitHub
-      link: https://github.com/vuejs/devtools-next
+      link: https://github.com/vuejs/devtools
   image:
     src: /logo.svg
     alt: Vue DevTools

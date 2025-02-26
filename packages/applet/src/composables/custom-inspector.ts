@@ -1,5 +1,5 @@
-import { onUnmounted, ref } from 'vue'
 import { DevToolsMessagingEvents, onRpcConnected, rpc } from '@vue/devtools-core'
+import { onUnmounted, ref } from 'vue'
 
 export interface CustomInspectorType {
   id: string
@@ -8,6 +8,7 @@ export interface CustomInspectorType {
   icon: string
   packageName: string | undefined
   homepage: string | undefined
+  pluginId: string
 }
 
 export function useCustomInspector() {

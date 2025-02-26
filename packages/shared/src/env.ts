@@ -11,7 +11,7 @@ export const target = (typeof window !== 'undefined'
 
 export const isInChromePanel = typeof target.chrome !== 'undefined' && !!target.chrome.devtools
 export const isInIframe = isBrowser && target.self !== target.top
-export const isInElectron = typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('electron')
+export const isInElectron = typeof navigator !== 'undefined' && navigator.userAgent?.toLowerCase().includes('electron')
 // @ts-expect-error skip type check
 export const isNuxtApp = typeof window !== 'undefined' && !!window.__NUXT__
 export const isInSeparateWindow = !isInIframe && !isInChromePanel && !isInElectron

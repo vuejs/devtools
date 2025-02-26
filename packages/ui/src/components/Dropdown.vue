@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T">
-import { Dropdown } from 'floating-vue'
-import { computed, provide } from 'vue'
 import type { FloatingVueCommonProps } from '../types'
 import type { ButtonProps } from './Button.vue'
+import { Dropdown } from 'floating-vue'
+import { computed, provide } from 'vue'
 import VueButton from './Button.vue'
 
 const props = withDefaults(defineProps<{

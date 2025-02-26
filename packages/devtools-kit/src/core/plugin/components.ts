@@ -1,11 +1,12 @@
-import { debounce } from 'perfect-debounce'
 import type { App, PluginDescriptor, PluginSetupFunction } from '../../types'
-import { hook } from '../../hook'
-import { getAppRecord, getComponentId, getComponentInstance } from '../../core/component/utils'
-import { DevToolsV6PluginAPIHookKeys, activeAppRecord, devtoolsContext, devtoolsState } from '../../ctx'
-import { ComponentWalker } from '../../core/component/tree/walker'
+import { debounce } from 'perfect-debounce'
 import { getInstanceState } from '../../core/component/state'
 import { editState } from '../../core/component/state/editor'
+import { ComponentWalker } from '../../core/component/tree/walker'
+import { getAppRecord, getComponentId, getComponentInstance } from '../../core/component/utils'
+import { activeAppRecord, devtoolsContext, devtoolsState, DevToolsV6PluginAPIHookKeys } from '../../ctx'
+import { hook } from '../../hook'
+import { setupBuiltinTimelineLayers } from '../timeline'
 import { exposeInstanceToWindow } from '../vm'
 
 const INSPECTOR_ID = 'components'
@@ -24,6 +25,8 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
       treeFilterPlaceholder: 'Search components',
     })
 
+    setupBuiltinTimelineLayers(api)
+
     api.on.getInspectorTree(async (payload) => {
       if (payload.app === app && payload.inspectorId === INSPECTOR_ID) {
         // @ts-expect-error skip type @TODO
@@ -34,6 +37,7 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
             // @TODO: should make this configurable?
             maxDepth: 100,
             recursively: false,
+            api,
           })
           // @ts-expect-error skip type @TODO
           payload.rootNodes = await walker.getComponentTree(instance)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { OverlayProps } from './Overlay.vue'
 import { onKeyStroke, useElementSize, useVModel } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
-import type { OverlayProps } from './Overlay.vue'
 import Overlay from './Overlay.vue'
 
 const props = withDefaults(defineProps<{

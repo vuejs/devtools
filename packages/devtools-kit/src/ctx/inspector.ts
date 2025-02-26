@@ -1,16 +1,18 @@
-import { target } from '@vue/devtools-shared'
 import type { App } from 'vue'
-import { debounce } from 'perfect-debounce'
 import type { CustomInspectorOptions, PluginDescriptor } from '../types'
-import { getAppRecord } from '../core/component/utils'
-import { activeAppRecord } from './state'
-import { DevToolsMessagingHookKeys } from './hook'
-import { devtoolsTimelineLayers } from './timeline'
+import { target } from '@vue/devtools-shared'
+import { debounce } from 'perfect-debounce'
 import { devtoolsContext } from '.'
+import { getAppRecord } from '../core/component/utils'
+import { DevToolsMessagingHookKeys } from './hook'
+import { activeAppRecord } from './state'
+import { devtoolsTimelineLayers } from './timeline'
 
 interface DevToolsKitInspector {
   options: CustomInspectorOptions
   descriptor: PluginDescriptor
+  treeFilterPlaceholder: string
+  stateFilterPlaceholder: string
   treeFilter: string
   selectedNodeId: string
   appRecord: unknown
@@ -31,6 +33,8 @@ export function addInspector(inspector: CustomInspectorOptions, descriptor: Plug
   devtoolsInspector.push({
     options: inspector,
     descriptor,
+    treeFilterPlaceholder: inspector.treeFilterPlaceholder ?? 'Search tree...',
+    stateFilterPlaceholder: inspector.stateFilterPlaceholder ?? 'Search state...',
     treeFilter: '',
     selectedNodeId: '',
     appRecord: getAppRecord(descriptor.app),
@@ -53,6 +57,7 @@ export function getActiveInspectors() {
         icon: `custom-ic-baseline-${options?.icon?.replace(/_/g, '-')}`,
         packageName: descriptor.packageName,
         homepage: descriptor.homepage,
+        pluginId: descriptor.id,
       }
     })
 }
@@ -75,6 +80,8 @@ export function getInspectorInfo(id: string) {
     packageName: descriptor.packageName,
     homepage: descriptor.homepage,
     timelineLayers,
+    treeFilterPlaceholder: inspector.treeFilterPlaceholder,
+    stateFilterPlaceholder: inspector.stateFilterPlaceholder,
   }
 }
 

@@ -1,18 +1,18 @@
 {
   "name": "vite-plugin-vue-devtools",
   "type": "module",
-  "version": "7.3.6",
+  "version": "7.7.2",
   "description": "A vite plugin for Vue DevTools",
   "author": "webfansplz",
   "license": "MIT",
-  "homepage": "https://github.com/vuejs/devtools-next#readme",
+  "homepage": "https://github.com/vuejs/devtools#readme",
   "repository": {
     "directory": "packages/vite",
     "type": "git",
-    "url": "git+https://github.com/vuejs/devtools-next.git"
+    "url": "git+https://github.com/vuejs/devtools.git"
   },
   "bugs": {
-    "url": "https://github.com/vuejs/devtools-next/issues"
+    "url": "https://github.com/vuejs/devtools/issues"
   },
   "keywords": [
     "vue-devtools",
@@ -47,21 +47,21 @@
     "stub": "tsup --watch"
   },
   "peerDependencies": {
-    "vite": "^3.1.0 || ^4.0.0-0 || ^5.0.0-0"
+    "vite": "^3.1.0 || ^4.0.0-0 || ^5.0.0-0 || ^6.0.0-0"
   },
   "dependencies": {
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
-    "execa": "catalog:",
-    "sirv": "^2.0.4",
-    "vite-plugin-inspect": "catalog:",
-    "vite-plugin-vue-inspector": "^5.1.2"
+    "execa": "^9.5.2",
+    "sirv": "^3.0.1",
+    "vite-plugin-inspect": "0.8.9",
+    "vite-plugin-vue-inspector": "^5.3.1"
   },
   "devDependencies": {
-    "@types/node": "catalog:",
-    "fast-glob": "^3.3.2",
+    "@types/node": "^22.13.4",
+    "fast-glob": "^3.3.3",
     "image-meta": "^0.2.1",
-    "pathe": "catalog:"
+    "pathe": "^2.0.3"
   }
 }

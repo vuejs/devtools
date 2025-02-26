@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
 import { onRpcConnected, rpc } from '@vue/devtools-core'
+import { ref, watch } from 'vue'
+import { createCustomInspectorStateContext } from '~/composables/custom-inspector-state'
+import { registerVirtualRouter } from '~/composables/virtual-router'
 import About from './components/About.vue'
 import Routes from './components/routes/Index.vue'
 import Timeline from './components/timeline/Index.vue'
-import { registerVirtualRouter } from '~/composables/virtual-router'
-import { createCustomInspectorStateContext } from '~/composables/custom-inspector-state'
 
 const props = defineProps<{
   id: string

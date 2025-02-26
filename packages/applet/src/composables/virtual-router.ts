@@ -1,6 +1,6 @@
+import type { MaybeRef } from '@vueuse/core'
 import type { Component, ComputedRef, InjectionKey, Ref } from 'vue'
 import { computed, defineComponent, h, inject, provide, ref, toValue } from 'vue'
-import type { MaybeRef } from '@vueuse/core'
 
 export interface VirtualRoute { path: string, component: Component, icon?: string, name?: string }
 const VirtualRouteKey: InjectionKey<Ref<{ path: string }>> = Symbol('VirtualRouteKey')

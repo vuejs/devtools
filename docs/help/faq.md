@@ -25,8 +25,8 @@ export default defineConfig({
 ## How to work with Laravel Vite Plugin?
 
 ```ts
-import { defineConfig } from 'vite'
 import laravel from 'laravel-vite-plugin'
+import { defineConfig } from 'vite'
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
@@ -64,9 +64,9 @@ export default defineNuxtConfig({
 ## How to work with [Vite Ruby](https://vite-ruby.netlify.app/)?
 
 ```ts
+import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import RubyPlugin from 'vite-plugin-ruby'
-import vue from '@vitejs/plugin-vue'
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
@@ -84,14 +84,13 @@ export default defineConfig({
 
 ```ts
 // wxt.config.ts
-import { defineConfig } from 'wxt'
-import vue from '@vitejs/plugin-vue'
 import devtools from 'vite-plugin-vue-devtools'
+import { defineConfig } from 'wxt'
 
 export default defineConfig({
+  modules: ['@wxt-dev/module-vue'],
   vite: () => ({
     plugins: [
-      vue(),
       devtools({
         // your app entrypoint (wherever you call createApp())
         appendTo: '/entrypoints/popup/main.ts',

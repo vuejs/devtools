@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { VueButton, VueIcon, VueInput, vTooltip } from '@vue/devtools-ui'
-import { debounce } from 'perfect-debounce'
 import { customTypeEnums, toSubmit } from '@vue/devtools-kit'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { vTooltip, VueButton, VueIcon, VueInput } from '@vue/devtools-ui'
 import { useMagicKeys, useVModel } from '@vueuse/core'
+import { debounce } from 'perfect-debounce'
+import { computed, ref, watch, watchEffect } from 'vue'
 
 const props = withDefaults(defineProps<{
   modelValue: string

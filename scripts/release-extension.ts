@@ -1,12 +1,12 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as p from '@clack/prompts'
-import semver from 'semver'
 import color from 'picocolors'
-import pkg from '../packages/chrome-extension/package.json'
-import firefoxPkg from '../packages/firefox-extension/package.json'
+import semver from 'semver'
 import manifest from '../packages/chrome-extension/manifest.json'
+import pkg from '../packages/chrome-extension/package.json'
 import firefoxManifest from '../packages/firefox-extension/manifest.json'
+import firefoxPkg from '../packages/firefox-extension/package.json'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const curVersion = pkg.version

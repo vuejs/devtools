@@ -1,6 +1,6 @@
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
+import { defineComponent } from 'vue'
 
 import { Post } from './types'
 

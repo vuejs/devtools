@@ -1,6 +1,6 @@
 // import { Bridge } from '../../core/src/bridge'
-import { createRpcClient } from '@vue/devtools-kit'
 import { functions, onRpcConnected } from '@vue/devtools-core'
+import { createRpcClient } from '@vue/devtools-kit'
 import { disconnectDevToolsClient, initDevTools, reloadDevToolsClient } from '../client/devtools-panel'
 
 const connectionInfo: {

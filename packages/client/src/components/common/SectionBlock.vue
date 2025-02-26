@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useVModel } from '@vueuse/core'
 import { VueIcon } from '@vue/devtools-ui'
+import { useVModel } from '@vueuse/core'
 
 const props = withDefaults(
   defineProps<{

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { functions, getDevToolsClientUrl } from '@vue/devtools-core'
+import { devtools, getRpcServer, onDevToolsConnected, setIframeServerContext } from '@vue/devtools-kit'
 import { target } from '@vue/devtools-shared'
 import { useDevToolsColorMode } from '@vue/devtools-ui'
-import { devtools, getRpcServer, onDevToolsConnected, setIframeServerContext } from '@vue/devtools-kit'
+import { computed, ref } from 'vue'
+import FrameBox from '~/components/FrameBox.vue'
 import { useFrameState, useIframe, usePanelVisible, usePosition } from '~/composables'
 import { checkIsSafari } from '~/utils'
-import FrameBox from '~/components/FrameBox.vue'
 
 type ViewMode = 'xs' | 'default' | 'fullscreen'
 const anchorEle = ref<HTMLDivElement>()
@@ -22,7 +22,7 @@ const panelState = ref<{
 const cssVars = computed(() => {
   const dark = mode.value === 'dark'
   return {
-    '--vue-devtools-widget-bg': dark ? '#111' : '#ffffff',
+    '--vue-devtools-widget-bg': dark ? '#121212' : '#ffffff',
     '--vue-devtools-widget-fg': dark ? '#F5F5F5' : '#111',
     '--vue-devtools-widget-border': dark ? '#3336' : '#efefef',
     '--vue-devtools-widget-shadow': dark ? 'rgba(0,0,0,0.3)' : 'rgba(128,128,128,0.1)',
@@ -103,6 +103,7 @@ const { iframe, getIframe } = useIframe(clientUrl, async () => {
       'vue-devtools__anchor--vertical': isVertical,
       'vue-devtools__anchor--hide': isHidden,
       'fullscreen': panelState.viewMode === 'fullscreen',
+      'reduce-motion': state.reduceMotion,
     }" @mousemove="bringUp"
   >
     <div
@@ -161,6 +162,15 @@ const { iframe, getIframe } = useIframe(clientUrl, async () => {
     z-index: 2147483645;
     transform-origin: center center;
     transform: translate(-50%, -50%) rotate(0);
+
+    &.reduce-motion {
+      transition: none !important;
+      animation: none !important;
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
 
     &.fullscreen {
       transform: none !important;

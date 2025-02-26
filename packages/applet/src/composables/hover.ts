@@ -1,5 +1,5 @@
-import { useEventListener } from '@vueuse/core'
 import type { MaybeRefOrGetter } from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { ref } from 'vue'
 
 export interface UseHoverOptions {

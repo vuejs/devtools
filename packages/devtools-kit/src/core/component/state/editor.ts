@@ -1,10 +1,10 @@
 import type { MaybeRef, Ref } from 'vue'
-import { isReactive, isRef, toRaw } from '../../../shared/stub-vue'
-import { getComponentInstance } from '../utils'
+import type { InspectorStateEditorPayload, PropPath } from '../types'
 import { activeAppRecord } from '../../../ctx'
+import { isReactive, isRef, toRaw } from '../../../shared/stub-vue'
 import { EditStatePayload } from '../../../types'
 
-import type { InspectorStateEditorPayload, PropPath } from '../types'
+import { getComponentInstance } from '../utils'
 
 export type Recordable = Record<PropertyKey, any>
 
@@ -160,14 +160,22 @@ export async function editComponentState(payload: InspectorStateEditorPayload, s
 
   let target: Record<string, unknown> | undefined
 
-  // TODO: props
-
-  // 1. check if is setup
-  if (instance.devtoolsRawSetupState && Object.keys(instance.devtoolsRawSetupState).includes(path[0]))
+  // 1. check if is props
+  if (Object.keys(instance.props).includes(path[0])) {
+    target = instance.props
+  }
+  // 2. check if is setup
+  else if (instance.devtoolsRawSetupState && Object.keys(instance.devtoolsRawSetupState).includes(path[0])) {
     target = instance.devtoolsRawSetupState
-  // 2. check if is options
-  if (instance.data && Object.keys(instance.data).includes(path[0]))
+  }
+  // 3. check if is options
+  else if (instance.data && Object.keys(instance.data).includes(path[0])) {
     target = instance.data
+  }
+  else {
+    // 4. fallback
+    target = instance.proxy
+  }
 
   if (target && targetPath) {
     if (state.type === 'object' && type === 'reactive') {

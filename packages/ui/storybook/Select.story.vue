@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Select from '../src/components/Select.vue'
 import { VueCheckbox } from '../src'
+import Select from '../src/components/Select.vue'
 
 const options = [
   {

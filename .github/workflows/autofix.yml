@@ -21,7 +21,9 @@ jobs:
           node-version: lts/*
 
       - name: Install pnpm
-        run: corepack enable pnpm
+        # https://github.com/nitrojs/nitro/pull/3060
+        # https://github.com/nodejs/corepack/pull/614
+        run: npm i -g --force corepack && corepack enable pnpm
 
       - name: Setup
         run: npm i -g @antfu/ni
@@ -35,4 +37,4 @@ jobs:
       - name: Lint
         run: nr lint --fix
 
-      - uses: autofix-ci/action@2891949f3779a1cafafae1523058501de3d4e944
+      - uses: autofix-ci/action@551dded8c6cc8a1054039c8bc0b8b48c51dfc6ef

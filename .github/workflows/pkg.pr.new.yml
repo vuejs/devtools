@@ -1,0 +1,38 @@
+name: Publish Any Commit
+
+on:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '!**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # https://github.com/nitrojs/nitro/pull/3060
+      # https://github.com/nodejs/corepack/pull/614
+      - run: npm i -g --force corepack && corepack enable pnpm
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Release
+        run: pnpm dlx pkg-pr-new publish --compact --pnpm './packages/{core,devtools,devtools-api,devtools-kit,vite,applet}'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { BuiltinLanguage } from 'shiki'
 // This components requires to run in DevTools to render correctly
 import { computed, nextTick } from 'vue'
-import type { BuiltinLanguage } from 'shiki'
 import { renderCodeHighlight } from '../composables/shiki'
 
 export interface VueCodeBlockProps {
@@ -68,6 +68,10 @@ const rendered = computed(() => {
         }
       }
     }
+    span {
+      --at-apply: '$ui-bg-base!';
+    }
+    --at-apply: '$ui-bg-base!';
   }
   pre {
     &:focus-visible {

@@ -1,9 +1,14 @@
 {
   "name": "@vue/devtools-ui",
   "type": "module",
-  "version": "7.3.6",
+  "version": "7.7.2",
   "author": "webfansplz",
   "license": "MIT",
+  "repository": {
+    "directory": "packages/ui",
+    "type": "git",
+    "url": "git+https://github.com/vuejs/devtools.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/types/src/index.d.ts",
@@ -33,27 +38,27 @@
   "peerDependencies": {
     "@unocss/reset": ">=0.50.0-0",
     "floating-vue": ">=2.0.0-0",
-    "shiki": ">=1.10.0",
+    "shiki": ">=1.16.0",
     "unocss": ">=0.50.0-0",
     "vue": ">=3.0.0-0"
   },
   "dependencies": {
     "@vue/devtools-shared": "workspace:*",
-    "@vueuse/components": "^10.11.0",
-    "@vueuse/core": "catalog:",
-    "@vueuse/integrations": "catalog:",
-    "colord": "catalog:",
-    "focus-trap": "^7.5.4"
+    "@vueuse/components": "^12.7.0",
+    "@vueuse/core": "^12.7.0",
+    "@vueuse/integrations": "^12.7.0",
+    "colord": "^2.9.3",
+    "focus-trap": "^7.6.4"
   },
   "devDependencies": {
     "@histoire/plugin-vue": "^0.17.17",
-    "@iconify-json/ic": "^1.1.17",
-    "@types/node": "catalog:",
-    "@unocss/reset": "catalog:",
-    "@vitejs/plugin-vue": "catalog:",
-    "floating-vue": "catalog:",
+    "@iconify-json/ic": "^1.2.2",
+    "@types/node": "^22.13.4",
+    "@unocss/reset": "^66.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "floating-vue": "5.2.2",
     "histoire": "^0.17.17",
-    "unocss": "catalog:",
-    "vite-plugin-dts": "catalog:"
+    "unocss": "^66.0.0",
+    "vite-plugin-dts": "^4.5.0"
   }
 }

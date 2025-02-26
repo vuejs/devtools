@@ -1,5 +1,5 @@
-import type { InspectorState, customTypeEnums } from '../types'
-import { getComponentName, getInstanceName } from '../utils'
+import type { customTypeEnums, InspectorState } from '../types'
+import { ensurePropertyExists, getComponentName, getInstanceName } from '../utils'
 import { processInstanceState } from './process'
 import { escape, getSetupStateType, toRaw } from './util'
 
@@ -22,7 +22,7 @@ export function getFunctionDetails(func: Function) {
   return {
     _custom: {
       type: 'function' satisfies customTypeEnums,
-      displayText: `<span style="opacity:.5;margin-right:5px;">function</span> <span style="white-space:nowrap;">${escape(name)}${args}</span>`,
+      displayText: `<span style="opacity:.8;margin-right:5px;">function</span> <span style="white-space:nowrap;">${escape(name)}${args}</span>`,
       tooltipText: string.trim() ? `<pre>${string}</pre>` : null,
     },
   }
@@ -218,14 +218,32 @@ export function getHTMLElementDetails(value: HTMLElement) {
   }
 }
 
+/**
+ * - ObjectRefImpl, toRef({ foo: 'foo' }, 'foo'), `_value` is the actual value, (since 3.5.0)
+ * - GetterRefImpl, toRef(() => state.foo), `_value` is the actual value, (since 3.5.0)
+ * - RefImpl, ref('foo') / computed(() => 'foo'), `_value` is the actual value
+ */
+function tryGetRefValue(ref: { _value?: unknown } | { value?: unknown }) {
+  if (ensurePropertyExists<{ _value?: unknown }>(ref, '_value', true)) {
+    return ref._value
+  }
+  if (ensurePropertyExists(ref, 'value', true)) {
+    return ref.value
+  }
+}
+
 export function getObjectDetails(object: Record<string, any>) {
   const info = getSetupStateType(object)
 
   const isState = info.ref || info.computed || info.reactive
   if (isState) {
     const stateTypeName = info.computed ? 'Computed' : info.ref ? 'Ref' : info.reactive ? 'Reactive' : null
-    const value = toRaw(info.reactive ? object : object._value)
-    const raw = object.effect?.raw?.toString() || object.effect?.fn?.toString()
+    const value = toRaw(info.reactive ? object : tryGetRefValue(object))
+
+    const raw = ensurePropertyExists(object, 'effect')
+      ? object.effect?.raw?.toString() || object.effect?.fn?.toString()
+      : null
+
     return {
       _custom: {
         type: stateTypeName?.toLowerCase(),
@@ -236,7 +254,7 @@ export function getObjectDetails(object: Record<string, any>) {
     }
   }
 
-  if (typeof object.__asyncLoader === 'function') {
+  if (ensurePropertyExists(object, '__asyncLoader') && typeof object.__asyncLoader === 'function') {
     return {
       _custom: {
         type: 'component-definition' satisfies customTypeEnums,

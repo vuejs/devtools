@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
 import { logEvent } from 'histoire/client'
+import { ref, watchEffect } from 'vue'
 import Input from '../src/components/Input.vue'
 
 const value = ref('')

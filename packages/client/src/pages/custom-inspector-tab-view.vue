@@ -5,7 +5,9 @@ import '@vue/devtools-applet/style.css'
 const route = useRoute()
 const router = useRouter()
 const loadError = ref(false)
-
+const customInspectorTabs = useCustomInspectorTabs()
+// @ts-expect-error skip type check
+const pluginId = computed(() => customInspectorTabs.value.find(tab => tab.name === route.params.name)?.pluginId)
 function onLoadError() {
   loadError.value = true
   const timer = setTimeout(() => {
@@ -27,5 +29,5 @@ function onLoadError() {
       </p>
     </div>
   </div>
-  <CustomInspectorPanel v-else :id="route.params.name" @load-error="onLoadError" />
+  <CustomInspectorPanel v-else-if="!loadError && pluginId" :id="route.params.name as string" :plugin-id="pluginId" @load-error="onLoadError" />
 </template>

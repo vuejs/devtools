@@ -1,8 +1,9 @@
+import type { AppRecord, CustomCommand, CustomTab } from '../types'
 import { target as global, isUrlString } from '@vue/devtools-shared'
 import { debounce } from 'perfect-debounce'
-import type { AppRecord, CustomCommand, CustomTab } from '../types'
-import { DevToolsMessagingHookKeys } from './hook'
 import { devtoolsContext } from '.'
+import { getTimelineLayersStateFromStorage } from '../core/timeline/storage'
+import { DevToolsMessagingHookKeys } from './hook'
 
 export interface DevToolsAppRecords extends AppRecord {}
 
@@ -15,6 +16,11 @@ export interface DevToolsState {
   tabs: CustomTab[]
   commands: CustomCommand[]
   highPerfModeEnabled: boolean
+  devtoolsClientDetected: {
+    [key: string]: boolean
+  }
+  perfUniqueGroupId: number
+  timelineLayersState: Record<string, boolean>
 }
 
 global.__VUE_DEVTOOLS_KIT_APP_RECORDS__ ??= []
@@ -33,7 +39,10 @@ function initStateFactory() {
     activeAppRecordId: '',
     tabs: [],
     commands: [],
-    highPerfModeEnabled: false,
+    highPerfModeEnabled: true,
+    devtoolsClientDetected: {},
+    perfUniqueGroupId: 0,
+    timelineLayersState: getTimelineLayersStateFromStorage(),
   }
 }
 global[STATE_KEY] ??= initStateFactory()
@@ -201,9 +210,9 @@ export function addCustomCommand(action: CustomCommand) {
     icon: resolveIcon(action.icon),
     children: action.children
       ? action.children.map((child: CustomCommand) => ({
-        ...child,
-        icon: resolveIcon(child.icon),
-      }))
+          ...child,
+          icon: resolveIcon(child.icon),
+        }))
       : undefined,
   })
   updateAllStates()

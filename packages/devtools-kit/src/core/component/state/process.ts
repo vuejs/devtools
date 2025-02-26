@@ -1,7 +1,7 @@
-import { camelize } from '@vue/devtools-shared'
 import type { VueAppInstance } from '../../../types'
 import type { InspectorState } from '../types'
-import { returnError } from '../utils'
+import { camelize } from '@vue/devtools-shared'
+import { ensurePropertyExists, returnError } from '../utils'
 import { vueBuiltins } from './constants'
 import { getPropType, getSetupStateType, toRaw } from './util'
 
@@ -61,15 +61,16 @@ function resolveMergedOptions(
  */
 function processProps(instance: VueAppInstance) {
   const props: InspectorState[] = []
-  const propDefinitions = instance.type.props
+  const propDefinitions = instance?.type?.props
 
-  for (const key in instance.props) {
+  for (const key in instance?.props) {
     const propDefinition = propDefinitions ? propDefinitions[key] : null
     const camelizeKey = camelize(key)
     props.push({
       type: 'props',
       key: camelizeKey,
       value: returnError(() => instance.props[key]),
+      editable: true,
       meta: propDefinition
         ? {
             type: propDefinition.type ? getPropType(propDefinition.type) : 'any',
@@ -95,10 +96,10 @@ function processProps(instance: VueAppInstance) {
  */
 function processState(instance: VueAppInstance) {
   const type = instance.type
-  const props = type.props
+  const props = type?.props
   const getters
     = type.vuex
-    && type.vuex.getters
+      && type.vuex.getters
   const computedDefs = type.computed
 
   const data = {
@@ -138,8 +139,8 @@ function processSetupState(instance: VueAppInstance) {
       const value = returnError(() => toRaw(instance.setupState[key])) as unknown as {
         render: Function
         __asyncLoader: Function
-
       }
+      const accessError = value instanceof Error
 
       const rawData = raw[key] as {
         effect: {
@@ -150,18 +151,21 @@ function processSetupState(instance: VueAppInstance) {
 
       let result: Partial<InspectorState>
 
-      let isOtherType = typeof value === 'function'
-        || typeof value?.render === 'function' // Components
-        || typeof value?.__asyncLoader === 'function' // Components
+      let isOtherType = accessError
+        || typeof value === 'function'
+        || (ensurePropertyExists(value, 'render') && typeof value.render === 'function') // Components
+        || (ensurePropertyExists(value, '__asyncLoader') && typeof value.__asyncLoader === 'function') // Components
         || (typeof value === 'object' && value && ('setup' in value || 'props' in value)) // Components
         || /^v[A-Z]/.test(key) // Directives
 
-      if (rawData) {
+      if (rawData && !accessError) {
         const info = getSetupStateType(rawData)
 
         const { stateType, stateTypeName } = getStateTypeAndName(info)
         const isState = info.ref || info.computed || info.reactive
-        const raw = rawData.effect?.raw?.toString() || rawData.effect?.fn?.toString()
+        const raw = ensurePropertyExists(rawData, 'effect')
+          ? rawData.effect?.raw?.toString() || rawData.effect?.fn?.toString()
+          : null
 
         if (stateType)
           isOtherType = false

@@ -1,19 +1,20 @@
-import { target } from '@vue/devtools-shared'
-import { HookKeys, Hookable } from 'hookable'
+import type { DevToolsApiType } from './api'
 import type { DevToolsContextHooks, DevToolsMessagingHooks } from './hook'
+import type { DevToolsAppRecords, DevToolsState } from './state'
+import { target } from '@vue/devtools-shared'
+import { Hookable, HookKeys } from 'hookable'
+import { createDevToolsApi } from './api'
 import { createDevToolsCtxHooks } from './hook'
 import { activeAppRecord, devtoolsAppRecords, devtoolsState } from './state'
-import type { DevToolsAppRecords, DevToolsState } from './state'
-import type { DevToolsApiType } from './api'
-import { createDevToolsApi } from './api'
 
-export * from './plugin'
 export * from './api'
+export * from './env'
 export * from './hook'
 export * from './inspector'
-export * from './env'
-export * from './state'
+export * from './plugin'
 export * from './router'
+export * from './state'
+export { updateTimelineLayersState } from './timeline'
 
 export interface DevtoolsContext {
   hooks: Hookable<DevToolsContextHooks & DevToolsMessagingHooks, HookKeys<DevToolsContextHooks & DevToolsMessagingHooks>>

@@ -1,9 +1,9 @@
-import { createServer } from 'node:http'
 import fs from 'node:fs'
+import { createServer } from 'node:http'
 import path from 'node:path'
+import { createRpcProxy, setElectronProxyContext } from '@vue/devtools-kit'
 import { createApp, eventHandler, toNodeListener } from 'h3'
 import { Server } from 'socket.io'
-import { createRpcProxy, setElectronProxyContext } from '@vue/devtools-kit'
 
 const port = process.env.PORT || 8098
 export function init() {

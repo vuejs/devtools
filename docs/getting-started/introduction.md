@@ -2,7 +2,7 @@
 
 ## What is Vue DevTools?
 
-**Vue DevTools** is a tool designed to enhance the Vue developer experience, it is a powerful and versatile tool that can significantly enhance your productivity and debugging capabilities when working with Vue applications. It's [features](/getting-started/features) for live editing, time travel debugging and comprehensive inspection make it an essential tool for any Vue.js developer.
+**Vue DevTools** is a tool designed to enhance the Vue developer experience, it is a powerful and versatile tool that can significantly enhance your productivity and debugging capabilities when working with Vue applications. Its [features](/getting-started/features) for live editing, time travel debugging and comprehensive inspection make it an essential tool for any Vue.js developer.
 
 ## Why should I use Vue DevTools?
 

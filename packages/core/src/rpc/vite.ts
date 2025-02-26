@@ -1,6 +1,6 @@
+import type { AssetImporter, AssetInfo, ImageMeta, ModuleInfo } from './types'
 import { createRpcClient, createRpcServer, getViteRpcClient } from '@vue/devtools-kit'
 import { createHooks } from 'hookable'
-import type { AssetImporter, AssetInfo, ImageMeta, ModuleInfo } from './types'
 
 const hooks = createHooks()
 

@@ -1,8 +1,9 @@
 import { target } from '@vue/devtools-shared'
-import { App, PluginDescriptor, PluginSetupFunction } from '../../types'
-import { hook } from '../../hook'
-import { devtoolsContext, devtoolsPluginBuffer } from '../../ctx'
 import { DevToolsPluginAPI } from '../../api'
+import { devtoolsContext, devtoolsPluginBuffer } from '../../ctx'
+import { devtoolsState } from '../../ctx/state'
+import { hook } from '../../hook'
+import { App, PluginDescriptor, PluginSetupFunction } from '../../types'
 
 export * from './components'
 
@@ -39,9 +40,13 @@ export function removeRegisteredPluginApp(app: App) {
   target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.delete(app)
 }
 
-export function registerDevToolsPlugin(app: App) {
-  if (target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.has(app))
+export function registerDevToolsPlugin(app: App, options?: { inspectingComponent?: boolean }) {
+  if (target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.has(app)) {
     return
+  }
+  if (devtoolsState.highPerfModeEnabled && !options?.inspectingComponent) {
+    return
+  }
 
   target.__VUE_DEVTOOLS_KIT__REGISTERED_PLUGIN_APPS__.add(app)
 

@@ -2,7 +2,7 @@ import type { RouteLocationNormalizedLoaded, RouteRecordNormalized } from 'vue-r
 
 export type { Router } from 'vue-router'
 export interface RouterInfo {
-  currentRoute: RouteLocationNormalizedLoaded | null | {}
+  currentRoute: RouteLocationNormalizedLoaded | null | Record<string, any>
   routes: RouteRecordNormalized[]
   // router: Router | null
 }

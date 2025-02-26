@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Pane, Splitpanes } from 'splitpanes'
-import { useDevToolsColorMode } from '@vue/devtools-ui'
 import { DevToolsMessagingEvents, onDevToolsConnected, onRpcConnected, refreshCurrentPageData, rpc, useDevToolsState } from '@vue/devtools-core'
+import { useDevToolsColorMode } from '@vue/devtools-ui'
+import { Pane, Splitpanes } from 'splitpanes'
 
 useDevToolsColorMode()
 const router = useRouter()
@@ -30,6 +30,7 @@ onRpcConnected(() => {
       minimizePanelInteractive: devtoolsClientState.value.minimizePanelInteractive,
       closeOnOutsideClick: devtoolsClientState.value.interactionCloseOnOutsideClick,
       showFloatingPanel: devtoolsClientState.value.showPanel,
+      reduceMotion: devtoolsClientState.value.reduceMotion,
     })
   })
 })
@@ -118,6 +119,18 @@ onUnmounted(() => {
   rpc.value.toggleClientConnected(false)
   rpc.functions.off(DevToolsMessagingEvents.ACTIVE_APP_UNMOUNTED, onActiveAppUnmounted)
 })
+
+function toggleDevToolsClientVisible(params: { visible: boolean, host: string }) {
+  const { host, visible } = params
+  rpc.value.updateDevToolsClientDetected({
+    [host]: visible,
+  })
+}
+
+watchEffect(() => {
+  const html = document.documentElement
+  html.classList.toggle('reduce-motion', devtoolsClientState.value.reduceMotion)
+})
 </script>
 
 <template>
@@ -129,7 +142,7 @@ onUnmounted(() => {
       :class="isUtilityView ? 'flex' : sidebarExpanded ? 'grid grid-cols-[250px_1fr]' : 'grid grid-cols-[50px_1fr]'"
       h-full h-screen of-hidden font-sans bg-base
     >
-      <SideNav v-if="!isUtilityView" of-x-hidden of-y-auto />
+      <SideNav v-if="!isUtilityView" of-x-hidden of-y-auto @toggle-devtools-client-visible="toggleDevToolsClientVisible" />
       <Splitpanes
         h-full of-hidden
         @resize="splitScreenSize = $event.map((v) => v.size)"

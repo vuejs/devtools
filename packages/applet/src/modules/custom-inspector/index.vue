@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
 import { onRpcConnected, rpc } from '@vue/devtools-core'
+import { computed, onUnmounted, provide, ref, watch } from 'vue'
 
+import AppConnecting from '~/components/basic/AppConnecting.vue'
+import { createCustomInspectorStateContext } from '~/composables/custom-inspector-state'
+import { registerVirtualRouter, VirtualRoute } from '~/composables/virtual-router'
 import About from './components/About.vue'
+import Settings from './components/Settings.vue'
 import State from './components/state/Index.vue'
 import Timeline from './components/timeline/Index.vue'
-import AppConnecting from '~/components/basic/AppConnecting.vue'
-import { VirtualRoute, registerVirtualRouter } from '~/composables/virtual-router'
-import { createCustomInspectorStateContext } from '~/composables/custom-inspector-state'
 
 const props = defineProps<{
   id: string
+  pluginId: string
 }>()
 
 const emit = defineEmits(['loadError'])
 const inspectorState = createCustomInspectorStateContext()
 const loading = ref(false)
+const pluginSettings = ref(null)
+provide('pluginSettings', pluginSettings)
 
 const routes = computed(() => {
   return [
@@ -36,6 +40,12 @@ const routes = computed(() => {
       name: 'About',
       component: About,
     },
+    pluginSettings.value && ({
+      path: '/settings',
+      name: 'Settings',
+      component: Settings,
+      icon: 'i-mdi:cog-outline',
+    }),
   ].filter(Boolean) as VirtualRoute[]
 })
 
@@ -57,10 +67,22 @@ function getInspectorInfo() {
         label: payload?.label,
         logo: payload?.logo,
         timelineLayerIds: payload?.timelineLayers.map(item => item.id),
+        pluginId: props.pluginId,
+        treeFilterPlaceholder: payload.treeFilterPlaceholder,
+        stateFilterPlaceholder: payload.stateFilterPlaceholder,
       }
       inspectorState.value = state
       restoreRouter()
       loading.value = false
+    })
+    rpc.value.getPluginSettings(props.pluginId).then((settings) => {
+      if (settings.options) {
+        // @ts-expect-error skip type check
+        pluginSettings.value = settings
+      }
+      else {
+        pluginSettings.value = null
+      }
     })
   })
 }

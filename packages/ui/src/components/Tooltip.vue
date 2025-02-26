@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Tooltip } from 'floating-vue'
 import type { FloatingVueCommonProps } from '../types'
+import { Tooltip } from 'floating-vue'
 
 defineProps<FloatingVueCommonProps>()
 </script>

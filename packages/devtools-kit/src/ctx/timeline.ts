@@ -1,6 +1,8 @@
-import { target } from '@vue/devtools-shared'
 import type { PluginDescriptor, TimelineLayerOptions } from '../types'
+import { target } from '@vue/devtools-shared'
 import { getAppRecord } from '../core/component/utils'
+import { addTimelineLayersStateToStorage } from '../core/timeline/storage'
+import { devtoolsState, updateDevToolsState } from './state'
 
 interface DevToolsKitTimelineLayer extends TimelineLayerOptions {
   appRecord: unknown
@@ -16,9 +18,21 @@ export const devtoolsTimelineLayers = new Proxy<DevToolsKitTimelineLayer[]>(targ
 })
 
 export function addTimelineLayer(options: TimelineLayerOptions, descriptor: PluginDescriptor) {
+  devtoolsState.timelineLayersState[descriptor.id] = false
   devtoolsTimelineLayers.push({
     ...options,
     descriptorId: descriptor.id,
     appRecord: getAppRecord(descriptor.app),
+  })
+}
+
+export function updateTimelineLayersState(state: Record<string, boolean>) {
+  const updatedState = {
+    ...devtoolsState.timelineLayersState,
+    ...state,
+  }
+  addTimelineLayersStateToStorage(updatedState)
+  updateDevToolsState({
+    timelineLayersState: updatedState,
   })
 }

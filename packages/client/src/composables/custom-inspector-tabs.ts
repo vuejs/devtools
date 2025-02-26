@@ -1,7 +1,7 @@
-import { useCustomInspector } from '@vue/devtools-applet'
 import type { CustomInspectorType } from '@vue/devtools-applet'
-
 import type { ModuleBuiltinTab } from '~/types/tab'
+
+import { useCustomInspector } from '@vue/devtools-applet'
 
 export function useCustomInspectorTabs() {
   const { registeredInspector } = useCustomInspector()
@@ -16,6 +16,7 @@ export function useCustomInspectorTabs() {
         title: inspector.label,
         path: `${CUSTOM_INSPECTOR_TAB_VIEW}/${inspector.id}`,
         category: 'modules',
+        pluginId: inspector.pluginId,
       }
     })
   })

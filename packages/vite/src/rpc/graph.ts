@@ -1,6 +1,6 @@
-import { debounce } from 'perfect-debounce'
 import type { ModuleInfo, ViteRPCFunctions } from '@vue/devtools-core'
 import { getViteRpcServer } from '@vue/devtools-kit'
+import { debounce } from 'perfect-debounce'
 import { RpcFunctionCtx } from './types'
 
 export function getGraphFunctions(ctx: RpcFunctionCtx) {

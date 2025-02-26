@@ -50,6 +50,7 @@ export interface AppRecord {
   version?: string
   types?: Record<string, string | symbol>
   instanceMap: Map<string, VueAppInstance>
+  perfGroupIds: Map<string, { groupId: number, time: number }>
   rootInstance: VueAppInstance
   routerId?: string
 }

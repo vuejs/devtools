@@ -1,5 +1,5 @@
-import { classify, kebabize } from '@vue/devtools-shared'
 import type { VueAppInstance } from '../../../types'
+import { classify, kebabize } from '@vue/devtools-shared'
 import { getInstanceName } from '../utils'
 
 export class ComponentFilter {
