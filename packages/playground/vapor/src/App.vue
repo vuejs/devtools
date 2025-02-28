@@ -4,6 +4,7 @@ import {
   onMounted,
   onUnmounted,
   reactive,
+  ref,
   watchPostEffect,
 } from 'vue'
 
@@ -140,10 +141,15 @@ function removeCompleted() {
 const vTodoFocus = (el, value) => {
   watchPostEffect(() => value.value && el.focus())
 }
+
+const count = ref(1)
 </script>
 
 <template>
   <section class="todoapp">
+    <div @click="count++">
+      {{ count }}
+    </div>
     <header class="header">
       <h1>todos</h1>
       <input

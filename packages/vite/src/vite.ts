@@ -203,6 +203,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
             tag: 'script',
             injectTo: 'head-prepend',
             launchEditor: pluginOptions.launchEditor,
+            cleanHtml: false,
             attrs: {
               type: 'module',
               src: `${config.base || '/'}@id/virtual:vue-inspector-path:load.js`,

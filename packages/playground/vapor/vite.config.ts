@@ -9,6 +9,7 @@ export default defineConfig({
       compiler: CompilerSFC,
     }),
     VueDevTools({
+      componentInspector: false,
     }),
   ],
   optimizeDeps: {
