@@ -60,6 +60,7 @@
     "prepare": "simple-git-hooks",
     "test": "vitest --environment jsdom",
     "play": "turbo dev --filter=./packages/playground/basic",
+    "play:vapor": "turbo dev --filter=./packages/playground/vapor",
     "play:applet": "turbo dev --filter=./packages/playground/applet",
     "play:ui": "turbo dev --filter=./packages/playground/ui",
     "play:multi-app": "turbo dev --filter=./packages/playground/multi-app",

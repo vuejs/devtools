@@ -5,13 +5,15 @@ packages:
 
 catalog:
   vite-plugin-dts: ^4.5.0
-  vue: ^3.5.13
+  vue: https://pkg.pr.new/vue@c6fe9f9
+  '@vue/compiler-vapor': https://pkg.pr.new/@vue/compiler-vapor@bce7164
+  '@vue/compiler-sfc': https://pkg.pr.new/@vue/compiler-sfc@bce7164
+  '@vitejs/plugin-vue': https://pkg.pr.new/@vitejs/plugin-vue@e2276e6
   vue-router: ^4.5.0
   perfect-debounce: ^1.0.0
   shiki: ^3.0.0
   splitpanes: ^3.1.8
   vue-virtual-scroller: 2.0.0-beta.8
-  '@vitejs/plugin-vue': ^5.2.1
   '@iconify/json': ^2.2.310
   '@types/node': ^22.13.5
   '@unocss/reset': ^66.0.0

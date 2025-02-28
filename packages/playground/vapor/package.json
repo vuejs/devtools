@@ -1,0 +1,34 @@
+{
+  "name": "playground-vapor",
+  "type": "module",
+  "version": "7.3.2",
+  "private": true,
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@tanstack/vue-query": "^5.66.9",
+    "@vueuse/core": "catalog:",
+    "element-plus": "^2.9.5",
+    "pinia": "catalog:",
+    "unplugin-auto-import": "catalog:",
+    "vee-validate": "^4.15.0",
+    "vue": "catalog:",
+    "vue-router": "catalog:",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@tanstack/vue-query-devtools": "^5.66.9",
+    "@vitejs/plugin-vue": "catalog:",
+    "@vue/devtools": "workspace:^",
+    "sass-embedded": "catalog:",
+    "serve": "catalog:",
+    "todomvc-app-css": "^2.4.3",
+    "typescript": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-inspect": "catalog:",
+    "vite-plugin-vue-devtools": "workspace:*"
+  }
+}
