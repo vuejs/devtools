@@ -1,8 +1,11 @@
 <script setup lang="ts">
-
+const count = ref(1)
 </script>
 
 <template>
+  <div class="h8 w10 flex cursor-pointer items-center justify-center bg-orange text-white" @click="count++">
+    {{ count }}
+  </div>
   <div class="flex flex-col justify-center">
     <div class="text-center">
       <RouterView />

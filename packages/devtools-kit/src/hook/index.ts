@@ -96,9 +96,15 @@ export function subscribeDevToolsHook(hook: DevToolsHook) {
 
   // component added hook
   hook.on<DevToolsEvent[DevToolsHooks.COMPONENT_ADDED]>(DevToolsHooks.COMPONENT_ADDED, async (app, uid, parentUid, component) => {
+    if (component.vapor) {
+      app = component.appContext.app
+      uid = component.uid
+      parentUid = component.parent?.uid
+      devtoolsHooks.callHook(DevToolsHooks.COMPONENT_ADDED, app, uid, parentUid, component)
+      return
+    }
     if (app?._instance?.type?.devtools?.hide || devtoolsState.highPerfModeEnabled)
       return
-
     if (!app || (typeof uid !== 'number' && !uid) || !component)
       return
 

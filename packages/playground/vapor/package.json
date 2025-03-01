@@ -9,12 +9,14 @@
   "dependencies": {
     "@vueuse/core": "catalog:",
     "unplugin-auto-import": "catalog:",
-    "vue": "https://pkg.pr.new/vue@c6fe9f9"
+    "vue": "https://pkg.pr.new/vue@12972"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "https://pkg.pr.new/@vitejs/plugin-vue@e2276e6",
-    "@vue/compiler-sfc": "https://pkg.pr.new/@vue/compiler-sfc@c6fe9f9",
-    "@vue/compiler-vapor": "https://pkg.pr.new/@vue/compiler-vapor@c6fe9f9",
+    "@vue/compiler-sfc": "https://pkg.pr.new/@vue/compiler-sfc@12972",
+    "@vue/compiler-vapor": "https://pkg.pr.new/@vue/compiler-vapor@12972",
+    "@vue/runtime-core": "https://pkg.pr.new/@vue/runtime-core@12972",
+    "@vue/runtime-dom": "https://pkg.pr.new/@vue/runtime-dom@12972",
     "todomvc-app-css": "^2.4.3",
     "typescript": "catalog:",
     "unocss": "catalog:",
