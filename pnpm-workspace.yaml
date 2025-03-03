@@ -28,6 +28,6 @@ catalog:
   mitt: ^3.0.1
   pathe: ^2.0.3
   execa: ^9.5.2
-  vite-plugin-inspect: ^0.10.6
+  vite-plugin-inspect: ^11.0.0
   serve: ^14.2.4
   typescript: ^5.7.3
