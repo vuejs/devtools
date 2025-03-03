@@ -54,7 +54,7 @@
     "@vitejs/plugin-vue-jsx": "^4.1.1",
     "dayjs": "^1.11.13",
     "floating-vue": "catalog:",
-    "ohash": "^1.1.4",
+    "ohash": "^2.0.10",
     "pinia": "catalog:",
     "sass-embedded": "catalog:",
     "simple-git-hooks": "^2.11.1",
