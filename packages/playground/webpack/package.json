@@ -12,7 +12,7 @@
     "dev": "vue-cli-service serve"
   },
   "dependencies": {
-    "core-js": "^3.40.0",
+    "core-js": "^3.41.0",
     "vue": "catalog:"
   },
   "devDependencies": {
