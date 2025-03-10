@@ -91,7 +91,7 @@ export function createDevToolsApi(hooks: Hookable<DevToolsContextHooks & DevTool
       const instance = getComponentInstance(activeAppRecord.value, id)
 
       if (instance)
-        return !(instance?.type instanceof Function) ? instance.render.toString() : instance.type.toString()
+        return !(typeof instance?.type === 'function') ? instance.render.toString() : instance.type.toString()
     },
     // scroll to component
     scrollToComponent(id: string) {
