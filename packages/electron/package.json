@@ -42,7 +42,6 @@
     "electron": "^33.4.3",
     "execa": "catalog:",
     "h3": "^1.15.1",
-    "ip": "^2.0.1",
     "pathe": "catalog:",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
