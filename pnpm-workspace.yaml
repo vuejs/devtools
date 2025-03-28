@@ -8,18 +8,18 @@ catalog:
   vue: ^3.5.13
   vue-router: ^4.5.0
   perfect-debounce: ^1.0.0
-  shiki: ^3.1.0
+  shiki: ^3.2.1
   splitpanes: ^3.2.0
   vue-virtual-scroller: 2.0.0-beta.8
-  '@vitejs/plugin-vue': ^5.2.1
-  '@iconify/json': ^2.2.314
-  '@types/node': ^22.13.10
+  '@vitejs/plugin-vue': ^5.2.3
+  '@iconify/json': ^2.2.321
+  '@types/node': ^22.13.14
   '@unocss/reset': ^66.0.0
   floating-vue: 5.2.2
   pinia: ^3.0.1
-  sass-embedded: ^1.85.1
+  sass-embedded: ^1.86.0
   unocss: ^66.0.0
-  unplugin-auto-import: ^19.1.1
+  unplugin-auto-import: ^19.1.2
   vite: ^6.2.1
   '@vueuse/core': ^12.8.2
   '@vueuse/integrations': ^12.8.2
