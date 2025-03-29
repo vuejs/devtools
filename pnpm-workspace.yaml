@@ -20,7 +20,7 @@ catalog:
   sass-embedded: ^1.86.0
   serve: ^14.2.4
   shiki: ^3.2.1
-  splitpanes: ^3.2.0
+  splitpanes: ^4.0.3
   typescript: ^5.8.2
   unocss: ^66.0.0
   unplugin-auto-import: ^19.1.2

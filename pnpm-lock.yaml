@@ -55,8 +55,8 @@ catalogs:
       specifier: ^3.2.1
       version: 3.2.1
     splitpanes:
-      specifier: ^3.2.0
-      version: 3.2.0
+      specifier: ^4.0.3
+      version: 4.0.3
     typescript:
       specifier: ^5.8.2
       version: 5.8.2
@@ -271,7 +271,7 @@ importers:
         version: 3.2.1
       splitpanes:
         specifier: 'catalog:'
-        version: 3.2.0(vue@3.5.13(typescript@5.8.2))
+        version: 4.0.3(vue@3.5.13(typescript@5.8.2))
       vue-virtual-scroller:
         specifier: 'catalog:'
         version: 2.0.0-beta.8(vue@3.5.13(typescript@5.8.2))
@@ -354,7 +354,7 @@ importers:
         version: 3.2.1
       splitpanes:
         specifier: 'catalog:'
-        version: 3.2.0(vue@3.5.13(typescript@5.8.2))
+        version: 4.0.3(vue@3.5.13(typescript@5.8.2))
       vis-network:
         specifier: ^9.1.9
         version: 9.1.9(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1)(keycharm@0.4.0)(uuid@9.0.1)(vis-data@7.1.9(uuid@9.0.1)(vis-util@5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1)))(vis-util@5.0.7(@egjs/hammerjs@2.0.17)(component-emitter@1.3.1))
@@ -8318,8 +8318,8 @@ packages:
     resolution: {integrity: sha512-1POYv7uv2gXoyGFpBCmpDVSNV74IfsWlDW216UPjbWufNf+bSU6GdbDsxdcxtfwb4xlI3yxzOTKClUosxARYrQ==}
     engines: {node: '>=0.10.0'}
 
-  splitpanes@3.2.0:
-    resolution: {integrity: sha512-K+WKxWdqtKShV33gPjQl769wHxB3glypTOReCvYu/AJd38J+abHlpiF8rK6uBNPMrgw5thHZCI5JkEwsAqa9XA==}
+  splitpanes@4.0.3:
+    resolution: {integrity: sha512-S/f1CoH2JroOib7kzQtTQNtQCa7VzNQ2qKOO5HNj/5EVVcNkfz1eX/sH+X3XKdBdDLihEKDekVGwrLADd2oirA==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -17954,7 +17954,7 @@ snapshots:
 
   speakingurl@14.0.1: {}
 
-  splitpanes@3.2.0(vue@3.5.13(typescript@5.8.2)):
+  splitpanes@4.0.3(vue@3.5.13(typescript@5.8.2)):
     dependencies:
       vue: 3.5.13(typescript@5.8.2)
 
