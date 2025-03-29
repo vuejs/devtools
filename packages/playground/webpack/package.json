@@ -24,7 +24,7 @@
     "@vue/devtools": "workspace:*",
     "@vue/devtools-api": "workspace:*",
     "eslint": "^9.23.0",
-    "eslint-plugin-vue": "^9.33.0"
+    "eslint-plugin-vue": "^10.0.0"
   },
   "eslintConfig": {
     "env": {
