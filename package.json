@@ -93,7 +93,7 @@
     "degit": "^2.8.4",
     "eslint": "^9.23.0",
     "eslint-plugin-format": "^1.0.1",
-    "eslint-vitest-rule-tester": "^1.1.0",
+    "eslint-vitest-rule-tester": "^2.2.0",
     "execa": "^9.5.2",
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.0",
