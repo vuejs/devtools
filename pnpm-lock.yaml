@@ -19,11 +19,11 @@ catalogs:
       specifier: ^5.2.3
       version: 5.2.3
     '@vueuse/core':
-      specifier: ^12.8.2
-      version: 12.8.2
+      specifier: ^13.1.0
+      version: 13.1.0
     '@vueuse/integrations':
-      specifier: ^12.8.2
-      version: 12.8.2
+      specifier: ^13.1.0
+      version: 13.1.0
     colord:
       specifier: ^2.9.3
       version: 2.9.3
@@ -235,7 +235,7 @@ importers:
         version: 66.0.0
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       unplugin-vue-components:
         specifier: ^28.4.1
         version: 28.4.1(@babel/parser@7.27.0)(vue@3.5.13(typescript@5.8.2))
@@ -333,10 +333,10 @@ importers:
         version: link:../ui
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       '@vueuse/integrations':
         specifier: 'catalog:'
-        version: 12.8.2(async-validator@4.2.5)(focus-trap@7.6.4)(fuse.js@7.1.0)(typescript@5.8.2)
+        version: 13.1.0(async-validator@4.2.5)(focus-trap@7.6.4)(fuse.js@7.1.0)(vue@3.5.13(typescript@5.8.2))
       colord:
         specifier: 'catalog:'
         version: 2.9.3
@@ -418,7 +418,7 @@ importers:
         version: 2.2.2
       unplugin-auto-import:
         specifier: 'catalog:'
-        version: 19.1.2(@vueuse/core@12.8.2(typescript@5.8.2))
+        version: 19.1.2(@vueuse/core@13.1.0(vue@3.5.13(typescript@5.8.2)))
       unplugin-vue-components:
         specifier: ^28.4.1
         version: 28.4.1(@babel/parser@7.27.0)(vue@3.5.13(typescript@5.8.2))
@@ -584,7 +584,7 @@ importers:
         version: link:../ui
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
     devDependencies:
       '@iconify/json':
         specifier: 'catalog:'
@@ -615,7 +615,7 @@ importers:
         version: 4.3.3(three@0.175.0)(typescript@5.8.2)(vue@3.5.13(typescript@5.8.2))
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       pinia:
         specifier: 'catalog:'
         version: 3.0.1(typescript@5.8.2)(vue@3.5.13(typescript@5.8.2))
@@ -624,7 +624,7 @@ importers:
         version: 0.175.0
       unplugin-auto-import:
         specifier: 'catalog:'
-        version: 19.1.2(@vueuse/core@12.8.2(typescript@5.8.2))
+        version: 19.1.2(@vueuse/core@13.1.0(vue@3.5.13(typescript@5.8.2)))
       vue:
         specifier: 'catalog:'
         version: 3.5.13(typescript@5.8.2)
@@ -679,7 +679,7 @@ importers:
         version: 5.70.0(vue@3.5.13(typescript@5.8.2))
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       element-plus:
         specifier: ^2.9.7
         version: 2.9.7(vue@3.5.13(typescript@5.8.2))
@@ -688,7 +688,7 @@ importers:
         version: 3.0.1(typescript@5.8.2)(vue@3.5.13(typescript@5.8.2))
       unplugin-auto-import:
         specifier: 'catalog:'
-        version: 19.1.2(@vueuse/core@12.8.2(typescript@5.8.2))
+        version: 19.1.2(@vueuse/core@13.1.0(vue@3.5.13(typescript@5.8.2)))
       vee-validate:
         specifier: ^4.15.0
         version: 4.15.0(vue@3.5.13(typescript@5.8.2))
@@ -740,13 +740,13 @@ importers:
     dependencies:
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       pinia:
         specifier: 'catalog:'
         version: 3.0.1(typescript@5.8.2)(vue@3.5.13(typescript@5.8.2))
       unplugin-auto-import:
         specifier: 'catalog:'
-        version: 19.1.2(@vueuse/core@12.8.2(typescript@5.8.2))
+        version: 19.1.2(@vueuse/core@13.1.0(vue@3.5.13(typescript@5.8.2)))
       vue:
         specifier: 'catalog:'
         version: 3.5.13(typescript@5.8.2)
@@ -827,7 +827,7 @@ importers:
         version: link:../../ui
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       vue:
         specifier: 'catalog:'
         version: 3.5.13(typescript@5.8.2)
@@ -901,14 +901,14 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@vueuse/components':
-        specifier: ^12.8.2
-        version: 12.8.2(typescript@5.8.2)
+        specifier: ^13.1.0
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 12.8.2(typescript@5.8.2)
+        version: 13.1.0(vue@3.5.13(typescript@5.8.2))
       '@vueuse/integrations':
         specifier: 'catalog:'
-        version: 12.8.2(async-validator@4.2.5)(focus-trap@7.6.4)(fuse.js@7.1.0)(typescript@5.8.2)
+        version: 13.1.0(async-validator@4.2.5)(focus-trap@7.6.4)(fuse.js@7.1.0)(vue@3.5.13(typescript@5.8.2))
       colord:
         specifier: 'catalog:'
         version: 2.9.3
@@ -3540,11 +3540,18 @@ packages:
   '@vue/web-component-wrapper@1.3.0':
     resolution: {integrity: sha512-Iu8Tbg3f+emIIMmI2ycSI8QcEuAUgPTgHwesDU1eKMLE4YC/c/sFbGc70QgMq31ijRftV0R7vCm9co6rldCeOA==}
 
-  '@vueuse/components@12.8.2':
-    resolution: {integrity: sha512-Nj27u1KsDWzoTthlChzVndJ9g0sW5APCXO3EJkSxlG11nN/ANTUlPPeoJOFvtbdDRnvsMJalboJyE0rRyg7yNg==}
+  '@vueuse/components@13.1.0':
+    resolution: {integrity: sha512-2cqRdRJ1CP/a9WpDAlIZneaivUuwze2e8W0CjKHbWqJ9p7nldccwMyEqKC7N6naYvipG469IGfYk6rnT/hoKfA==}
+    peerDependencies:
+      vue: ^3.5.0
 
   '@vueuse/core@12.8.2':
     resolution: {integrity: sha512-HbvCmZdzAu3VGi/pWYm5Ut+Kd9mn1ZHnn4L5G8kOQTPs/IwIAmJoBrmYk2ckLArgMXZj0AW3n5CAejLUO+PhdQ==}
+
+  '@vueuse/core@13.1.0':
+    resolution: {integrity: sha512-PAauvdRXZvTWXtGLg8cPUFjiZEddTqmogdwYpnn60t08AA5a8Q4hZokBnpTOnVNqySlFlTcRYIC8OqreV4hv3Q==}
+    peerDependencies:
+      vue: ^3.5.0
 
   '@vueuse/core@9.13.0':
     resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
@@ -3590,14 +3597,64 @@ packages:
       universal-cookie:
         optional: true
 
+  '@vueuse/integrations@13.1.0':
+    resolution: {integrity: sha512-wJ6aANdUs4SOpVabChQK+uLIwxRTUAEmn1DJnflGG7Wq6yaipiRmp6as/Md201FjJnquQt8MecIPbFv8HSBeDA==}
+    peerDependencies:
+      async-validator: ^4
+      axios: ^1
+      change-case: ^5
+      drauu: ^0.4
+      focus-trap: ^7
+      fuse.js: ^7
+      idb-keyval: ^6
+      jwt-decode: ^4
+      nprogress: ^0.2
+      qrcode: ^1.5
+      sortablejs: ^1
+      universal-cookie: ^7
+      vue: ^3.5.0
+    peerDependenciesMeta:
+      async-validator:
+        optional: true
+      axios:
+        optional: true
+      change-case:
+        optional: true
+      drauu:
+        optional: true
+      focus-trap:
+        optional: true
+      fuse.js:
+        optional: true
+      idb-keyval:
+        optional: true
+      jwt-decode:
+        optional: true
+      nprogress:
+        optional: true
+      qrcode:
+        optional: true
+      sortablejs:
+        optional: true
+      universal-cookie:
+        optional: true
+
   '@vueuse/metadata@12.8.2':
     resolution: {integrity: sha512-rAyLGEuoBJ/Il5AmFHiziCPdQzRt88VxR+Y/A/QhJ1EWtWqPBBAxTAFaSkviwEuOEZNtW8pvkPgoCZQ+HxqW1A==}
+
+  '@vueuse/metadata@13.1.0':
+    resolution: {integrity: sha512-+TDd7/a78jale5YbHX9KHW3cEDav1lz1JptwDvep2zSG8XjCsVE+9mHIzjTOaPbHUAk5XiE4jXLz51/tS+aKQw==}
 
   '@vueuse/metadata@9.13.0':
     resolution: {integrity: sha512-gdU7TKNAUVlXXLbaF+ZCfte8BjRJQWPCa2J55+7/h+yDtzw3vOoGQDRXzI6pyKyo6bXFT5/QoPE4hAknExjRLQ==}
 
   '@vueuse/shared@12.8.2':
     resolution: {integrity: sha512-dznP38YzxZoNloI0qpEfpkms8knDtaoQ6Y/sfS0L7Yki4zh40LFHEhur0odJC6xTHG5dxWVPiUWBXn+wCG2s5w==}
+
+  '@vueuse/shared@13.1.0':
+    resolution: {integrity: sha512-IVS/qRRjhPTZ6C2/AM3jieqXACGwFZwWTdw5sNTSKk2m/ZpkuuN+ri+WCVUP8TqaKwJYt/KuMwmXspMAw8E6ew==}
+    peerDependencies:
+      vue: ^3.5.0
 
   '@vueuse/shared@9.13.0':
     resolution: {integrity: sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==}
@@ -12721,13 +12778,11 @@ snapshots:
 
   '@vue/web-component-wrapper@1.3.0': {}
 
-  '@vueuse/components@12.8.2(typescript@5.8.2)':
+  '@vueuse/components@13.1.0(vue@3.5.13(typescript@5.8.2))':
     dependencies:
-      '@vueuse/core': 12.8.2(typescript@5.8.2)
-      '@vueuse/shared': 12.8.2(typescript@5.8.2)
+      '@vueuse/core': 13.1.0(vue@3.5.13(typescript@5.8.2))
+      '@vueuse/shared': 13.1.0(vue@3.5.13(typescript@5.8.2))
       vue: 3.5.13(typescript@5.8.2)
-    transitivePeerDependencies:
-      - typescript
 
   '@vueuse/core@12.8.2(typescript@5.8.2)':
     dependencies:
@@ -12737,6 +12792,13 @@ snapshots:
       vue: 3.5.13(typescript@5.8.2)
     transitivePeerDependencies:
       - typescript
+
+  '@vueuse/core@13.1.0(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 13.1.0
+      '@vueuse/shared': 13.1.0(vue@3.5.13(typescript@5.8.2))
+      vue: 3.5.13(typescript@5.8.2)
 
   '@vueuse/core@9.13.0(vue@3.5.13(typescript@5.8.2))':
     dependencies:
@@ -12760,7 +12822,19 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  '@vueuse/integrations@13.1.0(async-validator@4.2.5)(focus-trap@7.6.4)(fuse.js@7.1.0)(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@vueuse/core': 13.1.0(vue@3.5.13(typescript@5.8.2))
+      '@vueuse/shared': 13.1.0(vue@3.5.13(typescript@5.8.2))
+      vue: 3.5.13(typescript@5.8.2)
+    optionalDependencies:
+      async-validator: 4.2.5
+      focus-trap: 7.6.4
+      fuse.js: 7.1.0
+
   '@vueuse/metadata@12.8.2': {}
+
+  '@vueuse/metadata@13.1.0': {}
 
   '@vueuse/metadata@9.13.0': {}
 
@@ -12769,6 +12843,10 @@ snapshots:
       vue: 3.5.13(typescript@5.8.2)
     transitivePeerDependencies:
       - typescript
+
+  '@vueuse/shared@13.1.0(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      vue: 3.5.13(typescript@5.8.2)
 
   '@vueuse/shared@9.13.0(vue@3.5.13(typescript@5.8.2))':
     dependencies:
@@ -18576,7 +18654,7 @@ snapshots:
 
   unpipe@1.0.0: {}
 
-  unplugin-auto-import@19.1.2(@vueuse/core@12.8.2(typescript@5.8.2)):
+  unplugin-auto-import@19.1.2(@vueuse/core@13.1.0(vue@3.5.13(typescript@5.8.2))):
     dependencies:
       local-pkg: 1.1.1
       magic-string: 0.30.17
@@ -18585,7 +18663,7 @@ snapshots:
       unplugin: 2.2.2
       unplugin-utils: 0.2.4
     optionalDependencies:
-      '@vueuse/core': 12.8.2(typescript@5.8.2)
+      '@vueuse/core': 13.1.0(vue@3.5.13(typescript@5.8.2))
 
   unplugin-utils@0.2.4:
     dependencies:

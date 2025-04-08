@@ -8,8 +8,8 @@ catalog:
   '@types/node': ^22.13.14
   '@unocss/reset': ^66.0.0
   '@vitejs/plugin-vue': ^5.2.3
-  '@vueuse/core': ^12.8.2
-  '@vueuse/integrations': ^12.8.2
+  '@vueuse/core': ^13.1.0
+  '@vueuse/integrations': ^13.1.0
   colord: ^2.9.3
   execa: ^9.5.2
   floating-vue: 5.2.2
