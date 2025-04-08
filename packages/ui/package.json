@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@vue/devtools-shared": "workspace:*",
-    "@vueuse/components": "^12.8.2",
+    "@vueuse/components": "^13.1.0",
     "@vueuse/core": "catalog:",
     "@vueuse/integrations": "catalog:",
     "colord": "catalog:",
