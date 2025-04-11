@@ -59,7 +59,7 @@
     "sass-embedded": "catalog:",
     "simple-git-hooks": "^2.12.1",
     "unocss": "catalog:",
-    "unplugin": "^2.2.2",
+    "unplugin": "^2.3.1",
     "unplugin-auto-import": "catalog:",
     "unplugin-vue-components": "^28.4.1",
     "vite": "catalog:",
