@@ -4,8 +4,8 @@ packages:
   - packages/playground/**
 
 catalog:
-  '@iconify/json': ^2.2.321
-  '@types/node': ^22.13.14
+  '@iconify/json': ^2.2.328
+  '@types/node': ^22.14.1
   '@unocss/reset': ^66.0.0
   '@vitejs/plugin-vue': ^5.2.3
   '@vueuse/core': ^12.8.2
@@ -16,12 +16,12 @@ catalog:
   mitt: ^3.0.1
   pathe: ^2.0.3
   perfect-debounce: ^1.0.0
-  pinia: ^3.0.1
-  sass-embedded: ^1.86.0
+  pinia: ^3.0.2
+  sass-embedded: ^1.86.3
   serve: ^14.2.4
-  shiki: ^3.2.1
+  shiki: ^3.2.2
   splitpanes: ^4.0.3
-  typescript: ^5.8.2
+  typescript: ^5.8.3
   unocss: ^66.0.0
   unplugin-auto-import: ^19.1.2
   vite: ^6.2.1
