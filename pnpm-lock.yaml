@@ -515,8 +515,8 @@ importers:
         specifier: workspace:^
         version: link:../shared
       electron:
-        specifier: ^33.4.8
-        version: 33.4.8
+        specifier: ^35.2.1
+        version: 35.2.1
       execa:
         specifier: 'catalog:'
         version: 9.5.2
@@ -2989,9 +2989,6 @@ packages:
   '@types/node-forge@1.3.11':
     resolution: {integrity: sha512-FQx220y22OKNTqaByeBGqHWYz4cl94tpcxeFdvBo3wjG6XPBuZ0BNgNZRV5J5TFmmcsJ4IzsLkmGRiQbnYsBEQ==}
 
-  '@types/node@20.17.11':
-    resolution: {integrity: sha512-Ept5glCK35R8yeyIeYlRIZtX6SLRyqMhOFTgj5SOkMpLTdw3SEHI9fHx60xaUZ+V1aJxQJODE+7/j5ocZydYTg==}
-
   '@types/node@22.13.14':
     resolution: {integrity: sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==}
 
@@ -4949,8 +4946,8 @@ packages:
   electron-to-chromium@1.5.76:
     resolution: {integrity: sha512-CjVQyG7n7Sr+eBXE86HIulnL5N8xZY1sgmOPGuq/F0Rr0FJq63lg0kEtOIDfZBk44FnDLf6FUJ+dsJcuiUDdDQ==}
 
-  electron@33.4.8:
-    resolution: {integrity: sha512-dy/92HufGG66PslDMlXuK6uhO+70tgiZ4esReTZgDcZ0E67jCJ7S4/et4yZSEjXiT7IyjZTf72QwQbTpANxW4g==}
+  electron@35.2.1:
+    resolution: {integrity: sha512-LO4xXLpzkPPUVLvAbdHMlW7N9Z+Qqz+7QsmSWXluTIQMeJk+v7o36nUTZghyA2I1s//tlMvuaCtle6Qo2W0Ktg==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -8792,9 +8789,6 @@ packages:
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
 
-  undici-types@6.19.8:
-    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
-
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
@@ -11727,10 +11721,6 @@ snapshots:
     dependencies:
       '@types/node': 22.13.14
 
-  '@types/node@20.17.11':
-    dependencies:
-      undici-types: 6.19.8
-
   '@types/node@22.13.14':
     dependencies:
       undici-types: 6.20.0
@@ -14047,10 +14037,10 @@ snapshots:
 
   electron-to-chromium@1.5.76: {}
 
-  electron@33.4.8:
+  electron@35.2.1:
     dependencies:
       '@electron/get': 2.0.3
-      '@types/node': 20.17.11
+      '@types/node': 22.13.14
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -18420,8 +18410,6 @@ snapshots:
       quansync: 0.2.8
 
   uncrypto@0.1.3: {}
-
-  undici-types@6.19.8: {}
 
   undici-types@6.20.0: {}
 
