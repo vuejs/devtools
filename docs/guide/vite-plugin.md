@@ -54,7 +54,7 @@ interface VitePluginVueDevToolsOptions {
    * WARNING: only set this if you know exactly what it does.
    * @default ''
    */
-  appendTo?: string | RegExp
+  appendTo?: string | RegExp | string[]
 
   /**
    * Enable vue component inspector
