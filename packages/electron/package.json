@@ -39,9 +39,9 @@
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
-    "electron": "^33.4.8",
+    "electron": "^33.4.11",
     "execa": "catalog:",
-    "h3": "^1.15.1",
+    "h3": "^1.15.3",
     "ip": "^2.0.1",
     "pathe": "catalog:",
     "socket.io": "^4.8.1",
@@ -50,7 +50,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "catalog:",
     "tsx": "^4.19.3",
-    "unbuild": "3.4.1",
+    "unbuild": "3.5.0",
     "vue": "catalog:"
   }
 }
