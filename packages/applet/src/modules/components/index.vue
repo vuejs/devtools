@@ -279,6 +279,99 @@ useEventListener('keydown', (event) => {
   }
 })
 
+useEventListener('keydown', (event) => {
+  if (!activeComponentId.value)
+    return
+
+  switch (event.key) {
+    case 'ArrowRight':
+      handleArrowRight()
+      break
+    case 'ArrowLeft':
+      handleArrowLeft()
+      break
+    case 'ArrowDown':
+      handleArrowDown()
+      event.preventDefault()
+      break
+    case 'ArrowUp':
+      handleArrowUp()
+      event.preventDefault()
+      break
+    case ' ':
+    case 'Enter': {
+      handleEnter()
+      event.preventDefault()
+      break
+    }
+  }
+})
+
+function handleArrowRight() {
+  if (!expandedTreeNodes.value.includes(activeComponentId.value)) {
+    expandedTreeNodes.value.push(activeComponentId.value)
+  }
+}
+
+function handleArrowLeft() {
+  if (expandedTreeNodes.value.includes(activeComponentId.value)) {
+    expandedTreeNodes.value.splice(expandedTreeNodes.value.indexOf(activeComponentId.value), 1)
+  }
+}
+
+function handleArrowDown() {
+  const activeComponentIdIndex = flattenedTreeNodesIds.value.indexOf(activeComponentId.value)
+  const isActiveComponentExpanded = expandedTreeNodes.value.includes(activeComponentId.value)
+
+  if (isActiveComponentExpanded && activeComponentIdIndex >= 0 && activeComponentIdIndex < flattenedTreeNodesIds.value.length - 1) {
+    activeComponentId.value = flattenedTreeNodesIds.value[activeComponentIdIndex + 1]
+  }
+  else if (activeComponentIdIndex === 0) {
+    return false
+  }
+  else {
+    const listIndex = treeNodeLinkedList.value.findIndex(arr => arr.includes(activeComponentId.value))
+    const nextTree = treeNodeLinkedList.value[listIndex + 1]
+    if (nextTree) {
+      activeComponentId.value = nextTree[1]
+    }
+  }
+}
+
+function handleArrowUp() {
+  const isSubTreeRoot = treeNodeLinkedList.value.some(chain => chain[1] === activeComponentId.value)
+
+  if (isSubTreeRoot) {
+    activeComponentId.value = getPrevExpandedNode()
+  }
+  else {
+    const currentIndex = flattenedTreeNodesIds.value.indexOf(activeComponentId.value)
+    if (currentIndex > 0) {
+      activeComponentId.value = flattenedTreeNodesIds.value[currentIndex - 1]
+    }
+  }
+}
+
+function handleEnter() {
+  const node = flattenedTreeNodes.value.find(item => item.id === activeComponentId.value)
+  if (!node?.children?.length)
+    return
+
+  const index = expandedTreeNodes.value.indexOf(activeComponentId.value)
+  if (index === -1)
+    expandedTreeNodes.value.push(activeComponentId.value)
+  else expandedTreeNodes.value.splice(index, 1)
+}
+
+function getPrevExpandedNode() {
+  const list = treeNodeLinkedList.value
+  const listIndex = list.findIndex((chain: string[]) => chain.includes(activeComponentId.value))
+  if (listIndex > 0) {
+    return list[listIndex - 1].find(id => !expandedTreeNodes.value.includes(id)) || list[listIndex - 1][1]
+  }
+  return list[listIndex][0]
+}
+
 function scrollToComponent() {
   rpc.value.scrollToComponent(activeComponentId.value)
 }
