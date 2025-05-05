@@ -400,14 +400,11 @@ function getNearestPreviousNode(parentId: string) {
 
 function getNearestNextNode() {
   const linkedListTree = treeNodeLinkedList.value
-  const activeItemListIndex = [...linkedListTree]
-    .map((arr, index) => ({ arr, index }))
-    .reverse()
-    .find(({ arr }) => arr?.includes(activeComponentId.value))
-    ?.index as number
+  const activeItemListIndex = [...linkedListTree].findLastIndex(arr => arr?.includes(activeComponentId.value))
 
   if (activeItemListIndex === -1)
     return activeComponentId.value
+
   const arr1 = linkedListTree[activeItemListIndex]
   const arr2 = linkedListTree[activeItemListIndex + 1]
 
