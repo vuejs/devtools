@@ -1,0 +1,26 @@
+{
+  "name": "playground-reactivity-tracing",
+  "type": "module",
+  "version": "7.3.2",
+  "private": true,
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@vueuse/core": "catalog:",
+    "pinia": "catalog:",
+    "unplugin-auto-import": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "catalog:",
+    "sass-embedded": "catalog:",
+    "serve": "catalog:",
+    "typescript": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-inspect": "catalog:",
+    "vite-plugin-vue-devtools": "workspace:*"
+  }
+}
