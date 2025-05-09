@@ -16,7 +16,7 @@ const hostEnv = useHostEnv()
  */
 const enableFeatureSettings = hostEnv === 'iframe' || hostEnv === 'separate-window'
 
-const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar, reduceMotion, highlightComponentTracking } = toRefs(toReactive(devtoolsClientState))
+const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar, reduceMotion, flashUpdates } = toRefs(toReactive(devtoolsClientState))
 
 // #region settings
 const scaleOptions = [
@@ -204,17 +204,16 @@ const minimizePanelInteractiveLabel = computed(() => {
               <span op75>Always show the floating panel</span>
             </div>
 
+            <div class="flex items-center gap2 text-sm">
+              <VueCheckbox v-model="flashUpdates" />
+              <span op75>Highlight Component Re Rendering</span>
+            </div>
+
             <div mx--2 my1 h-1px border="b base" op75 />
 
             <p>Minimize floating panel on inactive</p>
             <div>
               <VueSelect v-model="minimizePanelInteractive" :button-props="{ outlined: true }" :options="minimizePanelInteractiveOptions" :placeholder="minimizePanelInteractiveLabel" />
-            </div>
-            <div mx--2 my1 h-1px border="b base" op75 />
-
-            <div class="flex items-center gap2 text-sm">
-              <VueCheckbox v-model="highlightComponentTracking" />
-              <span op75>Highlight Component Re Rendering</span>
             </div>
           </VueCard>
         </template>
