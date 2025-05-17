@@ -10,7 +10,7 @@
     "@vueuse/core": "catalog:",
     "pinia": "catalog:",
     "unplugin-auto-import": "catalog:",
-    "vue": "catalog:",
+    "vue": "https://pkg.pr.new/vue@13274",
     "vue-router": "catalog:"
   },
   "devDependencies": {
