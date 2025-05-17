@@ -7,8 +7,6 @@ const count = ref(num.value)
 const doubleCount = computed(() => count.value * 2)
 
 const fourCount = computed(() => count.value * 4)
-
-console.log('x', count)
 </script>
 
 <template>

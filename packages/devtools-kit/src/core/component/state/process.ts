@@ -131,6 +131,21 @@ function getStateTypeAndName(info: ReturnType<typeof getSetupStateType>) {
   }
 }
 
+function processReactivityDependencies(state, type: 'subs' | 'deps') {
+  const deps: unknown[] = []
+  for (let dep = state[type]; dep !== undefined; dep = dep.nextDep) {
+    const sub = dep.dep
+    console.log('x', dep)
+    const stateType = getSetupStateType(sub)
+    const isDep = sub.constructor.name === 'Dep'
+    const isReactivityState = stateType.ref || stateType.computed || stateType.reactive || isDep
+    if (isReactivityState && sub !== state) {
+      deps.push(sub)
+    }
+  }
+  return deps
+}
+
 function processSetupState(instance: VueAppInstance) {
   const raw = instance.devtoolsRawSetupState || {}
   return Object.keys(instance.setupState)
@@ -160,6 +175,7 @@ function processSetupState(instance: VueAppInstance) {
 
       if (rawData && !accessError) {
         const info = getSetupStateType(rawData)
+        let subs, deps
 
         const { stateType, stateTypeName } = getStateTypeAndName(info)
         const isState = info.ref || info.computed || info.reactive
@@ -170,10 +186,19 @@ function processSetupState(instance: VueAppInstance) {
         if (stateType)
           isOtherType = false
 
+        if (isState) {
+          subs = processReactivityDependencies(instance.devtoolsRawSetupState[key], 'subs')
+          deps = processReactivityDependencies(instance.devtoolsRawSetupState[key], 'deps')
+        }
+
+        console.log('subs', key, subs, deps)
+
         result = {
           ...stateType ? { stateType, stateTypeName: stateTypeName! } : {},
           ...raw ? { raw } : {},
           editable: isState && !info.readonly,
+          subs,
+          deps,
         }
       }
 
