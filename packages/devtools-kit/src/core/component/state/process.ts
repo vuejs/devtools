@@ -3,6 +3,7 @@ import type { InspectorState } from '../types'
 import { camelize } from '@vue/devtools-shared'
 import { ensurePropertyExists, returnError } from '../utils'
 import { vueBuiltins } from './constants'
+import { isComputed, isReactive, isRef } from './is'
 import { getPropType, getSetupStateType, toRaw } from './util'
 
 function mergeOptions(
@@ -121,6 +122,27 @@ function processState(instance: VueAppInstance) {
     }))
 }
 
+function getReactivityType(state) {
+  const constructorName = state.constructor.name
+
+  if (constructorName === 'SetupRenderEffect') {
+    return 'render'
+  }
+  else if (constructorName === 'RenderWatcherEffect') {
+    return 'watch'
+  }
+  else if (isComputed(state)) {
+    return 'computed'
+  }
+  else if (isRef(state)) {
+    return 'reactive'
+  }
+  else if (isReactive(state)) {
+    return 'ref'
+  }
+  return 'unknown'
+}
+
 function getStateTypeAndName(info: ReturnType<typeof getSetupStateType>) {
   // the order is important !!!
   const stateType = info.computed ? 'computed' : info.ref ? 'ref' : info.reactive ? 'reactive' : null
@@ -131,17 +153,99 @@ function getStateTypeAndName(info: ReturnType<typeof getSetupStateType>) {
   }
 }
 
-function processReactivityDependencies(state, type: 'subs' | 'deps') {
-  const deps: unknown[] = []
-  for (let dep = state[type]; dep !== undefined; dep = dep.nextDep) {
-    const sub = dep.dep
-    console.log('x', dep)
-    const stateType = getSetupStateType(sub)
-    const isDep = sub.constructor.name === 'Dep'
-    const isReactivityState = stateType.ref || stateType.computed || stateType.reactive || isDep
-    if (isReactivityState && sub !== state) {
-      deps.push(sub)
+export function findReactivityRelationships(state: InspectorState[]) {
+  const refToIndexMap = new Map()
+
+  state.forEach((item, index) => {
+    if (item.reference) {
+      refToIndexMap.set(item.reference, index)
     }
+  })
+
+  return state.map((item) => {
+    const result: Record<string, unknown> = { ...item }
+
+    if (item.deps && Array.isArray(item.deps)) {
+      result.deps = item.deps
+        .map((dep) => {
+          if (dep && dep.reference) {
+            const depIndex = refToIndexMap.get(dep.reference)
+            if (depIndex !== undefined) {
+              return {
+                index: depIndex,
+                key: state[depIndex].key,
+                type: dep.type,
+              }
+            }
+          }
+          return {
+            index: -1,
+            key: null,
+            type: dep.type,
+          }
+        })
+        .filter(Boolean)
+    }
+
+    if (item.subs && Array.isArray(item.subs)) {
+      result.subs = item.subs
+        .map((sub) => {
+          if (sub && sub.reference) {
+            const subIndex = refToIndexMap.get(sub.reference)
+            if (subIndex !== undefined) {
+              return {
+                index: subIndex,
+                key: state[subIndex].key,
+                type: sub.type,
+              }
+            }
+          }
+          return {
+            index: -1,
+            key: null,
+            type: sub.type,
+          }
+        })
+        .filter(Boolean)
+    }
+
+    const res = {
+      ...item,
+      ...result,
+    }
+
+    delete res.reference
+
+    return res
+  })
+}
+
+function processReactivitySubs(state) {
+  const subs: {
+    type: string
+    reference: unknown
+  }[] = []
+  for (let sub = state.subs; sub !== undefined; sub = sub.nextSub) {
+    const reactivityType = getReactivityType(sub.sub)
+    subs.push({
+      type: reactivityType,
+      reference: sub.sub,
+    })
+  }
+  return subs
+}
+
+function processReactivityDeps(state) {
+  const deps: {
+    type: string
+    reference: unknown
+  }[] = []
+  for (let dep = state.deps; dep !== undefined; dep = dep.nextDep) {
+    const reactivityType = getReactivityType(dep.dep)
+    deps.push({
+      type: reactivityType,
+      reference: dep.dep,
+    })
   }
   return deps
 }
@@ -187,11 +291,9 @@ function processSetupState(instance: VueAppInstance) {
           isOtherType = false
 
         if (isState) {
-          subs = processReactivityDependencies(instance.devtoolsRawSetupState[key], 'subs')
-          deps = processReactivityDependencies(instance.devtoolsRawSetupState[key], 'deps')
+          subs = processReactivitySubs(instance.devtoolsRawSetupState[key])
+          deps = processReactivityDeps(instance.devtoolsRawSetupState[key])
         }
-
-        console.log('subs', key, subs, deps)
 
         result = {
           ...stateType ? { stateType, stateTypeName: stateTypeName! } : {},
@@ -199,6 +301,7 @@ function processSetupState(instance: VueAppInstance) {
           editable: isState && !info.readonly,
           subs,
           deps,
+          reference: instance.devtoolsRawSetupState[key],
         }
       }
 

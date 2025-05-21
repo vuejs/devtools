@@ -28,8 +28,15 @@ export interface InspectorState {
     value: string | number
     type: string
   }[]
-  subs?: any[]
-  deps?: any[]
+  subs?: {
+    type: string
+    reference: unknown
+  }[]
+  deps?: {
+    type: string
+    reference: unknown
+  }[]
+  reference?: unknown
 }
 
 export interface InspectorStateApiPayload {

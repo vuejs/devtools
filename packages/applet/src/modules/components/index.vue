@@ -19,6 +19,7 @@ import { useComponentHighlight } from '~/composables/component-highlight'
 import { createSelectedContext } from '~/composables/select'
 import { createExpandedContext } from '~/composables/toggle-expanded'
 import { filterInspectorState } from '~/utils'
+import ReactivityRelationship from './components/ReactivityRelationship.vue'
 import ComponentRenderCode from './components/RenderCode.vue'
 
 const emit = defineEmits(['openInEditor', 'onInspectComponentStart', 'onInspectComponentEnd'])
@@ -36,6 +37,14 @@ const inspectComponentTipVisible = ref(false)
 const componentRenderCode = ref('')
 const componentRenderCodeVisible = ref(false)
 const highlighter = useComponentHighlight()
+
+// reactivity relationships
+const inspectorState = ref<CustomInspectorState[]>([])
+const reactivityRelationshipsVisible = ref(false)
+
+function toggleReactivityRelationships(state?: boolean) {
+  reactivityRelationshipsVisible.value = state ?? !reactivityRelationshipsVisible.value
+}
 
 // tree
 function dfs(node: { id: string, children?: { id: string }[] }, path: string[] = [], linkedList: string[][] = []) {
@@ -148,6 +157,8 @@ function getComponentState(id: string) {
     if (!parsedData)
       return
     activeComponentState.value = normalizeComponentState(parsedData)
+    inspectorState.value = parsedData.state
+    console.log(parsedData.state)
     expandedStateNodes.value = Array.from({ length: Object.keys(activeComponentState.value).length }, (_, i) => `${i}`)
   })
 }
@@ -168,6 +179,8 @@ function onInspectorStateUpdated(_data: string) {
   if (data.inspectorId !== inspectorId || data.nodeId !== activeComponentId.value)
     return
 
+  // @ts-expect-error skip type check
+  inspectorState.value = data.state.state
   activeComponentState.value = normalizeComponentState({ state: data.state.state })
 }
 
@@ -356,6 +369,7 @@ function closeComponentRenderCode() {
             <VueInput v-model="filterStateName" :loading-debounce-time="250" placeholder="Filter State..." class="flex-1 text-3.5" />
 
             <div class="flex items-center gap-2 px-1">
+              <i v-tooltip.bottom="`Reactivity relationships`" class="i-carbon-chart-relationship h-4 w-4 cursor-pointer hover:(op-70)" @click="toggleReactivityRelationships(true)" />
               <i v-tooltip.bottom="'Scroll to component'" class="i-material-symbols-light:eye-tracking-outline h-4 w-4 cursor-pointer hover:(op-70)" @click="scrollToComponent" />
               <i v-tooltip.bottom="'Show render code'" class="i-material-symbols-light:code h-5 w-5 cursor-pointer hover:(op-70)" @click="getComponentRenderCode" />
               <i v-if="isInChromePanel" v-tooltip.bottom="'Inspect DOM'" class="i-material-symbols-light:menu-open h-5 w-5 cursor-pointer hover:(op-70)" @click="inspectDOM" />
@@ -365,6 +379,7 @@ function closeComponentRenderCode() {
           <RootStateViewer class="no-scrollbar flex-1 overflow-scroll" :data="displayState" :node-id="activeComponentId" :inspector-id="inspectorId" expanded-state-id="component-state" />
         </div>
         <ComponentRenderCode v-if="componentRenderCodeVisible && componentRenderCode" :code="componentRenderCode" @close="closeComponentRenderCode" />
+        <ReactivityRelationship v-if="reactivityRelationshipsVisible" :state="inspectorState" @close="toggleReactivityRelationships(false)" />
       </Pane>
     </Splitpanes>
 

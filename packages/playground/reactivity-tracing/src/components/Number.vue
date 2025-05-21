@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{ num: number }>()
 
-const db = computed(() => {
+const doubleNum = computed(() => {
   return props.num * 2
 })
 </script>
@@ -9,6 +9,6 @@ const db = computed(() => {
 <template>
   <span>
     {{ num }}
-    {{ db }}
+    {{ doubleNum }}
   </span>
 </template>
