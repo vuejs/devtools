@@ -23,6 +23,20 @@ export interface ModuleIframeView {
    * @default true
    */
   persistent?: boolean
+
+  /**
+   * Triggered when the iframe is loaded
+   *
+   * @param iframe The iframe element
+   */
+  onLoad?: (iframe: HTMLIFrameElement) => void
+
+  /**
+   * Triggered when the iframe is closed if {@link persistent} is false
+   *
+   * @param iframe The iframe element
+   */
+  onClose?: (iframe: HTMLIFrameElement) => void
 }
 
 export interface ModuleVNodeView {

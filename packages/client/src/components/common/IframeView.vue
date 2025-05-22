@@ -8,6 +8,8 @@ const iframeCacheMap = new Map<string, HTMLIFrameElement>()
 const props = withDefaults(defineProps<{
   src: string
   inline?: boolean
+  onLoad?: (iframeEl: HTMLIFrameElement) => void
+  onClose?: (iframeEl: HTMLIFrameElement) => void
 }>(), {
   inline: false,
 })
@@ -27,20 +29,27 @@ onMounted(() => {
     iframeLoaded.value = true
   }
   else {
-    iframeEl.value = document.createElement('iframe')
-    iframeCacheMap.set(key.value, iframeEl.value)
-    iframeEl.value.src = props.src
+    const iframe = document.createElement('iframe')
+    iframeEl.value = iframe
+    iframeCacheMap.set(key.value, iframe)
+    iframe.addEventListener('load', () => {
+      props.onLoad?.(iframe)
+    })
+    iframe.addEventListener('close', () => {
+      props.onClose?.(iframe)
+    })
+    iframe.src = props.src
     // CORS
     try {
-      iframeEl.value.style.opacity = '0.01'
-      iframeEl.value.onload = () => {
+      iframe.style.opacity = '0.01'
+      iframe.onload = () => {
         syncColorMode()
-        iframeEl.value!.style.opacity = '1'
+        iframe!.style.opacity = '1'
         iframeLoaded.value = true
       }
     }
     catch (e) {
-      iframeEl.value.style.opacity = '1'
+      iframe.style.opacity = '1'
     }
 
     document.body.appendChild(iframeEl.value)
