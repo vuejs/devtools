@@ -8,11 +8,14 @@ const iframeCacheMap = new Map<string, HTMLIFrameElement>()
 const props = withDefaults(defineProps<{
   src: string
   inline?: boolean
-  onLoad?: (iframeEl: HTMLIFrameElement) => void
-  onClose?: (iframeEl: HTMLIFrameElement) => void
 }>(), {
   inline: false,
 })
+
+const emit = defineEmits<{
+  load: [iframeEl: HTMLIFrameElement]
+  close: [iframeEl: HTMLIFrameElement]
+}>()
 
 const { colorMode } = useDevToolsColorMode()
 const anchor = ref<HTMLDivElement>()
@@ -33,10 +36,10 @@ onMounted(() => {
     iframeEl.value = iframe
     iframeCacheMap.set(key.value, iframe)
     iframe.addEventListener('load', () => {
-      props.onLoad?.(iframe)
+      emit('load', iframe)
     })
     iframe.addEventListener('close', () => {
-      props.onClose?.(iframe)
+      emit('close', iframe)
     })
     iframe.src = props.src
     // CORS
