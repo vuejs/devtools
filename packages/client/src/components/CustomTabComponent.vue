@@ -34,7 +34,7 @@ watch(() => tabName.value, () => {
     </div>
   </template>
   <template v-else-if="tab?.view?.type === 'iframe'">
-    <IframeView v-if="iframeViewVisible" :src="tab.view.src" :inline="iframeInline" />
+    <IframeView v-if="iframeViewVisible" :src="tab.view.src" :inline="iframeInline" @load="tab.view.onLoad" @close="tab.view.onClose" />
   </template>
   <template v-else-if="tab?.view?.type === 'vnode'">
     <Component :is="tab.view.vnode" />
