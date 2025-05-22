@@ -30,6 +30,12 @@ addCustomTab({
   view: {
     type: 'iframe',
     src: normalizeUrl(`__inspect/`),
+    onLoad(iframe) {
+      console.log('iframe loaded', iframe)
+    },
+    onClose(iframe) {
+      console.log('iframe closed', iframe)
+    },
   },
   category: 'advanced',
 })
