@@ -1,24 +1,62 @@
-export function detectIframe(target: Window | typeof globalThis, inIframe = false) {
-  console.log({
-    inIframe,
-  })
-  function injectIframeHook(iframe) {
-    if ((iframe as any).__vdevtools__injected) {
+export function detectIframeApp(target: Window | typeof globalThis, inIframe = false) {
+  if (inIframe) {
+    function sendEventToParent(cb) {
+      try {
+        // @ts-expect-error skip type check
+        const hook = window.parent.__VUE_DEVTOOLS_GLOBAL_HOOK__
+        if (hook) {
+          cb(hook)
+        }
+      }
+      catch (e) {
+        // Ignore
+      }
+    }
+
+    const hook = {
+      id: 'vue-devtools-next',
+      devtoolsVersion: '7.0',
+      on: (event, cb) => {
+        sendEventToParent((hook) => {
+          hook.on(event, cb)
+        })
+      },
+      once: (event, cb) => {
+        sendEventToParent((hook) => {
+          hook.once(event, cb)
+        })
+      },
+      off: (event, cb) => {
+        sendEventToParent((hook) => {
+          hook.off(event, cb)
+        })
+      },
+      emit: (event, ...payload) => {
+        sendEventToParent((hook) => {
+          hook.emit(event, ...payload)
+        })
+      },
+    }
+
+    Object.defineProperty(target, '__VUE_DEVTOOLS_GLOBAL_HOOK__', {
+      get() {
+        return hook
+      },
+    })
+  }
+
+  function injectVueHookToIframe(iframe) {
+    if (iframe.__vdevtools__injected) {
       return
     }
     try {
-      (iframe as any).__vdevtools__injected = true
+      iframe.__vdevtools__injected = true
       const inject = () => {
+        console.log('inject', iframe)
         try {
-          /**
-           * Install the hook on window, which is an event emitter.
-           * Note because Chrome content scripts cannot directly modify the window object,
-           * we are evaluating this function by inserting a script tag. That's why we have
-           * to inline the whole event emitter implementation here.
-           */
-          (iframe.contentWindow as any).__VUE_DEVTOOLS_IFRAME__ = iframe
+          iframe.contentWindow.__VUE_DEVTOOLS_IFRAME__ = iframe
           const script = iframe.contentDocument.createElement('script')
-          script.textContent = `;(${detectIframe.toString()})(window, true)`
+          script.textContent = `;(${detectIframeApp.toString()})(window, true)`
           iframe.contentDocument.documentElement.appendChild(script)
           script.parentNode.removeChild(script)
         }
@@ -34,23 +72,26 @@ export function detectIframe(target: Window | typeof globalThis, inIframe = fals
     }
   }
 
-  let iframeChecks = 0
-  function injectToIframes() {
+  // detect iframe app to inject vue hook
+  function injectVueHookToIframes() {
     if (typeof window === 'undefined') {
       return
     }
 
     const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe:not([data-vue-devtools-ignore])'))
     for (const iframe of iframes) {
-      injectIframeHook(iframe)
+      injectVueHookToIframe(iframe)
     }
   }
-  injectToIframes()
-  const iframeTimer = setInterval(() => {
-    injectToIframes()
-    iframeChecks++
-    if (iframeChecks >= 5) {
-      clearInterval(iframeTimer)
+
+  injectVueHookToIframes()
+
+  let iframeAppChecks = 0
+  const iframeAppCheckTimer = setInterval(() => {
+    injectVueHookToIframes()
+    iframeAppChecks++
+    if (iframeAppChecks >= 5) {
+      clearInterval(iframeAppCheckTimer)
     }
   }, 1000)
 }
