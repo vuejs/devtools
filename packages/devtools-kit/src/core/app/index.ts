@@ -1,6 +1,7 @@
-import { target } from '@vue/devtools-shared'
+import { isBrowser, target } from '@vue/devtools-shared'
 import slug from 'speakingurl'
 import { AppRecord, VueAppInstance } from '../../types'
+import { getRootElementsFromComponentInstance } from '../component/tree/el'
 
 const appRecordInfo = target.__VUE_DEVTOOLS_NEXT_APP_RECORD_INFO__ ??= {
   id: 0,
@@ -52,6 +53,7 @@ export function createAppRecord(app: VueAppInstance['appContext']['app'], types:
     appRecordInfo.id++
     const name = getAppRecordName(app, appRecordInfo.id.toString())
     const id = getAppRecordId(app, slug(name))
+    const [el] = getRootElementsFromComponentInstance(rootInstance) as /* type-compatible, this is returning VNode[] */ unknown as HTMLElement[]
 
     const record: AppRecord = {
       id,
@@ -60,6 +62,7 @@ export function createAppRecord(app: VueAppInstance['appContext']['app'], types:
       instanceMap: new Map(),
       perfGroupIds: new Map(),
       rootInstance,
+      iframe: isBrowser && document !== el?.ownerDocument ? el?.ownerDocument?.location?.pathname : undefined,
     }
 
     app.__VUE_DEVTOOLS_NEXT_APP_RECORD__ = record
