@@ -1,5 +1,5 @@
 import type { DevToolsV6PluginAPIHookKeys, DevToolsV6PluginAPIHookPayloads, OpenInEditorOptions } from '@vue/devtools-kit'
-import { devtools, DevToolsContextHookKeys, DevToolsMessagingHookKeys, devtoolsRouter, devtoolsRouterInfo, findReactivityRelationships, getActiveInspectors, getInspector, getInspectorActions, getInspectorInfo, getInspectorNodeActions, getRpcClient, getRpcServer, stringify, toggleClientConnected, updateDevToolsClientDetected, updateTimelineLayersState } from '@vue/devtools-kit'
+import { buildReactivityRelationships, devtools, DevToolsContextHookKeys, DevToolsMessagingHookKeys, devtoolsRouter, devtoolsRouterInfo, getActiveInspectors, getInspector, getInspectorActions, getInspectorInfo, getInspectorNodeActions, getRpcClient, getRpcServer, stringify, toggleClientConnected, updateDevToolsClientDetected, updateTimelineLayersState } from '@vue/devtools-kit'
 import { createHooks } from 'hookable'
 
 const hooks = createHooks()
@@ -66,9 +66,16 @@ export const functions = {
 
     const res = await devtools.ctx.api.getInspectorState(payload)
 
-    // @ts-expect-error skip type check
-    res.state = findReactivityRelationships(res.state)
     return stringify(res) as string
+  },
+  async buildReactivityRelationships(payload: { inspectorId: string, nodeId: string }) {
+    const inspector = getInspector(payload.inspectorId)
+    if (inspector)
+      inspector.selectedNodeId = payload.nodeId
+
+    const res = await devtools.ctx.api.getInspectorState(payload)
+    // @ts-expect-error skip type check
+    return stringify(buildReactivityRelationships(res.state))
   },
   async editInspectorState(payload: DevToolsV6PluginAPIHookPayloads[DevToolsV6PluginAPIHookKeys.EDIT_INSPECTOR_STATE]) {
     return await devtools.ctx.api.editInspectorState(payload)
@@ -175,10 +182,6 @@ export const functions = {
       broadcast.emit(DevToolsMessagingEvents.INSPECTOR_TREE_UPDATED, stringify(payload))
     })
     devtools.ctx.hooks.hook(DevToolsMessagingHookKeys.SEND_INSPECTOR_STATE_TO_CLIENT, (payload) => {
-      if (payload?.state?.state) {
-        // @ts-expect-error skip type check
-        payload.state.state = findReactivityRelationships(payload.state.state)
-      }
       broadcast.emit(DevToolsMessagingEvents.INSPECTOR_STATE_UPDATED, stringify(payload))
     })
     devtools.ctx.hooks.hook(DevToolsMessagingHookKeys.DEVTOOLS_STATE_UPDATED, () => {

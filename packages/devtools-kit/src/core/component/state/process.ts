@@ -1,7 +1,7 @@
 import type { VueAppInstance } from '../../../types'
 import type { InspectorState } from '../types'
 import { camelize } from '@vue/devtools-shared'
-import { ensurePropertyExists, returnError } from '../utils'
+import { ensurePropertyExists, getInstanceName, returnError } from '../utils'
 import { vueBuiltins } from './constants'
 import { isComputed, isReactive, isRef } from './is'
 import { getPropType, getSetupStateType, toRaw } from './util'
@@ -135,10 +135,10 @@ function getReactivityType(state) {
     return 'computed'
   }
   else if (isRef(state)) {
-    return 'reactive'
+    return 'ref'
   }
   else if (isReactive(state)) {
-    return 'ref'
+    return 'reactive'
   }
   return 'unknown'
 }
@@ -153,101 +153,130 @@ function getStateTypeAndName(info: ReturnType<typeof getSetupStateType>) {
   }
 }
 
-export function findReactivityRelationships(state: InspectorState[]) {
-  const refToIndexMap = new Map()
+export function buildReactivityRelationships(state: InspectorState[]) {
+  const dependencies = new Map()
 
-  state.forEach((item, index) => {
+  // 1. initial dependencies
+  state.forEach((item) => {
+    const deps = [...(item.deps || []), ...(item.subs || [])]
+    deps.forEach((dep) => {
+      if (!dependencies.has(dep.reference)) {
+        dependencies.set(dep.reference, {
+          type: dep.type,
+          data: dep.data,
+          id: crypto.randomUUID(),
+        })
+      }
+    })
+  })
+
+  // 2. add reactivity key to dependencies
+  state.forEach((item) => {
     if (item.reference) {
-      refToIndexMap.set(item.reference, index)
+      const dep = dependencies.get(item.reference)
+      if (dep) {
+        if (!['watch', 'render'].includes(dep?.type)) {
+          dep.data.key = item.key
+        }
+      }
     }
   })
 
-  return state.map((item) => {
-    const result: Record<string, unknown> = { ...item }
+  const relationship: {
+    id: string
+    from: string
+    to: string
+  }[] = []
 
-    if (item.deps && Array.isArray(item.deps)) {
-      result.deps = item.deps
-        .map((dep) => {
-          if (dep && dep.reference) {
-            const depIndex = refToIndexMap.get(dep.reference)
-            if (depIndex !== undefined) {
-              return {
-                index: depIndex,
-                key: state[depIndex].key,
-                type: dep.type,
-              }
-            }
-          }
-          return {
-            index: -1,
-            key: null,
-            type: dep.type,
-          }
-        })
-        .filter(Boolean)
-    }
+  const graphNodes: {
+    id: string
+    type: string
+    data: Record<string, unknown>
+  }[] = []
 
-    if (item.subs && Array.isArray(item.subs)) {
-      result.subs = item.subs
-        .map((sub) => {
-          if (sub && sub.reference) {
-            const subIndex = refToIndexMap.get(sub.reference)
-            if (subIndex !== undefined) {
-              return {
-                index: subIndex,
-                key: state[subIndex].key,
-                type: sub.type,
-              }
-            }
-          }
-          return {
-            index: -1,
-            key: null,
-            type: sub.type,
+  // 3. create graph nodes
+  for (const [_, value] of dependencies.entries()) {
+    graphNodes.push(value)
+  }
+
+  // 4. build relationship
+  state.forEach((item) => {
+    const ref = item.reference
+    const _i = dependencies.get(ref)
+    if (_i) {
+      if (item.subs) {
+        item.subs.forEach((sub) => {
+          const subRef = sub.reference
+          const subItem = dependencies.get(subRef)
+          if (subItem) {
+            relationship.push({
+              id: crypto.randomUUID(),
+              from: subItem.id,
+              to: _i.id,
+            })
           }
         })
-        .filter(Boolean)
+      }
+      if (item.deps) {
+        item.deps.forEach((dep) => {
+          const depRef = dep.reference
+          const depItem = dependencies.get(depRef)
+          if (depItem) {
+            relationship.push({
+              id: crypto.randomUUID(),
+              from: _i.id,
+              to: depItem.id,
+            })
+          }
+        })
+      }
     }
-
-    const res = {
-      ...item,
-      ...result,
-    }
-
-    delete res.reference
-
-    return res
   })
+  const deduplicatedRelationship = relationship.filter((item, index) => {
+    return index === relationship.findIndex(r =>
+      (r.from === item.from && r.to === item.to)
+      || (r.from === item.to && r.to === item.from),
+    )
+  })
+
+  return {
+    graphNodes,
+    relationship: deduplicatedRelationship,
+  }
 }
 
-function processReactivitySubs(state) {
-  const subs: {
+function processReactivityDependency(state, type: 'subs' | 'deps') {
+  const dependency: {
     type: string
     reference: unknown
+    data: Record<string, unknown>
   }[] = []
-  for (let sub = state.subs; sub !== undefined; sub = sub.nextSub) {
-    const reactivityType = getReactivityType(sub.sub)
-    subs.push({
-      type: reactivityType,
-      reference: sub.sub,
-    })
-  }
-  return subs
-}
 
-function processReactivityDeps(state) {
-  const deps: {
-    type: string
-    reference: unknown
-  }[] = []
-  for (let dep = state.deps; dep !== undefined; dep = dep.nextDep) {
-    const reactivityType = getReactivityType(dep.dep)
-    deps.push({
+  const itemKey = type === 'subs' ? 'sub' : 'dep'
+  const listKey = type === 'subs' ? 'subs' : 'deps'
+  const nextKey = type === 'subs' ? 'nextSub' : 'nextDep'
+
+  for (let _dependency = state[listKey]; _dependency !== undefined; _dependency = _dependency[nextKey]) {
+    const reactivityType = getReactivityType(_dependency[itemKey])
+    const data: Record<string, unknown> = {}
+    if (reactivityType === 'watch') {
+      data.cb = _dependency[itemKey].cb.toString()
+    }
+    else if (reactivityType === 'render') {
+      data.instanceName = getInstanceName(_dependency[itemKey]?.instance)
+    }
+    else {
+      data.value = _dependency[itemKey]?.value
+    }
+
+    dependency.push({
       type: reactivityType,
-      reference: dep.dep,
+      reference: _dependency[itemKey],
+      data,
     })
   }
-  return deps
+
+  return dependency
 }
 
 function processSetupState(instance: VueAppInstance) {
@@ -291,8 +320,8 @@ function processSetupState(instance: VueAppInstance) {
           isOtherType = false
 
         if (isState) {
-          subs = processReactivitySubs(instance.devtoolsRawSetupState[key])
-          deps = processReactivityDeps(instance.devtoolsRawSetupState[key])
+          subs = processReactivityDependency(instance.devtoolsRawSetupState[key], 'subs')
+          deps = processReactivityDependency(instance.devtoolsRawSetupState[key], 'deps')
         }
 
         result = {

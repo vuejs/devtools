@@ -48,3 +48,15 @@ export interface CustomInspectorNode {
 export interface CustomInspectorState {
   [key: string]: (StateBase | Omit<ComponentState, 'type'>)[]
 }
+
+export interface ReactivityRelationship {
+  id: string
+  from: string
+  to: string
+}
+
+export interface ReactivityGraphNode {
+  id: string
+  type: string
+  data: Record<string, unknown>
+}

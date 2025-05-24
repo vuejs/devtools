@@ -31,10 +31,12 @@ export interface InspectorState {
   subs?: {
     type: string
     reference: unknown
+    data: Record<string, unknown>
   }[]
   deps?: {
     type: string
     reference: unknown
+    data: Record<string, unknown>
   }[]
   reference?: unknown
 }

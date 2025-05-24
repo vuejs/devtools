@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CustomInspectorNode, CustomInspectorState } from '@vue/devtools-kit'
+import type { CustomInspectorNode, CustomInspectorState, ReactivityGraphNode, ReactivityRelationship } from '@vue/devtools-kit'
 import {
   DevToolsMessagingEvents,
   rpc,
@@ -19,7 +19,7 @@ import { useComponentHighlight } from '~/composables/component-highlight'
 import { createSelectedContext } from '~/composables/select'
 import { createExpandedContext } from '~/composables/toggle-expanded'
 import { filterInspectorState } from '~/utils'
-import ReactivityRelationship from './components/ReactivityRelationship.vue'
+import ReactivityRelationships from './components/ReactivityRelationships.vue'
 import ComponentRenderCode from './components/RenderCode.vue'
 
 const emit = defineEmits(['openInEditor', 'onInspectComponentStart', 'onInspectComponentEnd'])
@@ -40,7 +40,9 @@ const highlighter = useComponentHighlight()
 
 // reactivity relationships
 const inspectorState = ref<CustomInspectorState[]>([])
-const reactivityRelationshipsVisible = ref(false)
+const reactivityRelationshipsVisible = ref(true)
+const reactivityGraphNodes = ref<ReactivityGraphNode[]>([])
+const reactivityRelationships = ref<ReactivityRelationship[]>([])
 
 function toggleReactivityRelationships(state?: boolean) {
   reactivityRelationshipsVisible.value = state ?? !reactivityRelationshipsVisible.value
@@ -151,6 +153,17 @@ function normalizeComponentState(data: { state?: any[] }) {
   return res
 }
 
+function getReactivityRelationships(id: string) {
+  rpc.value.buildReactivityRelationships({ inspectorId, nodeId: id }).then((data) => {
+    const parsedData = parse(data as string)
+    console.log('parsedData', parsedData)
+    if (parsedData) {
+      reactivityGraphNodes.value = parsedData.graphNodes
+      reactivityRelationships.value = parsedData.relationship
+    }
+  })
+}
+
 function getComponentState(id: string) {
   rpc.value.getInspectorState({ inspectorId, nodeId: id }).then((data) => {
     const parsedData = parse(data!)
@@ -158,13 +171,13 @@ function getComponentState(id: string) {
       return
     activeComponentState.value = normalizeComponentState(parsedData)
     inspectorState.value = parsedData.state
-    console.log(parsedData.state)
     expandedStateNodes.value = Array.from({ length: Object.keys(activeComponentState.value).length }, (_, i) => `${i}`)
   })
 }
 
 watch(activeComponentId, (id) => {
   getComponentState(id)
+  getReactivityRelationships(id)
   if (componentRenderCodeVisible.value) {
     getComponentRenderCode()
   }
@@ -181,6 +194,7 @@ function onInspectorStateUpdated(_data: string) {
 
   // @ts-expect-error skip type check
   inspectorState.value = data.state.state
+  getReactivityRelationships(data.nodeId)
   activeComponentState.value = normalizeComponentState({ state: data.state.state })
 }
 
@@ -379,7 +393,7 @@ function closeComponentRenderCode() {
           <RootStateViewer class="no-scrollbar flex-1 overflow-scroll" :data="displayState" :node-id="activeComponentId" :inspector-id="inspectorId" expanded-state-id="component-state" />
         </div>
         <ComponentRenderCode v-if="componentRenderCodeVisible && componentRenderCode" :code="componentRenderCode" @close="closeComponentRenderCode" />
-        <ReactivityRelationship v-if="reactivityRelationshipsVisible" :state="inspectorState" @close="toggleReactivityRelationships(false)" />
+        <ReactivityRelationships v-if="reactivityRelationshipsVisible" :state="inspectorState" :nodes="reactivityGraphNodes" :relationships="reactivityRelationships" @close="toggleReactivityRelationships(false)" />
       </Pane>
     </Splitpanes>
 

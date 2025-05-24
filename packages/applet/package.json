@@ -37,6 +37,7 @@
     "perfect-debounce": "catalog:",
     "shiki": "catalog:",
     "splitpanes": "catalog:",
+    "vis-network": "catalog:",
     "vue-virtual-scroller": "catalog:"
   },
   "devDependencies": {
