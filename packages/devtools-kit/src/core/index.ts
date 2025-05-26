@@ -137,6 +137,7 @@ export function initDevTools() {
       get() {
         return _devtoolsHook
       },
+      configurable: true,
     })
   }
   else {

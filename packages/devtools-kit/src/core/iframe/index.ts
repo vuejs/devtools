@@ -42,6 +42,7 @@ export function detectIframeApp(target: Window | typeof globalThis, inIframe = f
       get() {
         return hook
       },
+      configurable: true,
     })
   }
 
