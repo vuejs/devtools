@@ -14,6 +14,12 @@
     "default_popup": "popups/not-found.html",
     "default_title": "Vue DevTools"
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@vue-devtools",
+      "strict_min_version": "58.0"
+    }
+  },
   "content_scripts": [
     {
       "js": [
