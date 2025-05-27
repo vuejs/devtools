@@ -53,4 +53,5 @@ export interface AppRecord {
   perfGroupIds: Map<string, { groupId: number, time: number }>
   rootInstance: VueAppInstance
   routerId?: string
+  iframe?: string
 }

@@ -220,10 +220,11 @@ const devtoolsState = useDevToolsState()
 const appRecords = computed(() => devtoolsState.appRecords.value.map(app => ({
   label: app.name + (app.version ? ` (${app.version})` : ''),
   value: app.id,
+  iframe: app.iframe,
 })))
 
 const normalizedAppRecords = computed(() => appRecords.value.map(app => ({
-  label: app.label,
+  label: app.label + (app.iframe ? ` (iframe: ${app.iframe})` : ''),
   id: app.value,
 })))
 
