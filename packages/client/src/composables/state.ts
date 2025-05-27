@@ -17,6 +17,7 @@ interface DevtoolsClientState {
   scale: number
   interactionCloseOnOutsideClick: boolean
   showPanel: boolean
+  highlightComponentTracking: boolean
   minimizePanelInteractive: number
   reduceMotion: boolean
 }
@@ -45,6 +46,7 @@ function clientStateFactory(): DevtoolsClientState {
     scale: 1,
     interactionCloseOnOutsideClick: false,
     showPanel: true,
+    highlightComponentTracking: false,
     minimizePanelInteractive: 5000,
     reduceMotion: false,
   }
