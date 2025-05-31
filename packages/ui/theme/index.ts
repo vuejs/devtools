@@ -1,2 +1,2 @@
-export * from './theme'
-export * from './uno.config'
+export * from './theme.ts'
+export * from './uno.config.ts'
