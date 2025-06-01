@@ -1,8 +1,9 @@
 import { defineConfig } from 'tsup'
 
-export default defineConfig({
+export default defineConfig([{
   entryPoints: [
     'src/*.ts',
+    '!src/devtools-panel.ts',
   ],
   esbuildOptions(options) {
     if (options.format === 'iife')
@@ -16,4 +17,17 @@ export default defineConfig({
   clean: true,
   format: ['iife'],
   minify: true,
-})
+}, {
+  entryPoints: [
+    'src/devtools-panel.ts',
+  ],
+  define: {
+    'process.env': JSON.stringify(process.env),
+    '__VUE_OPTIONS_API__': 'true',
+    '__VUE_PROD_DEVTOOLS__': 'true',
+  },
+  clean: true,
+  format: ['esm'],
+  minify: true,
+  noExternal: ['@vue/devtools-core', '@vue/devtools-kit', '@vue/devtools-shared'],
+}])
