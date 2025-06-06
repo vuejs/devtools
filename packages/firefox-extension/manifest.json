@@ -47,10 +47,11 @@
   "permissions": [
     "<all_urls>"
   ],
-  "version": "7.7.6",
+  "version": "7.7.7",
   "web_accessible_resources": [
     "dist/user-app.js",
     "client/devtools-panel.css",
     "client/devtools-panel.js"
-  ]
+  ],
+  "version_name": "7.7.7"
 }
