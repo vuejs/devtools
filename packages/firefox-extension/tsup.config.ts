@@ -29,10 +29,5 @@ export default defineConfig([{
   clean: true,
   format: ['esm'],
   minify: true,
-  esbuildOptions(options) {
-    options.chunkNames = 'chunks/[name]-[hash]'
-    options.assetNames = 'assets/[name]-[hash]'
-    options.metafile = true
-  },
   noExternal: ['@vue/devtools-core', '@vue/devtools-kit', '@vue/devtools-shared'],
 }])
