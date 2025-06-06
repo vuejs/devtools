@@ -80,6 +80,6 @@ function detect(win: Window) {
   }, 100)
 }
 
-if (document instanceof HTMLDocument) {
+if (document instanceof Document) {
   detect(window)
 }

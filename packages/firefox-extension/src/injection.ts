@@ -1,4 +1,4 @@
-if (document instanceof HTMLDocument) {
+if (document instanceof Document) {
   const content = chrome.runtime.getURL('dist/prepare.js')
   const script = document.createElement('script')
   script.src = content
