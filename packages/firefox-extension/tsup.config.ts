@@ -10,7 +10,9 @@ export default defineConfig([{
       options.outExtension = { '.js': '.js' }
   },
   define: {
-    'process.env': JSON.stringify(process.env),
+    'process.env': JSON.stringify({
+      NODE_ENV: 'production',
+    }),
     '__VUE_OPTIONS_API__': 'true',
     '__VUE_PROD_DEVTOOLS__': 'true',
   },
@@ -22,7 +24,9 @@ export default defineConfig([{
     'src/devtools-panel.ts',
   ],
   define: {
-    'process.env': JSON.stringify(process.env),
+    'process.env': JSON.stringify({
+      NODE_ENV: 'production',
+    }),
     '__VUE_OPTIONS_API__': 'true',
     '__VUE_PROD_DEVTOOLS__': 'true',
   },

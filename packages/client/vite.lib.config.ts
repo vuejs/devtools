@@ -6,7 +6,9 @@ import baseConfig from './vite.base.config'
 export default defineConfig(mergeConfig(baseConfig, {
 
   define: {
-    'process.env': process.env,
+    'process.env': JSON.stringify({
+      NODE_ENV: 'production',
+    }),
   },
   build: {
     emptyOutDir: false,
