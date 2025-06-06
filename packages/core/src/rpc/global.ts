@@ -30,6 +30,7 @@ function getDevToolsState() {
       name: item.name,
       version: item.version,
       routerId: item.routerId,
+      iframe: item.iframe,
     })),
     activeAppRecordId: state.activeAppRecordId,
     timelineLayersState: state.timelineLayersState,
