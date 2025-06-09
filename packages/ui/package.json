@@ -48,7 +48,7 @@
     "@vueuse/core": "catalog:",
     "@vueuse/integrations": "catalog:",
     "colord": "catalog:",
-    "focus-trap": "^7.6.4"
+    "focus-trap": "^7.6.5"
   },
   "devDependencies": {
     "@histoire/plugin-vue": "^0.17.17",
