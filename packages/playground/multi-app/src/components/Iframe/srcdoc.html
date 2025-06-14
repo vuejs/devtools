@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://play.vuejs.org/vue.runtime.esm-browser.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import { createApp, h, ref } from 'vue'
+
+      const app = createApp({
+        setup() {
+          const counter = ref(0)
+
+          return {
+            counter,
+          }
+        },
+
+        render(ctx) {
+          return h(
+            'div',
+            {
+              style: {
+                color: 'black',
+                display: 'flex',
+                'flex-wrap': 'wrap',
+                'justify-content': 'center',
+                'align-items': 'center',
+                height: '100vh',
+              },
+            },
+            h('h1', { style: { width: '100%' } }, 'App3 in iframe'),
+            h('count', `${ctx.counter}`),
+            h('div', h('button', { onClick: () => ctx.counter++ }, '++')),
+          )
+        },
+      }).mount('#app')
+    </script>
+  </body>
+</html>

@@ -18,11 +18,14 @@ import {
 import { createDevToolsHook, hook, subscribeDevToolsHook } from '../hook'
 import { DevToolsHooks } from '../types'
 import { createAppRecord, removeAppRecordId } from './app'
+import { detectIframeApp } from './iframe'
 import { callDevToolsPluginSetupFn, createComponentsDevToolsPlugin, registerDevToolsPlugin, removeRegisteredPluginApp, setupDevToolsPlugin } from './plugin'
 import { initPluginSettings } from './plugin/plugin-settings'
 import { normalizeRouterInfo } from './router'
 
 export function initDevTools() {
+  detectIframeApp(target)
+
   updateDevToolsState({
     vitePluginDetected: getDevToolsEnv().vitePluginDetected,
   })
@@ -136,6 +139,7 @@ export function initDevTools() {
       get() {
         return _devtoolsHook
       },
+      configurable: true,
     })
   }
   else {
