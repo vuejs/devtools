@@ -53,7 +53,6 @@ export function detectIframeApp(target: Window | typeof globalThis, inIframe = f
     try {
       iframe.__vdevtools__injected = true
       const inject = () => {
-        console.log('inject', iframe)
         try {
           iframe.contentWindow.__VUE_DEVTOOLS_IFRAME__ = iframe
           const script = iframe.contentDocument.createElement('script')
