@@ -1,6 +1,6 @@
 import type { DevToolsHook, RouterInfo } from './src/types'
 
-/* eslint-disable vars-on-top, no-var */
+/* eslint-disable vars-on-top */
 declare global {
   var __VUE_DEVTOOLS_GLOBAL_HOOK__: DevToolsHook
   var __VUE_DEVTOOLS_NEXT_APP_RECORD_INFO__: {
