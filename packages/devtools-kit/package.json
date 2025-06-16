@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@vue/devtools-shared": "workspace:^",
-    "birpc": "^2.3.0",
+    "birpc": "^2.4.0",
     "hookable": "^5.5.3",
     "mitt": "catalog:",
     "perfect-debounce": "catalog:",
