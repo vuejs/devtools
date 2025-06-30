@@ -51,7 +51,7 @@
     "@unocss/core": "^66.0.0",
     "@unocss/reset": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
-    "@vitejs/plugin-vue-jsx": "^4.1.2",
+    "@vitejs/plugin-vue-jsx": "^5.0.1",
     "dayjs": "^1.11.13",
     "floating-vue": "catalog:",
     "ohash": "^2.0.11",
