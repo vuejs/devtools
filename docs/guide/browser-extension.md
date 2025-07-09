@@ -69,7 +69,3 @@ This is the same as the Chrome extension, but you need to install it from the Ch
     </p>
   </a>
 </div>
-
-## Firefox
-
-We'll launch on the Firefox App Store once v7.x is stable.
