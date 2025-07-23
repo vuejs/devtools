@@ -7,7 +7,7 @@ catalog:
   '@iconify/json': ^2.2.349
   '@types/node': ^22.15.31
   '@unocss/reset': ^66.2.0
-  '@vitejs/plugin-vue': ^5.2.4
+  '@vitejs/plugin-vue': ^6.0.0
   '@vueuse/core': ^12.8.2
   '@vueuse/integrations': ^12.8.2
   colord: ^2.9.3
