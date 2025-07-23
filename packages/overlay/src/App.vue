@@ -84,12 +84,7 @@ const vueInspectorEnabled = computed(() => {
   return !!vueInspector.value
 })
 
-function toggleVueInspector() {
-  if (vueInspectorEnabled.value) {
-    vueInspector.value?.disable()
-    return
-  }
-
+function enableVueInspector() {
   vueInspector.value.enable()
 }
 
@@ -134,7 +129,7 @@ const { iframe, getIframe } = useIframe(clientUrl, async () => {
           class="vue-devtools__anchor-btn vue-devtools__panel-content vue-devtools__inspector-button"
           title="Toggle Component Inspector"
           :class="{ active: vueInspectorEnabled }"
-          @click="toggleVueInspector"
+          @click="enableVueInspector"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg" style="height: 1.1em; width: 1.1em; opacity:0.5;"
