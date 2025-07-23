@@ -14,6 +14,7 @@ This is a list of [supported editors](https://github.com/yyx990803/launch-editor
 
 ```ts
 import VueDevTools from 'vite-plugin-vue-devtools'
+
 export default defineConfig({
   plugins: [
     VueDevTools({

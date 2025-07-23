@@ -31,7 +31,7 @@ function toggleOption(key: any, v: any) {
           <div v-if="item.type === 'boolean'" class="flex justify-start">
             <VueSwitch
               :model-value="values[index]"
-              class="row-reverse flex hover:bg-active py1 pl2 pr1"
+              class="row-reverse flex py1 pl2 pr1 hover:bg-active"
               @update:model-value="(v: boolean) => toggleOption(index, v)"
             />
           </div>

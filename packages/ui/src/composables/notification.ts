@@ -3,9 +3,9 @@ import Notification from '../components/Notification.vue'
 
 // @unocss-include
 
-export type VueNotificationPlacement =
-  | 'top-left' | 'top-center' | 'top-right'
-  | 'bottom-left' | 'bottom-center' | 'bottom-right'
+export type VueNotificationPlacement
+  = | 'top-left' | 'top-center' | 'top-right'
+    | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
 export interface VueNotificationOptions {
   message: string

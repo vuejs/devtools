@@ -43,11 +43,11 @@ function onImageLoadError() {
       <div flex-auto />
 
       <div flex="~ gap2 wrap">
-        <div flex="~ col auto" min-w-40 p4 theme-card-lime @click="virtualRouter.push('/state')">
+        <div flex="~ col auto" min-w-40 theme-card-lime p4 @click="virtualRouter.push('/state')">
           <div i-carbon-tree-view-alt text-3xl />
           <code>State</code>
         </div>
-        <div v-if="state.timelineLayerIds?.length" flex="~ col auto" min-w-40 p4 theme-card-lime @click="virtualRouter.push('/timeline')">
+        <div v-if="state.timelineLayerIds?.length" flex="~ col auto" min-w-40 theme-card-lime p4 @click="virtualRouter.push('/timeline')">
           <div i-mdi:timeline-clock-outline text-3xl />
           <div>Timeline</div>
         </div>

@@ -70,7 +70,7 @@ useIntersectionObserver(
     class="$ui-z-max-override" h-full of-hidden bg-base
   >
     <div
-      sticky top-0 z-1 w-full p1 bg-base border="b base"
+      sticky top-0 z-1 w-full bg-base p1 border="b base"
     >
       <VueDropdown placement="left-start" :distance="dropdownDistance" :skidding="5" trigger="click" :shown="showDocking" class="w-full">
         <button
@@ -85,7 +85,7 @@ useIntersectionObserver(
         >
           <div i-logos-vue h-6 w-6 />
           <template v-if="sidebarExpanded">
-            <span text-lg font-600 text-base>
+            <span text-lg text-base font-600>
               DevTools
             </span>
             <div flex-auto />
@@ -116,7 +116,7 @@ useIntersectionObserver(
 
     <div
       :flex="`~ items-center gap-1 ${sidebarExpanded ? '' : 'none col'}`"
-      border="t base" sticky bottom-0 w-full p1 bg-base class="$ui-z-max-override"
+      border="t base" sticky bottom-0 w-full bg-base p1 class="$ui-z-max-override"
     >
       <VueDropdown
         v-if="overflowTabs.length && !sidebarScrollable && !sidebarExpanded" placement="left-end"
