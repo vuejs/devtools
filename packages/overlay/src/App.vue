@@ -85,7 +85,7 @@ const vueInspectorEnabled = computed(() => {
 })
 
 function toggleVueInspector() {
-  if(vueInspectorEnabled.value) {
+  if (vueInspectorEnabled.value) {
     vueInspector.value?.disable()
     return
   }
