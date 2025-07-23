@@ -28,11 +28,11 @@ const virtualRouter = useVirtualRouter()
         <!-- <div flex="~ col auto" min-w-40 p4 theme-card-lime>
           <div i-logos-pinia text-3xl />
         </div> -->
-        <div flex="~ col auto" min-w-40 p4 theme-card-lime @click="virtualRouter.push('/store')">
+        <div flex="~ col auto" min-w-40 theme-card-lime p4 @click="virtualRouter.push('/store')">
           <div i-carbon-tree-view-alt text-3xl />
           <code>Store</code>
         </div>
-        <div flex="~ col auto" min-w-40 p4 theme-card-lime @click="virtualRouter.push('/timeline')">
+        <div flex="~ col auto" min-w-40 theme-card-lime p4 @click="virtualRouter.push('/timeline')">
           <div i-mdi:timeline-clock-outline text-3xl />
           <div>Timeline</div>
         </div>

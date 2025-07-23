@@ -23,11 +23,11 @@ const { copy } = useCopy()
 <template>
   <div class="h-screen w-screen $ui-fcc">
     <AppConnecting>
-      <p class="pt-5 font-bold text-base">
+      <p class="pt-5 text-base font-bold">
         Waiting for connection...
       </p>
       <div v-if="props.local && props.network" class="mt-5">
-        <p class="text-center text-sm op80 text-base">
+        <p class="text-center text-sm text-base op80">
           Add one of the following to the top of your page 👇:
         </p>
         <div class="mt-3 $ui-fcc flex-row gap3">

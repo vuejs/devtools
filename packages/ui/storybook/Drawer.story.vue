@@ -16,7 +16,7 @@ const placement = ref<'left' | 'right' | 'top' | 'bottom'>('right')
         :options="['left', 'right', 'top', 'bottom']"
       />
     </template>
-    <div class="relative h-500px w-full container">
+    <div class="container relative h-500px w-full">
       <HstButton @click="modalShow = true">
         Show Drawer
       </HstButton>

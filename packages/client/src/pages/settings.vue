@@ -107,7 +107,7 @@ const minimizePanelInteractiveLabel = computed(() => {
           >
             <VueSwitch
               :model-value="!hiddenTabCategories.includes(name)"
-              class="row-reverse flex hover:bg-active py1 pl2 pr1"
+              class="row-reverse flex py1 pl2 pr1 hover:bg-active"
               @update:model-value="(v: boolean) => toggleTabCategory(name, v)"
             >
               <div flex="~ gap-2" flex-auto items-center justify-start>
@@ -119,7 +119,7 @@ const minimizePanelInteractiveLabel = computed(() => {
 
             <template v-for="tab of tabs" :key="tab.name">
               <VueSwitch
-                class="row-reverse n-primary flex hover:bg-active py1 pl2 pr1"
+                class="row-reverse n-primary flex py1 pl2 pr1 hover:bg-active"
                 :model-value="!hiddenTabs.includes(tab.name)"
                 :class="tab.hidden ? 'op35' : ''"
                 @update:model-value="(v: boolean) => toggleTab(tab.name, v)"
@@ -130,7 +130,7 @@ const minimizePanelInteractiveLabel = computed(() => {
                   <div flex-auto />
                   <template v-if="pinnedTabs.includes(tab.name)">
                     <button
-                      class="flex items-center hover:(bg-active op100) px1 py1 text-sm op65"
+                      class="flex items-center px1 py1 text-sm op65 hover:(bg-active op100)"
                       @click.stop="() => {
                         if (pinnedTabs.indexOf(tab.name) === 0) return
                         pinMove(tab.name, -1)
@@ -139,7 +139,7 @@ const minimizePanelInteractiveLabel = computed(() => {
                       <div class="i-carbon-caret-up" />
                     </button>
                     <button
-                      class="flex items-center hover:(bg-active op100) px1 py1 text-sm op65"
+                      class="flex items-center px1 py1 text-sm op65 hover:(bg-active op100)"
                       @click.stop="() => {
                         if (pinnedTabs.indexOf(tab.name) === pinnedTabs.length - 1) return
                         pinMove(tab.name, 1)
@@ -148,7 +148,7 @@ const minimizePanelInteractiveLabel = computed(() => {
                       <div class="i-carbon-caret-down" />
                     </button>
                   </template>
-                  <button class="flex items-center hover:(bg-active op100) px1 py1 text-sm op65" @click.stop="togglePinTab(tab.name)">
+                  <button class="flex items-center px1 py1 text-sm op65 hover:(bg-active op100)" @click.stop="togglePinTab(tab.name)">
                     <div :class="pinnedTabs.includes(tab.name) ? ' i-carbon-pin-filled rotate--45' : ' i-carbon-pin op45'" />
                   </button>
                 </div>
