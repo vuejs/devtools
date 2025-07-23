@@ -33,7 +33,7 @@
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
     "mitt": "catalog:",
-    "nanoid": "^5.1.0",
+    "nanoid": "^5.1.5",
     "pathe": "catalog:",
     "vite-hot-client": "catalog:"
   },
