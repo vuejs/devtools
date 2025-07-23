@@ -41,7 +41,7 @@
     "node": ">=v14.21.3"
   },
   "scripts": {
-    "build": "unbuild",
+    "build": "tsdown",
     "stub": "tsdown --watch"
   },
   "peerDependencies": {
