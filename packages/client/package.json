@@ -38,7 +38,7 @@
     "minimatch": "^10.0.1",
     "shiki": "catalog:",
     "splitpanes": "catalog:",
-    "vis-network": "^9.1.9",
+    "vis-network": "^10.0.1",
     "vite-hot-client": "catalog:",
     "vue-router": "catalog:",
     "vue-virtual-scroller": "catalog:",
