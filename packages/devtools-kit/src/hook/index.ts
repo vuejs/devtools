@@ -4,7 +4,7 @@ import { createHooks } from 'hookable'
 import { devtoolsState } from '../ctx'
 import { DevToolsEvent, DevToolsHook, DevToolsHooks, VueHooks } from '../types'
 
-export { VueHooks } from '../types'
+export type { VueHooks } from '../types'
 
 export const devtoolsHooks: Hookable<DevToolsEvent, HookKeys<DevToolsEvent>> = target.__VUE_DEVTOOLS_HOOK ??= createHooks<DevToolsEvent>()
 

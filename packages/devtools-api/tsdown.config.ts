@@ -1,10 +1,12 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   entryPoints: [
     'src/index.ts',
   ],
-  noExternal: ['speakingurl', 'superjson'],
+  external: [
+    'vue',
+  ],
   clean: true,
   format: ['esm', 'cjs'],
   dts: true,

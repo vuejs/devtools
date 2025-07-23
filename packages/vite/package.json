@@ -22,15 +22,13 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/vite.d.ts",
-      "import": "./dist/vite.mjs",
+      "import": "./dist/vite.js",
       "require": "./dist/vite.cjs"
     },
     "./*": "./*"
   },
   "main": "dist/vite.cjs",
   "module": "dist/vite.mjs",
-  "types": "dist/vite.d.ts",
   "files": [
     "*.d.ts",
     "./src/overlay.js",
@@ -44,7 +42,7 @@
   },
   "scripts": {
     "build": "unbuild",
-    "stub": "tsup --watch"
+    "stub": "tsdown --watch"
   },
   "peerDependencies": {
     "vite": "^3.1.0 || ^4.0.0-0 || ^5.0.0-0 || ^6.0.0-0 || ^7.0.0-0"

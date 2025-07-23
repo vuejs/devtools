@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   entryPoints: [
@@ -7,7 +7,10 @@ export default defineConfig({
   external: [
     'vue',
   ],
-  clean: true,
+  noExternal: [
+    'vite-hot-client',
+  ],
+  // clean: true,
   format: ['esm', 'cjs'],
   dts: true,
   shims: true,

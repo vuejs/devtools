@@ -21,9 +21,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
-    "prepare:type": "tsup --dts-only",
-    "stub": "tsup --watch --onSuccess 'tsup --dts-only'"
+    "build": "tsdown",
+    "prepare:type": "tsdown --dts-only",
+    "stub": "tsdown --watch --onSuccess 'tsdown --dts-only'"
   },
   "dependencies": {
     "rfdc": "^1.4.1"
