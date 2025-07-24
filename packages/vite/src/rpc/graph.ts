@@ -15,9 +15,15 @@ export function getGraphFunctions(ctx: RpcFunctionCtx) {
   })
   return {
     async getGraphModules(): Promise<ModuleInfo[]> {
-      const list = await rpc.list()
-      const modules = list?.modules || []
-
+      const meta = await rpc.getMetadata()
+      const modules = (
+        meta
+          ? await rpc.getModulesList({
+              vite: meta?.instances[0].vite,
+              env: meta?.instances[0].environments[0],
+            })
+          : null
+      ) || []
       return modules
     },
   }
