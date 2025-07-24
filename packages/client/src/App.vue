@@ -29,6 +29,7 @@ onRpcConnected(() => {
     rpc.value.emit('update-client-state', {
       minimizePanelInteractive: devtoolsClientState.value.minimizePanelInteractive,
       closeOnOutsideClick: devtoolsClientState.value.interactionCloseOnOutsideClick,
+      highlightComponentTracking: devtoolsClientState.value.highlightComponentTracking,
       showFloatingPanel: devtoolsClientState.value.showPanel,
       reduceMotion: devtoolsClientState.value.reduceMotion,
     })
