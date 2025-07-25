@@ -145,7 +145,7 @@ watchEffect(() => {
       <SideNav v-if="!isUtilityView" of-x-hidden of-y-auto @toggle-devtools-client-visible="toggleDevToolsClientVisible" />
       <Splitpanes
         class="h-full of-hidden"
-        @resize="splitScreenSize = $event.map((v) => v.size)"
+        @resize="splitScreenSize = $event.panes.map((v) => v.size)"
       >
         <Pane h-full class="of-auto!" min-size="10" :size="splitScreenSize[0]">
           <RouterView />
