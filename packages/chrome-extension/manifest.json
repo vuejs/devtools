@@ -9,7 +9,8 @@
     "default_title": "Vue DevTools"
   },
   "background": {
-    "service_worker": "dist/background.js"
+    "service_worker": "dist/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {

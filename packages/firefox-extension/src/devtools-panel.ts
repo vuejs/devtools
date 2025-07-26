@@ -1,4 +1,3 @@
-// import { Bridge } from '../../core/src/bridge'
 import { functions, onRpcConnected } from '@vue/devtools-core'
 import { createRpcClient } from '@vue/devtools-kit'
 import { disconnectDevToolsClient, initDevTools, reloadDevToolsClient } from '../client/devtools-panel'
@@ -42,6 +41,7 @@ function injectScript(scriptName: string, cb: () => void) {
     (function() {
       var script = document.constructor.prototype.createElement.call(document, 'script');
       script.src = "${scriptName}";
+      script.type = "module";
       document.documentElement.appendChild(script);
       script.parentNode.removeChild(script);
     })()

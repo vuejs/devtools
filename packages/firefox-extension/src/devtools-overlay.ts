@@ -4,6 +4,7 @@ if (document instanceof HTMLDocument) {
   // create detector script
   const detector = document.createElement('script')
   detector.src = chrome.runtime.getURL('dist/detector.js')
+  detector.type = 'module'
   detector.onload = () => {
     detector.parentNode!.removeChild(detector)
   }

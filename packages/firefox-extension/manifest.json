@@ -3,7 +3,8 @@
     "persistent": true,
     "scripts": [
       "dist/background.js"
-    ]
+    ],
+    "type": "module"
   },
   "browser_action": {
     "default_icon": {

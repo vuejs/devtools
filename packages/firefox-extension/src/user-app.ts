@@ -10,7 +10,5 @@ createRpcServer(functions, {
 function handshake(e: MessageEvent) {
   if (e.data.source === 'proxy->server' && e.data.payload.event === 'init') {
     window.removeEventListener('message', handshake)
-
-    const listeners: ((event: unknown) => void)[] = []
   }
 }
