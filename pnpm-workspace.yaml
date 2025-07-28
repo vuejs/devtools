@@ -4,12 +4,12 @@ packages:
   - packages/playground/**
 
 catalog:
-  '@iconify/json': ^2.2.362
+  '@iconify/json': ^2.2.363
   '@types/node': ^24.1.0
   '@unocss/reset': ^66.3.3
-  '@vitejs/plugin-vue': ^6.0.0
-  '@vueuse/core': ^13.5.0
-  '@vueuse/integrations': ^13.5.0
+  '@vitejs/plugin-vue': ^6.0.1
+  '@vueuse/core': ^13.6.0
+  '@vueuse/integrations': ^13.6.0
   colord: ^2.9.3
   execa: ^9.6.0
   floating-vue: 5.2.2
@@ -24,7 +24,7 @@ catalog:
   typescript: ^5.8.3
   unocss: ^66.3.3
   unplugin-auto-import: ^19.3.0
-  vite: ^7.0.5
+  vite: ^7.0.6
   vite-hot-client: ^2.1.0
   vite-plugin-dts: ^4.5.4
   vite-plugin-inspect: ^11.3.0
