@@ -73,7 +73,7 @@
     "gen:vue-apis": "tsx ./scripts/vue-api-manifest.ts"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.18.0",
+    "@antfu/eslint-config": "^4.19.0",
     "@antfu/ni": "^25.0.0",
     "@arethetypeswrong/cli": "^0.18.2",
     "@clack/prompts": "^0.11.0",
@@ -91,7 +91,7 @@
     "bumpp": "^10.2.0",
     "cross-env": "^7.0.3",
     "degit": "^2.8.4",
-    "eslint": "^9.31.0",
+    "eslint": "^9.32.0",
     "eslint-plugin-format": "^1.0.1",
     "eslint-vitest-rule-tester": "^2.2.0",
     "execa": "^9.6.0",
@@ -114,9 +114,9 @@
     "tsx": "^4.20.3",
     "turbo": "^2.5.5",
     "typescript": "^5.8.3",
-    "unbuild": "3.5.0",
+    "unbuild": "3.6.0",
     "unocss": "^66.3.3",
-    "vite": "^7.0.5",
+    "vite": "^7.0.6",
     "vitest": "^3.2.4",
     "vue": "^3.5.18"
   },
