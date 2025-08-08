@@ -12,7 +12,7 @@
     "dev": "vue-cli-service serve"
   },
   "dependencies": {
-    "core-js": "^3.44.0",
+    "core-js": "^3.45.0",
     "vue": "catalog:"
   },
   "devDependencies": {
@@ -24,7 +24,7 @@
     "@vue/devtools": "workspace:*",
     "@vue/devtools-api": "workspace:*",
     "eslint": "^9.32.0",
-    "eslint-plugin-vue": "^10.3.0"
+    "eslint-plugin-vue": "^10.4.0"
   },
   "eslintConfig": {
     "env": {

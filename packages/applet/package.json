@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
-    "unplugin-vue": "^7.0.0",
+    "unplugin-vue": "^7.0.1",
     "vite-plugin-dts": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"

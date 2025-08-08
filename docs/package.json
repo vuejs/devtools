@@ -11,7 +11,7 @@
     "@unocss/reset": "catalog:",
     "@vueuse/core": "catalog:",
     "unplugin-vue-components": "^28.8.0",
-    "vitepress": "1.6.3",
+    "vitepress": "1.6.4",
     "vue": "catalog:"
   }
 }
