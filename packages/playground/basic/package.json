@@ -9,7 +9,7 @@
   "dependencies": {
     "@tanstack/vue-query": "^5.83.1",
     "@vueuse/core": "catalog:",
-    "element-plus": "^2.10.5",
+    "element-plus": "^2.10.6",
     "pinia": "catalog:",
     "unplugin-auto-import": "catalog:",
     "vee-validate": "^4.15.1",
