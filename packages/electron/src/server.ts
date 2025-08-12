@@ -22,6 +22,7 @@ export function init() {
     cors: {
       origin: true,
     },
+    maxHttpBufferSize: 1e8,
   })
 
   io.on('connection', (socket) => {
