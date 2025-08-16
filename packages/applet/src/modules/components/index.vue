@@ -8,10 +8,10 @@ import {
 import { parse } from '@vue/devtools-kit'
 import { isInChromePanel, isInSeparateWindow, sortByKey } from '@vue/devtools-shared'
 import { vTooltip, VueButton, VueDialog, VueInput } from '@vue/devtools-ui'
-import { useElementSize, useEventListener, useToggle, watchDebounced } from '@vueuse/core'
+import { onKeyStroke, useElementSize, useEventListener, useToggle, watchDebounced } from '@vueuse/core'
 import { flatten, groupBy } from 'lodash-es'
 import { Pane, Splitpanes } from 'splitpanes'
-import { computed, nextTick, onUnmounted, ref, watch, watchEffect } from 'vue'
+import { computed, onUnmounted, ref, watch, watchEffect } from 'vue'
 import SelectiveList from '~/components/basic/SelectiveList.vue'
 import RootStateViewer from '~/components/state/RootStateViewer.vue'
 import ComponentTree from '~/components/tree/TreeViewer.vue'
@@ -279,38 +279,11 @@ useEventListener('keydown', (event) => {
   }
 })
 
-useEventListener('keydown', (event) => {
-  if (!activeComponentId.value)
-    return
-
-  nextTick(() => {
-    switch (event.key) {
-      case 'ArrowRight':{
-        handleArrowRight()
-        break
-      }
-      case 'ArrowLeft': {
-        handleArrowLeft()
-        break
-      }
-      case 'ArrowDown': {
-        handleArrowDown()
-        event.preventDefault()
-        return false
-      }
-      case 'ArrowUp': {
-        handleArrowUp()
-        event.preventDefault()
-        break
-      }
-      case ' ':
-      case 'Enter': {
-        handleEnter()
-        break
-      }
-    }
-  })
-})
+onKeyStroke('ArrowRight', handleArrowRight)
+onKeyStroke('ArrowLeft', handleArrowLeft)
+onKeyStroke('ArrowDown', handleArrowDown)
+onKeyStroke('ArrowUp', handleArrowUp)
+onKeyStroke([' ', 'Enter'], handleEnter)
 
 function handleArrowRight() {
   const isPresentInExpandedNodes = expandedTreeNodes.value.includes(activeComponentId.value)
