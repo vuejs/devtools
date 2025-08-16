@@ -279,28 +279,20 @@ useEventListener('keydown', (event) => {
   }
 })
 
-onKeyStroke('ArrowRight', handleArrowRight)
-onKeyStroke('ArrowLeft', handleArrowLeft)
-onKeyStroke('ArrowDown', handleArrowDown)
-onKeyStroke('ArrowUp', handleArrowUp)
-onKeyStroke([' ', 'Enter'], handleEnter)
-
-function handleArrowRight() {
+onKeyStroke('ArrowRight', () => {
   const isPresentInExpandedNodes = expandedTreeNodes.value.includes(activeComponentId.value)
   const hasChildren = flattenedTreeNodes.value.find(item => item.id === activeComponentId.value)?.children?.length
 
   if (!isPresentInExpandedNodes && hasChildren) {
     expandedTreeNodes.value.push(activeComponentId.value)
   }
-}
-
-function handleArrowLeft() {
+})
+onKeyStroke('ArrowLeft', () => {
   if (expandedTreeNodes.value.includes(activeComponentId.value)) {
     expandedTreeNodes.value.splice(expandedTreeNodes.value.indexOf(activeComponentId.value), 1)
   }
-}
-
-function handleArrowDown() {
+})
+onKeyStroke('ArrowDown', () => {
   const activeComponentIdIndex = flattenedTreeNodesIds.value.indexOf(activeComponentId.value)
   const isActiveComponentExpanded = expandedTreeNodes.value.includes(activeComponentId.value)
 
@@ -313,9 +305,9 @@ function handleArrowDown() {
   else {
     activeComponentId.value = getNearestNextNode()
   }
-}
+})
 
-function handleArrowUp() {
+onKeyStroke('ArrowUp', () => {
   const activeId = activeComponentId.value
   const list = treeNodeLinkedList.value.find(item => item.includes(activeId))
   if (!list)
@@ -329,9 +321,9 @@ function handleArrowUp() {
   if (element) {
     activeComponentId.value = element.id
   }
-}
+})
 
-function handleEnter() {
+onKeyStroke([' ', 'Enter'], () => {
   const node = flattenedTreeNodes.value.find(item => item.id === activeComponentId.value)
   if (!node?.children?.length)
     return
@@ -340,7 +332,7 @@ function handleEnter() {
   if (index === -1)
     expandedTreeNodes.value.push(activeComponentId.value)
   else expandedTreeNodes.value.splice(index, 1)
-}
+})
 
 function getNearestPreviousNode(parentId: string) {
   const parentNode = flattenedTreeNodes.value.find(item => item.id === parentId)
