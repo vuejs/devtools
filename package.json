@@ -89,7 +89,7 @@
     "@vue/test-utils": "^2.4.6",
     "archiver": "^7.0.1",
     "bumpp": "^10.2.3",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.0.0",
     "degit": "^2.8.4",
     "eslint": "^9.33.0",
     "eslint-plugin-format": "^1.0.1",
