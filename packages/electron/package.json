@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "catalog:",
-    "tsx": "^4.20.4",
+    "tsx": "^4.20.5",
     "unbuild": "3.6.1",
     "vue": "catalog:"
   }
