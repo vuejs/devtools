@@ -40,8 +40,8 @@ catalogs:
       specifier: ^2.0.3
       version: 2.0.3
     perfect-debounce:
-      specifier: ^1.0.0
-      version: 1.0.0
+      specifier: ^2.0.0
+      version: 2.0.0
     pinia:
       specifier: ^3.0.3
       version: 3.0.3
@@ -268,7 +268,7 @@ importers:
         version: 4.17.21
       perfect-debounce:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 2.0.0
       shiki:
         specifier: 'catalog:'
         version: 3.12.2
@@ -488,7 +488,7 @@ importers:
         version: 3.0.1
       perfect-debounce:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 2.0.0
       speakingurl:
         specifier: ^14.0.1
         version: 14.0.1
@@ -7195,6 +7195,9 @@ packages:
 
   perfect-debounce@1.0.0:
     resolution: {integrity: sha512-xCy9V055GLEqoFaHoC1SoLIaLmWctgCUaBaWxDZ7/Zx4CTyX7cJQLJOok/orfjZAh9kEYpjJa4d0KcJmCbctZA==}
+
+  perfect-debounce@2.0.0:
+    resolution: {integrity: sha512-fkEH/OBiKrqqI/yIgjR92lMfs2K8105zt/VT6+7eTjNwisrsh47CeIED9z58zI7DfKdH3uHAn25ziRZn3kgAow==}
 
   picocolors@0.2.1:
     resolution: {integrity: sha512-cMlDqaLEqfSaW8Z7N5Jw+lyIW869EzT73/F5lhtY9cLGoVxSXznfgfXMO0Z5K0o0Q2TkTXq+0KFsdnSe3jDViA==}
@@ -16712,6 +16715,8 @@ snapshots:
   pend@1.2.0: {}
 
   perfect-debounce@1.0.0: {}
+
+  perfect-debounce@2.0.0: {}
 
   picocolors@0.2.1: {}
 

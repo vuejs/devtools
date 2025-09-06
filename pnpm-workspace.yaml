@@ -15,7 +15,7 @@ catalog:
   floating-vue: 5.2.2
   mitt: ^3.0.1
   pathe: ^2.0.3
-  perfect-debounce: ^1.0.0
+  perfect-debounce: ^2.0.0
   pinia: ^3.0.3
   sass-embedded: ^1.92.1
   serve: ^14.2.5
