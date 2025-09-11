@@ -61,7 +61,7 @@
     "unocss": "catalog:",
     "unplugin": "^2.3.10",
     "unplugin-auto-import": "catalog:",
-    "unplugin-vue-components": "^28.8.0",
+    "unplugin-vue-components": "^29.0.0",
     "vite": "catalog:",
     "vue": "catalog:"
   }
