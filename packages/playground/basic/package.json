@@ -7,7 +7,7 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@tanstack/vue-query": "^5.87.1",
+    "@tanstack/vue-query": "^5.87.4",
     "@vueuse/core": "catalog:",
     "element-plus": "^2.11.2",
     "pinia": "catalog:",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
-    "@tanstack/vue-query-devtools": "^5.87.1",
+    "@tanstack/vue-query-devtools": "^5.87.4",
     "@vitejs/plugin-vue": "catalog:",
     "@vue/devtools": "workspace:^",
     "sass-embedded": "catalog:",
