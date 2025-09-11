@@ -1,10 +1,18 @@
+import os from 'node:os'
 import { functions } from '@vue/devtools-core'
 import { createRpcClient, setElectronClientContext } from '@vue/devtools-kit'
-import ip from 'ip'
 import io from 'socket.io-client/dist/socket.io.js'
 import { createConnectionApp, initDevTools } from '../client/devtools-panel'
 
 const port = window.process.env.PORT || 8098
+
+function address() {
+  return Object.values(os.networkInterfaces()).map((addresses) => {
+    return addresses?.filter((details) => {
+      return !details.internal && details.family === 'IPv4'
+    })
+  }).flat()[0]
+}
 
 function init() {
   const localhost = `http://localhost:${port}`
@@ -13,7 +21,7 @@ function init() {
 
   const app = createConnectionApp('#app', {
     local: localhost,
-    network: `http://${ip.address()}:${port}`,
+    network: `http://${address()}:${port}`,
   })
 
   socket.on('vue-devtools:init', () => {
