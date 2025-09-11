@@ -209,7 +209,7 @@ onUnmounted(() => {
               <VueInput v-model="filterTreeKey" :placeholder="inspectorState.treeFilterPlaceholder" />
               <div v-if="actions?.length" class="flex items-center gap-2 px-1">
                 <div v-for="(action, index) in actions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callAction(index)">
-                  <VueIcIcon :name="`baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer op70 text-base hover:op100 />
+                  <VueIcIcon :name="`baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
                 </div>
               </div>
             </div>
@@ -227,7 +227,7 @@ onUnmounted(() => {
               <VueInput v-model="filterStateKey" :placeholder="inspectorState.stateFilterPlaceholder" />
               <div v-if="nodeActions?.length" class="flex items-center gap-2 px-1">
                 <div v-for="(action, index) in nodeActions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callNodeAction(index)">
-                  <VueIcIcon :name="`baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer op70 text-base hover:op100 />
+                  <VueIcIcon :name="`baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
                 </div>
               </div>
             </div>

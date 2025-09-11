@@ -18,7 +18,7 @@ const modalShowInline = ref(false)
       </Dialog>
     </Variant>
     <Variant title="inline">
-      <div class="h300px w-full container">
+      <div class="container h300px w-full">
         <HstButton @click="modalShowInline = true">
           Show Dialog
         </HstButton>

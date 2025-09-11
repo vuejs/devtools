@@ -8,7 +8,8 @@
   ],
   "ignoreDeps": [
     "node",
-    "nanoid"
+    "nanoid",
+    "vite-plugin-inspect"
   ],
   "labels": [
     "dependencies"
@@ -30,6 +31,8 @@
   "pin": {
     "enabled": false
   },
-  "rangeStrategy": "bump",
-  "postUpdateOptions": ["pnpmDedupe"]
+  "postUpdateOptions": [
+    "pnpmDedupe"
+  ],
+  "rangeStrategy": "bump"
 }

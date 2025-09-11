@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-shared",
   "type": "module",
-  "version": "7.7.2",
+  "version": "8.0.1",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
@@ -21,9 +21,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
-    "prepare:type": "tsup --dts-only",
-    "stub": "tsup --watch --onSuccess 'tsup --dts-only'"
+    "build": "tsdown",
+    "prepare:type": "tsdown --dts-only",
+    "stub": "tsdown --watch --onSuccess 'tsdown --dts-only'"
   },
   "dependencies": {
     "rfdc": "^1.4.1"

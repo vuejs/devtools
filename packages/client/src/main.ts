@@ -7,17 +7,6 @@ import { getViteClient } from 'vite-hot-client'
 import { createApp } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import WaitForConnection from '~/components/WaitForConnection.vue'
-import Assets from '~/pages/assets.vue'
-import Components from '~/pages/components.vue'
-import CustomInspectorTabView from '~/pages/custom-inspector-tab-view.vue'
-import CustomTabView from '~/pages/custom-tab-view.vue'
-import Graph from '~/pages/graph.vue'
-import Overview from '~/pages/overview.vue'
-import Pages from '~/pages/pages.vue'
-import PiniaPage from '~/pages/pinia.vue'
-import RouterPage from '~/pages/router.vue'
-import Settings from '~/pages/settings.vue'
-import Timeline from '~/pages/timeline.vue'
 import App from './App.vue'
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
@@ -26,18 +15,18 @@ import '@vue/devtools-ui/style.css'
 import '~/assets/styles/main.css'
 
 const routes = [
-  { path: '/', redirect: '/overview' },
-  { path: '/overview', component: Overview },
-  { path: '/components', component: Components },
-  { path: '/pinia', component: PiniaPage },
-  { path: '/router', component: RouterPage },
-  { path: '/pages', component: Pages },
-  { path: '/timeline', component: Timeline },
-  { path: '/assets', component: Assets },
-  { path: '/graph', component: Graph },
-  { path: '/settings', component: Settings },
-  { path: `/${CUSTOM_TAB_VIEW}/:name`, component: CustomTabView },
-  { path: `/${CUSTOM_INSPECTOR_TAB_VIEW}/:name`, component: CustomInspectorTabView },
+  { path: '/', redirect: '/components' },
+  { path: '/overview', component: () => import('~/pages/overview.vue') },
+  { path: '/components', component: () => import('~/pages/components.vue') },
+  { path: '/pinia', component: () => import('~/pages/pinia.vue') },
+  { path: '/router', component: () => import('~/pages/router.vue') },
+  { path: '/pages', component: () => import('~/pages/pages.vue') },
+  { path: '/timeline', component: () => import('~/pages/timeline.vue') },
+  { path: '/assets', component: () => import('~/pages/assets.vue') },
+  { path: '/graph', component: () => import('~/pages/graph.vue') },
+  { path: '/settings', component: () => import('~/pages/settings.vue') },
+  { path: `/${CUSTOM_TAB_VIEW}/:name`, component: () => import('~/pages/custom-tab-view.vue') },
+  { path: `/${CUSTOM_INSPECTOR_TAB_VIEW}/:name`, component: () => import('~/pages/custom-inspector-tab-view.vue') },
 ]
 
 const router = createRouter({

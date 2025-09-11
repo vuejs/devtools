@@ -76,15 +76,15 @@ onUnmounted(() => {
 
       <!-- Main Grid -->
       <div flex="~ gap2 wrap">
-        <div p4 theme-card-green flex="~ col auto">
+        <div theme-card-green p4 flex="~ col auto">
           <div i-logos-vue text-3xl />
           <code>v{{ vueVersion }}</code>
         </div>
-        <RouterLink flex="~ col auto" to="/pages" replace min-w-40 p4 theme-card-lime>
+        <RouterLink flex="~ col auto" to="/pages" replace min-w-40 theme-card-lime p4>
           <div i-carbon-tree-view-alt text-3xl />
           <div>{{ pageCount }} pages</div>
         </RouterLink>
-        <RouterLink v-if="componentCount" flex="~ col auto" to="/components" replace min-w-40 p4 theme-card-lime>
+        <RouterLink v-if="componentCount" flex="~ col auto" to="/components" replace min-w-40 theme-card-lime p4>
           <div i-carbon-assembly-cluster text-3xl />
           <div>{{ componentCount }} components</div>
         </RouterLink>

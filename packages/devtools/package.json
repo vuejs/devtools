@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools",
   "type": "module",
-  "version": "7.7.2",
+  "version": "8.0.1",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
@@ -29,9 +29,9 @@
     "hook.d.ts"
   ],
   "scripts": {
-    "build": "tsup --clean",
-    "prepare:type": "tsup --dts-only",
-    "stub": "tsup --watch --onSuccess 'tsup --dts-only'"
+    "build": "tsdown --clean",
+    "prepare:type": "tsdown --dts-only",
+    "stub": "tsdown --watch --onSuccess 'tsdown --dts-only'"
   },
   "dependencies": {
     "@vue/devtools-electron": "workspace:^",

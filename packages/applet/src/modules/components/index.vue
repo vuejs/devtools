@@ -8,7 +8,7 @@ import {
 import { parse } from '@vue/devtools-kit'
 import { isInChromePanel, isInSeparateWindow, sortByKey } from '@vue/devtools-shared'
 import { vTooltip, VueButton, VueDialog, VueInput } from '@vue/devtools-ui'
-import { useElementSize, useEventListener, useToggle, watchDebounced } from '@vueuse/core'
+import { onKeyStroke, useElementSize, useEventListener, useToggle, watchDebounced } from '@vueuse/core'
 import { flatten, groupBy } from 'lodash-es'
 import { Pane, Splitpanes } from 'splitpanes'
 import { computed, onUnmounted, ref, watch, watchEffect } from 'vue'
@@ -220,10 +220,11 @@ const devtoolsState = useDevToolsState()
 const appRecords = computed(() => devtoolsState.appRecords.value.map(app => ({
   label: app.name + (app.version ? ` (${app.version})` : ''),
   value: app.id,
+  iframe: app.iframe,
 })))
 
 const normalizedAppRecords = computed(() => appRecords.value.map(app => ({
-  label: app.label,
+  label: app.label + (app.iframe ? ` (iframe: ${app.iframe})` : ''),
   id: app.value,
 })))
 
@@ -278,6 +279,105 @@ useEventListener('keydown', (event) => {
     cancelInspectComponentInspector()
   }
 })
+
+onKeyStroke('ArrowRight', () => {
+  const isPresentInExpandedNodes = expandedTreeNodes.value.includes(activeComponentId.value)
+  const hasChildren = flattenedTreeNodes.value.find(item => item.id === activeComponentId.value)?.children?.length
+
+  if (!isPresentInExpandedNodes && hasChildren) {
+    expandedTreeNodes.value.push(activeComponentId.value)
+  }
+})
+onKeyStroke('ArrowLeft', () => {
+  if (expandedTreeNodes.value.includes(activeComponentId.value)) {
+    expandedTreeNodes.value.splice(expandedTreeNodes.value.indexOf(activeComponentId.value), 1)
+  }
+})
+onKeyStroke('ArrowDown', () => {
+  const activeComponentIdIndex = flattenedTreeNodesIds.value.indexOf(activeComponentId.value)
+  const isActiveComponentExpanded = expandedTreeNodes.value.includes(activeComponentId.value)
+
+  if (isActiveComponentExpanded && activeComponentIdIndex >= 0 && activeComponentIdIndex < flattenedTreeNodesIds.value.length - 1) {
+    activeComponentId.value = flattenedTreeNodesIds.value[activeComponentIdIndex + 1]
+  }
+  else if (activeComponentIdIndex === 0) {
+    return false
+  }
+  else {
+    activeComponentId.value = getNearestNextNode()
+  }
+})
+
+onKeyStroke('ArrowUp', () => {
+  const activeId = activeComponentId.value
+  const list = treeNodeLinkedList.value.find(item => item.includes(activeId))
+  if (!list)
+    return
+
+  const activeItemListIndex = list.indexOf(activeId)
+  const activeItemParentIndex = activeItemListIndex > 0 ? activeItemListIndex - 1 : 0
+  const parentId = list[activeItemParentIndex]
+
+  const element = getNearestPreviousNode(parentId)
+  if (element) {
+    activeComponentId.value = element.id
+  }
+})
+
+onKeyStroke([' ', 'Enter'], () => {
+  const node = flattenedTreeNodes.value.find(item => item.id === activeComponentId.value)
+  if (!node?.children?.length)
+    return
+
+  const index = expandedTreeNodes.value.indexOf(activeComponentId.value)
+  if (index === -1)
+    expandedTreeNodes.value.push(activeComponentId.value)
+  else expandedTreeNodes.value.splice(index, 1)
+})
+
+function getNearestPreviousNode(parentId: string) {
+  const parentNode = flattenedTreeNodes.value.find(item => item.id === parentId)
+  if (!parentNode || !parentNode.children?.length)
+    return parentNode
+
+  if (parentNode.children.length === 1)
+    return parentNode
+
+  const indexInSiblings = parentNode?.children?.findIndex(item => item.id === activeComponentId.value)
+
+  if (indexInSiblings <= 0)
+    return parentNode
+
+  let prevSiblingNode = parentNode.children[indexInSiblings - 1]
+
+  while (prevSiblingNode
+    && expandedTreeNodes.value.includes(prevSiblingNode.id)
+    && prevSiblingNode.children?.length) {
+    const lastChildNode = prevSiblingNode.children[prevSiblingNode.children.length - 1]
+    const next = getNearestPreviousNode(lastChildNode.id)
+
+    if (!next || next.id === prevSiblingNode.id)
+      break
+    prevSiblingNode = next
+  }
+
+  return prevSiblingNode || parentNode
+}
+
+function getNearestNextNode() {
+  const linkedListTree = treeNodeLinkedList.value
+  const activeItemListIndex = [...linkedListTree].findLastIndex(arr => arr?.includes(activeComponentId.value))
+
+  if (activeItemListIndex === -1)
+    return activeComponentId.value
+
+  const arr1 = linkedListTree[activeItemListIndex]
+  const arr2 = linkedListTree[activeItemListIndex + 1]
+
+  const cloesestNodeIndex = arr2?.findIndex((val, index) => val !== arr1[index]) ?? -1
+
+  return cloesestNodeIndex !== -1 ? arr2[cloesestNodeIndex] : activeComponentId.value
+}
 
 function scrollToComponent() {
   rpc.value.scrollToComponent(activeComponentId.value)

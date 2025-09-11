@@ -28,7 +28,7 @@ function onToggle(e) {
 
 <template>
   <details :open="open" @toggle="onToggle">
-    <summary class="cursor-pointer select-none hover:bg-active p4" :class="collapse ? '' : 'pointer-events-none'">
+    <summary class="cursor-pointer select-none p4 hover:bg-active" :class="collapse ? '' : 'pointer-events-none'">
       <IconTitle :icon="icon" :text="text" text-xl transition :class="open ? 'op100' : 'op60'">
         <div>
           <div text-base>
@@ -48,7 +48,7 @@ function onToggle(e) {
           v-if="collapse"
           icon="i-carbon-chevron-down"
           class="chevron"
-          cursor-pointer place-self-start op75 transition duration-500 text-base
+          cursor-pointer place-self-start text-base op75 transition duration-500
         />
       </IconTitle>
     </summary>

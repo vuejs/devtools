@@ -18,11 +18,14 @@ import {
 import { createDevToolsHook, hook, subscribeDevToolsHook } from '../hook'
 import { DevToolsHooks } from '../types'
 import { createAppRecord, removeAppRecordId } from './app'
+import { detectIframeApp } from './iframe'
 import { callDevToolsPluginSetupFn, createComponentsDevToolsPlugin, registerDevToolsPlugin, removeRegisteredPluginApp, setupDevToolsPlugin } from './plugin'
 import { initPluginSettings } from './plugin/plugin-settings'
 import { normalizeRouterInfo } from './router'
 
 export function initDevTools() {
+  detectIframeApp(target)
+
   updateDevToolsState({
     vitePluginDetected: getDevToolsEnv().vitePluginDetected,
   })
@@ -54,8 +57,10 @@ export function initDevTools() {
 
     console.log('%cVue DevTools v7 detected in your Vue2 project. v7 only supports Vue3 and will not work.', 'font-bold: 500; font-size: 14px;')
 
-    const url = 'https://chromewebstore.google.com/detail/vuejs-devtools/iaajmlceplecbljialhhkmedjlpdblhp'
-    console.log(`%cThe legacy version that supports both Vue 2 and Vue 3 has been moved to %c ${url}`, 'font-size: 14px;', 'text-decoration: underline; cursor: pointer;font-size: 14px;')
+    const legacyChromeUrl = 'https://chromewebstore.google.com/detail/vuejs-devtools/iaajmlceplecbljialhhkmedjlpdblhp'
+    const legacyFirefoxUrl = 'https://addons.mozilla.org/firefox/addon/vue-js-devtools-v6-legacy'
+    console.log(`%cThe legacy version of chrome extension that supports both Vue 2 and Vue 3 has been moved to %c ${legacyChromeUrl}`, 'font-size: 14px;', 'text-decoration: underline; cursor: pointer;font-size: 14px;')
+    console.log(`%cThe legacy version of firefox extension that supports both Vue 2 and Vue 3 has been moved to %c ${legacyFirefoxUrl}`, 'font-size: 14px;', 'text-decoration: underline; cursor: pointer;font-size: 14px;')
 
     console.log('%cPlease install and enable only the legacy version for your Vue2 app.', 'font-bold: 500; font-size: 14px;')
 
@@ -134,6 +139,7 @@ export function initDevTools() {
       get() {
         return _devtoolsHook
       },
+      configurable: true,
     })
   }
   else {

@@ -1,10 +1,10 @@
 import type { VNode } from 'vue'
 
-type TabCategory =
-  | 'pinned'
-  | 'app'
-  | 'modules'
-  | 'advanced'
+type TabCategory
+  = | 'pinned'
+    | 'app'
+    | 'modules'
+    | 'advanced'
 
 export type ModuleView = ModuleIframeView | ModuleVNodeView | ModuleSFCView
 

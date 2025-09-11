@@ -5,7 +5,7 @@ const { fileTypeData, fileTypeShow, toggleFileType } = useFileTypes()
 <template>
   <div
 
-    absolute bottom-0 grid grid-cols-3 w-260px gap-2 b-1 b-l-0 border-base rounded-tr-lg px4 py2 text-sm transition-transform duration-300 glass-effect
+    absolute bottom-0 grid grid-cols-3 w-260px gap-2 b-1 b-l-0 border-base rounded-tr-lg glass-effect px4 py2 text-sm transition-transform duration-300
     class="group"
     :class="{
       'translate-x-[calc(-100%+30px)] translate-y-[calc(100%-30px)]': !fileTypeShow,

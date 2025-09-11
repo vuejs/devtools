@@ -140,12 +140,12 @@ watchEffect(() => {
       v-else
       class="h-full of-auto transition-base"
       :class="isUtilityView ? 'flex' : sidebarExpanded ? 'grid grid-cols-[250px_1fr]' : 'grid grid-cols-[50px_1fr]'"
-      h-full h-screen of-hidden font-sans bg-base
+      h-full h-screen of-hidden bg-base font-sans
     >
       <SideNav v-if="!isUtilityView" of-x-hidden of-y-auto @toggle-devtools-client-visible="toggleDevToolsClientVisible" />
       <Splitpanes
-        h-full of-hidden
-        @resize="splitScreenSize = $event.map((v) => v.size)"
+        class="h-full of-hidden"
+        @resize="splitScreenSize = $event.panes.map((v) => v.size)"
       >
         <Pane h-full class="of-auto!" min-size="10" :size="splitScreenSize[0]">
           <RouterView />

@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-applet",
   "type": "module",
-  "version": "7.7.2",
+  "version": "8.0.1",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
-    "unplugin-vue": "^6.0.1",
+    "unplugin-vue": "^7.0.1",
     "vite-plugin-dts": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"

@@ -46,12 +46,12 @@ body::-webkit-scrollbar {
 .splitpanes--vertical > .splitpanes__splitter {
   min-width: 0 !important;
   width: 0 !important;
-  @apply border-r border-base;
+  --at-apply: border-r border-base;
 }
 .splitpanes--horizontal > .splitpanes__splitter {
   min-height: 0 !important;
   height: 0 !important;
-  --uno: border-t border-base;
+  --at-apply: border-t border-base;
 }
 .splitpanes--vertical > .splitpanes__splitter:before {
   left: -5px;
@@ -65,21 +65,31 @@ body::-webkit-scrollbar {
 }
 
 /* Overrides Floating Vue */
-.v-popper--theme-dropdown .v-popper__inner,
-.v-popper--theme-tooltip .v-popper__inner {
-  --uno: 'bg-base text-black dark:text-white rounded border border-base shadow';
+html .v-popper--theme-dropdown .v-popper__inner,
+html .v-popper--theme-tooltip .v-popper__inner {
+  --at-apply: 'bg-white text-black rounded border border-base shadow';
   box-shadow: 0 6px 30px #0000001a;
 }
 
-.v-popper--theme-tooltip .v-popper__arrow-inner,
-.v-popper--theme-dropdown .v-popper__arrow-inner {
-  visibility: visible;
-  --uno: 'border-white dark:border-#121212';
+html.dark .v-popper--theme-dropdown .v-popper__inner,
+html.dark .v-popper--theme-tooltip .v-popper__inner {
+  --at-apply: 'bg-#121212 text-white';
 }
 
-.v-popper--theme-tooltip .v-popper__arrow-outer,
-.v-popper--theme-dropdown .v-popper__arrow-outer {
-  --at-apply: border-base;
+#devtools-app .v-popper--theme-tooltip .v-popper__arrow-inner,
+#devtools-app .v-popper--theme-dropdown .v-popper__arrow-inner {
+  visibility: visible;
+  --at-apply: 'border-white';
+}
+
+#devtools-app.dark .v-popper--theme-tooltip .v-popper__arrow-inner,
+#devtools-app.dark .v-popper--theme-dropdown .v-popper__arrow-inner {
+  --at-apply: 'border-#121212';
+}
+
+#devtools-app .v-popper--theme-tooltip .v-popper__arrow-outer,
+#devtools-app .v-popper--theme-dropdown .v-popper__arrow-outer {
+  --at-apply: 'border-gray/20';
 }
 
 .v-popper--theme-tooltip.v-popper--shown,

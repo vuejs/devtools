@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-chrome-extension",
   "type": "module",
-  "version": "7.7.0",
+  "version": "7.7.7",
   "private": true,
   "author": "webfansplz",
   "license": "MIT",
@@ -9,8 +9,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "cross-env NODE_ENV=production tsup",
-    "dev": "cross-env NODE_ENV=development tsup --watch"
+    "build": "cross-env NODE_ENV=production tsdown",
+    "dev": "cross-env NODE_ENV=development tsdown --watch"
   },
   "dependencies": {
     "@vue/devtools-core": "workspace:^",
