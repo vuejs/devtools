@@ -94,7 +94,6 @@
     "eslint": "^9.35.0",
     "eslint-plugin-format": "^1.0.1",
     "eslint-vitest-rule-tester": "^2.2.1",
-    "execa": "^9.6.0",
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.1",
     "jsdom": "^26.1.0",

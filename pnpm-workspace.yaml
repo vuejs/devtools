@@ -11,7 +11,6 @@ catalog:
   '@vueuse/core': ^13.9.0
   '@vueuse/integrations': ^13.9.0
   colord: ^2.9.3
-  execa: ^9.6.0
   floating-vue: 5.2.2
   mitt: ^3.0.1
   pathe: ^2.0.3
