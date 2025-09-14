@@ -40,7 +40,6 @@
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
     "electron": "^36.9.4",
-    "execa": "catalog:",
     "h3": "^1.15.4",
     "pathe": "catalog:",
     "socket.io": "^4.8.1",
