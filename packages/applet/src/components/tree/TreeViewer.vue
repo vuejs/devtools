@@ -2,6 +2,7 @@
 import type { ComponentTreeNode, InspectorTree } from '@vue/devtools-kit'
 import { UNDEFINED } from '@vue/devtools-kit'
 import { vTooltip } from '@vue/devtools-ui'
+import { ref } from 'vue'
 import NodeTag from '~/components/basic/NodeTag.vue'
 import ToggleExpanded from '~/components/basic/ToggleExpanded.vue'
 import ComponentTreeViewer from '~/components/tree/TreeViewer.vue'
@@ -10,8 +11,8 @@ import { useToggleExpanded } from '~/composables/toggle-expanded'
 
 const props = withDefaults(defineProps<{
   data: ComponentTreeNode[] | InspectorTree[]
-  depth: number
-  withTag: boolean
+  depth?: number
+  withTag?: boolean
 }>(), {
   depth: 0,
   withTag: false,
@@ -20,6 +21,7 @@ const emit = defineEmits(['hover', 'leave'])
 const selectedNodeId = defineModel()
 const { expanded, toggleExpanded } = useToggleExpanded()
 const { select: _select } = useSelect()
+const hoveredNodeId = ref<string | null>(null)
 
 function normalizeLabel(item: ComponentTreeNode | InspectorTree) {
   return ('name' in item && item?.name) || ('label' in item && item.label)
@@ -27,6 +29,21 @@ function normalizeLabel(item: ComponentTreeNode | InspectorTree) {
 
 function select(id: string) {
   selectedNodeId.value = id
+}
+
+function onNodeHover(item: ComponentTreeNode | InspectorTree) {
+  hoveredNodeId.value = item.id
+  emit('hover', item.id)
+}
+
+function onNodeLeave() {
+  hoveredNodeId.value = null
+  emit('leave')
+}
+
+function onExpandToggleClick(event: Event, itemId: string) {
+  event.stopPropagation()
+  toggleExpanded(itemId)
 }
 </script>
 
@@ -39,19 +56,19 @@ function select(id: string) {
     }"
   >
     <div
-      class="group flex cursor-pointer items-center rounded-1 hover:(bg-primary-300 dark:bg-gray-600)"
+      class="group relative flex cursor-pointer items-center rounded-1 hover:(bg-primary-300 dark:bg-gray-600)"
       :style=" { paddingLeft: `${15 * depth + 4}px` }"
       :class="{ 'bg-primary-600! active': selectedNodeId === item.id }"
       @click="select(item.id)"
       @dblclick="toggleExpanded(item.id)"
-      @mouseover="() => emit('hover', item.id)"
-      @mouseleave="() => emit('leave')"
+      @mouseover="onNodeHover(item)"
+      @mouseleave="onNodeLeave"
     >
       <ToggleExpanded
         v-if="item?.children?.length"
         :value="expanded.includes(item.id)"
         class="[.active_&]:op20 group-hover:op20"
-        @click.stop="toggleExpanded(item.id)"
+        @click.stop="onExpandToggleClick($event, item.id)"
       />
       <!-- placeholder -->
       <span v-else pl5 />
@@ -85,6 +102,23 @@ function select(id: string) {
         inactive
       </span>
       <NodeTag v-for="(_item, _index) in item.tags" :key="_index" :tag="_item" />
+
+      <!-- Hover actions for nodes with children -->
+      <div
+        v-if="item?.children?.length && hoveredNodeId === item.id"
+        class="absolute right-2 flex items-center gap-1 border border-gray-200 rounded bg-white px-1 shadow-sm dark:border-gray-600 dark:bg-gray-800"
+      >
+        <div
+          v-tooltip="expanded.includes(item.id) ? 'Collapse' : 'Expand'"
+          class="flex cursor-pointer items-center rounded p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700"
+          @click.stop="onExpandToggleClick($event, item.id)"
+        >
+          <i
+            :class="expanded.includes(item.id) ? 'i-ic-baseline-unfold-less' : 'i-ic-baseline-unfold-more'"
+            class="text-xs opacity-70 hover:opacity-100"
+          />
+        </div>
+      </div>
     </div>
     <div
       v-if="item?.children?.length && expanded.includes(item.id)"

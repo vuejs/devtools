@@ -37,6 +37,12 @@ watch(filterStoreKey, (value, oldValue) => {
   if (!value.trim().length && !oldValue.trim().length)
     return
   getPiniaInspectorTree(value)
+  // Auto-expand when searching to show results better
+  if (value.trim().length) {
+    setTimeout(() => {
+      expandedTreeNodes.value = flattenedTreeNodesIds.value
+    }, 100)
+  }
 })
 
 const displayState = computed(() => {
@@ -70,6 +76,70 @@ function getNodesByDepth(list: string[][], depth: number) {
     nodes.push(...item.slice(0, depth + 1))
   })
   return [...new Set(nodes)]
+}
+
+function expandAllTreeNodes() {
+  // Get all node IDs recursively for complete expansion
+  const getAllNodeIds = (nodes: CustomInspectorNode[]): string[] => {
+    const ids: string[] = []
+    const traverse = (node: CustomInspectorNode) => {
+      ids.push(node.id)
+      if (node.children && node.children.length > 0) {
+        node.children.forEach(traverse)
+      }
+    }
+    nodes.forEach(traverse)
+    return ids
+  }
+
+  expandedTreeNodes.value = getAllNodeIds(tree.value)
+}
+
+function collapseAllTreeNodes() {
+  expandedTreeNodes.value = []
+}
+
+function expandAllStateNodes() {
+  // Collect all possible state node paths for deep expansion
+  const getAllStateIds = (obj: any, prefix = ''): string[] => {
+    const ids: string[] = []
+
+    if (prefix) {
+      ids.push(prefix)
+    }
+
+    if (Array.isArray(obj)) {
+      obj.forEach((item, index) => {
+        const path = prefix ? `${prefix}.${index}` : `${index}`
+        ids.push(...getAllStateIds(item, path))
+      })
+    }
+    else if (obj && typeof obj === 'object') {
+      Object.keys(obj).forEach((key) => {
+        const path = prefix ? `${prefix}.${key}` : key
+        ids.push(...getAllStateIds(obj[key], path))
+      })
+    }
+
+    return ids
+  }
+
+  // Get IDs from all state sections
+  const allIds: string[] = []
+  Object.keys(state.value).forEach((section, sectionIndex) => {
+    allIds.push(`${sectionIndex}`)
+    if (state.value[section] && Array.isArray(state.value[section])) {
+      state.value[section].forEach((item: any, itemIndex: number) => {
+        allIds.push(...getAllStateIds(item, `${sectionIndex}.${itemIndex}`))
+      })
+    }
+  })
+
+  expandedStateNodes.value = [...new Set(allIds)]
+}
+
+function collapseAllStateNodes() {
+  expandedStateNodes.value = []
 }
 
 function flattenTreeNodes(tree: CustomInspectorNode[]) {
@@ -144,7 +214,8 @@ function getPiniaInspectorTree(filter: string = '') {
     if (!selected.value && data.length) {
       selected.value = data[0].id
       getPiniaState(data[0].id)
-      expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
+      // Auto-expand first 2 levels by default for better UX
+      expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 2)
     }
   })
 }
@@ -161,7 +232,8 @@ function onInspectorTreeUpdated(_data: string) {
 
   if (!flattenedTreeNodesIds.value.includes(selected.value)) {
     selected.value = data.rootNodes[0].id
-    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
+    // Auto-expand first 2 levels by default for better UX
+    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 2)
     getPiniaState(data.rootNodes[0].id)
   }
 }
@@ -206,7 +278,7 @@ onUnmounted(() => {
       <Pane border="r base" size="40" h-full>
         <div class="h-full flex flex-col p2">
           <div class="grid grid-cols-[1fr_auto] mb1 items-center gap2 pb1" border="b dashed base">
-            <VueInput v-model="filterStoreKey" :placeholder="inspectorState.treeFilterPlaceholder" />
+            <VueInput v-model="filterStoreKey" :placeholder="inspectorState.treeFilterPlaceholder || 'Search stores...'" clearable />
             <div v-if="actions?.length" class="flex items-center gap-2 px-1">
               <div v-for="(action, index) in actions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callAction(index)">
                 <i :class="`i-ic-baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
@@ -214,17 +286,25 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="no-scrollbar flex-1 select-none overflow-scroll">
-            <ComponentTree v-model="selected" :data="tree" />
+            <ComponentTree v-model="selected" :data="tree" :depth="0" :with-tag="false" />
           </div>
         </div>
       </Pane>
       <Pane size="60">
         <div class="h-full flex flex-col p2">
           <div class="grid grid-cols-[1fr_auto] mb1 items-center gap2 pb1" border="b dashed base">
-            <VueInput v-model="filterStateKey" :placeholder="inspectorState.stateFilterPlaceholder" />
-            <div v-if="nodeActions?.length" class="flex items-center gap-2 px-1">
-              <div v-for="(action, index) in nodeActions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callNodeAction(index)">
-                <i :class="`i-ic-baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
+            <VueInput v-model="filterStateKey" :placeholder="inspectorState.stateFilterPlaceholder || 'Search state properties...'" clearable />
+            <div class="flex items-center gap-2 px-1">
+              <div v-tooltip.bottom-end="{ content: 'Expand All' }" class="flex items-center gap1" @click="expandAllStateNodes">
+                <i class="i-ic-baseline-unfold-more" cursor-pointer text-base op70 hover:op100 />
+              </div>
+              <div v-tooltip.bottom-end="{ content: 'Collapse All' }" class="flex items-center gap1" @click="collapseAllStateNodes">
+                <i class="i-ic-baseline-unfold-less" cursor-pointer text-base op70 hover:op100 />
+              </div>
+              <div v-if="nodeActions?.length" class="flex items-center gap-2 px-1">
+                <div v-for="(action, index) in nodeActions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callNodeAction(index)">
+                  <i :class="`i-ic-baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
+                </div>
               </div>
             </div>
           </div>
