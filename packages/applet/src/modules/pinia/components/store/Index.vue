@@ -37,10 +37,13 @@ watch(filterStoreKey, (value, oldValue) => {
   if (!value.trim().length && !oldValue.trim().length)
     return
   getPiniaInspectorTree(value)
-  // Auto-expand when searching to show results better
+  // Auto-expand when searching
   if (value.trim().length) {
     setTimeout(() => {
-      expandedTreeNodes.value = flattenedTreeNodesIds.value
+      expandAllTreeNodes()
+      if (selected.value) {
+        expandAllStateNodes()
+      }
     }, 100)
   }
 })
@@ -79,13 +82,15 @@ function getNodesByDepth(list: string[][], depth: number) {
 }
 
 function expandAllTreeNodes() {
-  // Get all node IDs recursively for complete expansion
+  // Recursively expand all tree nodes
   const getAllNodeIds = (nodes: CustomInspectorNode[]): string[] => {
     const ids: string[] = []
     const traverse = (node: CustomInspectorNode) => {
-      ids.push(node.id)
-      if (node.children && node.children.length > 0) {
-        node.children.forEach(traverse)
+      if (node?.id) {
+        ids.push(node.id)
+        if (node.children?.length) {
+          node.children.forEach(traverse)
+        }
       }
     }
     nodes.forEach(traverse)
@@ -100,41 +105,72 @@ function collapseAllTreeNodes() {
 }
 
 function expandAllStateNodes() {
-  // Collect all possible state node paths for deep expansion
-  const getAllStateIds = (obj: any, prefix = ''): string[] => {
+  // Recursively expand all state nodes, including deepest nested levels
+  const getAllStateIds = (obj: any, prefix = '', depth = 0): string[] => {
     const ids: string[] = []
 
-    if (prefix) {
-      ids.push(prefix)
-    }
+    // Add depth limit but allow deeper expansion
+    if (depth > 30 || !obj)
+      return ids
 
-    if (Array.isArray(obj)) {
-      obj.forEach((item, index) => {
-        const path = prefix ? `${prefix}.${index}` : `${index}`
-        ids.push(...getAllStateIds(item, path))
-      })
+    if (prefix)
+      ids.push(prefix)
+
+    try {
+      if (Array.isArray(obj)) {
+        obj.forEach((item, index) => {
+          const path = prefix ? `${prefix}.${index}` : `${index}`
+          ids.push(path)
+          // Continue recursively expanding array items
+          ids.push(...getAllStateIds(item, path, depth + 1))
+        })
+      }
+      else if (typeof obj === 'object' && obj !== null) {
+        // Skip built-in objects but expand plain objects
+        if (obj instanceof Date || obj instanceof RegExp || obj instanceof Error)
+          return ids
+
+        // Expand all object properties
+        Object.keys(obj).forEach((key) => {
+          const path = prefix ? `${prefix}.${key}` : key
+          ids.push(path)
+          ids.push(...getAllStateIds(obj[key], path, depth + 1))
+        })
+      }
     }
-    else if (obj && typeof obj === 'object') {
-      Object.keys(obj).forEach((key) => {
-        const path = prefix ? `${prefix}.${key}` : key
-        ids.push(...getAllStateIds(obj[key], path))
-      })
+    catch (error) {
+      console.warn('Error during state expansion:', error)
     }
 
     return ids
   }
 
-  // Get IDs from all state sections
   const allIds: string[] = []
+
+  // Expand all state sections
   Object.keys(state.value).forEach((section, sectionIndex) => {
     allIds.push(`${sectionIndex}`)
-    if (state.value[section] && Array.isArray(state.value[section])) {
-      state.value[section].forEach((item: any, itemIndex: number) => {
-        allIds.push(...getAllStateIds(item, `${sectionIndex}.${itemIndex}`))
+
+    const sectionData = state.value[section]
+    if (Array.isArray(sectionData)) {
+      sectionData.forEach((item: any, itemIndex: number) => {
+        const itemPath = `${sectionIndex}.${itemIndex}`
+        allIds.push(itemPath)
+
+        if (item && typeof item === 'object') {
+          // Extract actual value and deeply expand
+          const valueToExpand = item.value !== undefined ? item.value : item
+          allIds.push(...getAllStateIds(valueToExpand, itemPath))
+        }
       })
+    }
+    else if (sectionData && typeof sectionData === 'object') {
+      // Directly expand object-type sections
+      allIds.push(...getAllStateIds(sectionData, `${sectionIndex}`))
     }
   })
 
+  // Ensure all paths are expanded
   expandedStateNodes.value = [...new Set(allIds)]
 }
 
@@ -194,7 +230,9 @@ function getPiniaState(nodeId: string) {
       return
     // @ts-expect-error skip type check
     state.value = filterEmptyState(parsedData)
-    expandedStateNodes.value = Array.from({ length: Object.keys(state.value).length }, (_, i) => `${i}`)
+    // Auto-expand state sections and first level items
+    const stateIds = Object.keys(state.value).map((_, i) => `${i}`)
+    expandedStateNodes.value = stateIds
   })
 }
 
@@ -214,8 +252,8 @@ function getPiniaInspectorTree(filter: string = '') {
     if (!selected.value && data.length) {
       selected.value = data[0].id
       getPiniaState(data[0].id)
-      // Auto-expand first 2 levels by default for better UX
-      expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 2)
+      // Auto-expand first 6 levels by default for better UX
+      expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 6)
     }
   })
 }
@@ -232,8 +270,8 @@ function onInspectorTreeUpdated(_data: string) {
 
   if (!flattenedTreeNodesIds.value.includes(selected.value)) {
     selected.value = data.rootNodes[0].id
-    // Auto-expand first 2 levels by default for better UX
-    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 2)
+    // Auto-expand first 6 levels by default for better UX
+    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 6)
     getPiniaState(data.rootNodes[0].id)
   }
 }
