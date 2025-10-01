@@ -37,6 +37,15 @@ watch(filterStoreKey, (value, oldValue) => {
   if (!value.trim().length && !oldValue.trim().length)
     return
   getPiniaInspectorTree(value)
+  // Auto-expand when searching
+  if (value.trim().length) {
+    setTimeout(() => {
+      expandAllTreeNodes()
+      if (selected.value) {
+        expandAllStateNodes()
+      }
+    }, 100)
+  }
 })
 
 const displayState = computed(() => {
@@ -70,6 +79,103 @@ function getNodesByDepth(list: string[][], depth: number) {
     nodes.push(...item.slice(0, depth + 1))
   })
   return [...new Set(nodes)]
+}
+
+function expandAllTreeNodes() {
+  // Recursively expand all tree nodes
+  const getAllNodeIds = (nodes: CustomInspectorNode[]): string[] => {
+    const ids: string[] = []
+    const traverse = (node: CustomInspectorNode) => {
+      if (node?.id) {
+        ids.push(node.id)
+        if (node.children?.length) {
+          node.children.forEach(traverse)
+        }
+      }
+    }
+    nodes.forEach(traverse)
+    return ids
+  }
+
+  expandedTreeNodes.value = getAllNodeIds(tree.value)
+}
+
+function collapseAllTreeNodes() {
+  expandedTreeNodes.value = []
+}
+
+function expandAllStateNodes() {
+  // Recursively expand all state nodes, including deepest nested levels
+  const getAllStateIds = (obj: any, prefix = '', depth = 0): string[] => {
+    const ids: string[] = []
+
+    // Add depth limit but allow deeper expansion
+    if (depth > 30 || !obj)
+      return ids
+
+    if (prefix)
+      ids.push(prefix)
+
+    try {
+      if (Array.isArray(obj)) {
+        obj.forEach((item, index) => {
+          const path = prefix ? `${prefix}.${index}` : `${index}`
+          ids.push(path)
+          // Continue recursively expanding array items
+          ids.push(...getAllStateIds(item, path, depth + 1))
+        })
+      }
+      else if (typeof obj === 'object' && obj !== null) {
+        // Skip built-in objects but expand plain objects
+        if (obj instanceof Date || obj instanceof RegExp || obj instanceof Error)
+          return ids
+
+        // Expand all object properties
+        Object.keys(obj).forEach((key) => {
+          const path = prefix ? `${prefix}.${key}` : key
+          ids.push(path)
+          ids.push(...getAllStateIds(obj[key], path, depth + 1))
+        })
+      }
+    }
+    catch (error) {
+      console.warn('Error during state expansion:', error)
+    }
+
+    return ids
+  }
+
+  const allIds: string[] = []
+
+  // Expand all state sections
+  Object.keys(state.value).forEach((section, sectionIndex) => {
+    allIds.push(`${sectionIndex}`)
+
+    const sectionData = state.value[section]
+    if (Array.isArray(sectionData)) {
+      sectionData.forEach((item: any, itemIndex: number) => {
+        const itemPath = `${sectionIndex}.${itemIndex}`
+        allIds.push(itemPath)
+
+        if (item && typeof item === 'object') {
+          // Extract actual value and deeply expand
+          const valueToExpand = item.value !== undefined ? item.value : item
+          allIds.push(...getAllStateIds(valueToExpand, itemPath))
+        }
+      })
+    }
+    else if (sectionData && typeof sectionData === 'object') {
+      // Directly expand object-type sections
+      allIds.push(...getAllStateIds(sectionData, `${sectionIndex}`))
+    }
+  })
+
+  // Ensure all paths are expanded
+  expandedStateNodes.value = [...new Set(allIds)]
+}
+
+function collapseAllStateNodes() {
+  expandedStateNodes.value = []
 }
 
 function flattenTreeNodes(tree: CustomInspectorNode[]) {
@@ -124,7 +230,9 @@ function getPiniaState(nodeId: string) {
       return
     // @ts-expect-error skip type check
     state.value = filterEmptyState(parsedData)
-    expandedStateNodes.value = Array.from({ length: Object.keys(state.value).length }, (_, i) => `${i}`)
+    // Auto-expand state sections and first level items
+    const stateIds = Object.keys(state.value).map((_, i) => `${i}`)
+    expandedStateNodes.value = stateIds
   })
 }
 
@@ -144,7 +252,8 @@ function getPiniaInspectorTree(filter: string = '') {
     if (!selected.value && data.length) {
       selected.value = data[0].id
       getPiniaState(data[0].id)
-      expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
+      // Auto-expand first 6 levels by default for better UX
+      expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 6)
     }
   })
 }
@@ -161,7 +270,8 @@ function onInspectorTreeUpdated(_data: string) {
 
   if (!flattenedTreeNodesIds.value.includes(selected.value)) {
     selected.value = data.rootNodes[0].id
-    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
+    // Auto-expand first 6 levels by default for better UX
+    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 6)
     getPiniaState(data.rootNodes[0].id)
   }
 }
@@ -206,7 +316,7 @@ onUnmounted(() => {
       <Pane border="r base" size="40" h-full>
         <div class="h-full flex flex-col p2">
           <div class="grid grid-cols-[1fr_auto] mb1 items-center gap2 pb1" border="b dashed base">
-            <VueInput v-model="filterStoreKey" :placeholder="inspectorState.treeFilterPlaceholder" />
+            <VueInput v-model="filterStoreKey" :placeholder="inspectorState.treeFilterPlaceholder || 'Search stores...'" clearable />
             <div v-if="actions?.length" class="flex items-center gap-2 px-1">
               <div v-for="(action, index) in actions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callAction(index)">
                 <i :class="`i-ic-baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
@@ -214,17 +324,25 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="no-scrollbar flex-1 select-none overflow-scroll">
-            <ComponentTree v-model="selected" :data="tree" />
+            <ComponentTree v-model="selected" :data="tree" :depth="0" :with-tag="false" />
           </div>
         </div>
       </Pane>
       <Pane size="60">
         <div class="h-full flex flex-col p2">
           <div class="grid grid-cols-[1fr_auto] mb1 items-center gap2 pb1" border="b dashed base">
-            <VueInput v-model="filterStateKey" :placeholder="inspectorState.stateFilterPlaceholder" />
-            <div v-if="nodeActions?.length" class="flex items-center gap-2 px-1">
-              <div v-for="(action, index) in nodeActions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callNodeAction(index)">
-                <i :class="`i-ic-baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
+            <VueInput v-model="filterStateKey" :placeholder="inspectorState.stateFilterPlaceholder || 'Search state properties...'" clearable />
+            <div class="flex items-center gap-2 px-1">
+              <div v-tooltip.bottom-end="{ content: 'Expand All' }" class="flex items-center gap1" @click="expandAllStateNodes">
+                <i class="i-ic-baseline-unfold-more" cursor-pointer text-base op70 hover:op100 />
+              </div>
+              <div v-tooltip.bottom-end="{ content: 'Collapse All' }" class="flex items-center gap1" @click="collapseAllStateNodes">
+                <i class="i-ic-baseline-unfold-less" cursor-pointer text-base op70 hover:op100 />
+              </div>
+              <div v-if="nodeActions?.length" class="flex items-center gap-2 px-1">
+                <div v-for="(action, index) in nodeActions" :key="index" v-tooltip.bottom-end="{ content: action.tooltip }" class="flex items-center gap1" @click="callNodeAction(index)">
+                  <i :class="`i-ic-baseline-${action.icon.replace(/\_/g, '-')}`" cursor-pointer text-base op70 hover:op100 />
+                </div>
               </div>
             </div>
           </div>
