@@ -9,6 +9,7 @@ import App from './App.vue'
 
 import Hey from './pages/Hey.vue'
 import Home from './pages/Home.vue'
+import PiniaDemo from './pages/PiniaDemo.vue'
 import VeeValidate from './pages/VeeValidate.vue'
 import VueQuery from './pages/VueQuery.vue'
 import store from './stores/vuexStore'
@@ -70,6 +71,11 @@ const routes: RouteRecordRaw[] = [
     path: '/prop-mutation',
     component: () => import('./pages/PropMutation.vue'),
     name: 'prop-mutation',
+  },
+  {
+    path: '/pinia-demo',
+    component: PiniaDemo,
+    name: 'pinia-demo',
   },
 ]
 
