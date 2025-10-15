@@ -39,7 +39,7 @@
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
-    "electron": "^36.9.0",
+    "electron": "^36.9.4",
     "execa": "catalog:",
     "h3": "^1.15.4",
     "pathe": "catalog:",
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "catalog:",
-    "tsx": "^4.20.5",
+    "tsx": "^4.20.6",
     "unbuild": "3.6.1",
     "vue": "catalog:"
   }

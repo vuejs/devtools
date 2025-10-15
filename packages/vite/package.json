@@ -59,7 +59,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "fast-glob": "^3.3.3",
-    "image-meta": "^0.2.1",
+    "image-meta": "^0.2.2",
     "pathe": "catalog:"
   }
 }
