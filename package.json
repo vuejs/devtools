@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",
-    "@antfu/ni": "^25.0.0",
+    "@antfu/ni": "^26.2.0",
     "@arethetypeswrong/cli": "^0.18.2",
     "@clack/prompts": "^0.11.0",
     "@types/chrome": "^0.1.24",
