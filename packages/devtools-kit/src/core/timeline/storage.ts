@@ -20,7 +20,7 @@ export function getTimelineLayersStateFromStorage() {
       selected: '',
     }
   }
-  const state = localStorage.getItem(TIMELINE_LAYERS_STATE_STORAGE_ID)
+  const state = typeof localStorage.getItem !== 'undefined' ? localStorage.getItem(TIMELINE_LAYERS_STATE_STORAGE_ID) : null
   return state
     ? JSON.parse(state)
     : {
