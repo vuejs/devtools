@@ -69,7 +69,7 @@ export default defineConfig({
       },
       {
         text: 'Playground',
-        link: 'https://stackblitz.com/github/vuejs/create-vue-templates/tree/main/devtools-router-pinia',
+        link: 'https://stackblitz.com/github/vuejs/create-vue-templates/tree/main/router-pinia',
       },
     ],
 
