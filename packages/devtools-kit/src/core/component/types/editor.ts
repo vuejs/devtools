@@ -19,6 +19,6 @@ export interface InspectorStateEditorPayload {
     obj: Recordable,
     path: PropPath,
     value: unknown,
-    cb?: (object: Recordable, field: string, value: unknown) => void
+    cb?: (object: Recordable, field: string, value: unknown) => void,
   ) => unknown
 }
