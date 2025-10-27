@@ -73,7 +73,7 @@
     "gen:vue-apis": "tsx ./scripts/vue-api-manifest.ts"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.4.1",
+    "@antfu/eslint-config": "^6.1.0",
     "@antfu/ni": "^25.0.0",
     "@arethetypeswrong/cli": "^0.18.2",
     "@clack/prompts": "^0.11.0",
