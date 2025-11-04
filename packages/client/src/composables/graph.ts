@@ -512,21 +512,26 @@ export function getGraphFilterDataset() {
   const node = modulesMap.get(nodeId)
   if (!node)
     return null
-  const dataset = recursivelyGetGraphNodeData(nodeId)
+  const existingNodeIds = new Set<string>()
+  const dataset = recursivelyGetGraphNodeData(nodeId, existingNodeIds, 0)
   return dataset
 }
 
 // max depth is 20
-function recursivelyGetGraphNodeData(nodeId: string, depth = 0): GraphNodesTotalData[] {
+function recursivelyGetGraphNodeData(nodeId: string, existingNodeIds: Set<string>, depth: number): GraphNodesTotalData[] {
+  if (existingNodeIds.has(nodeId)) {
+    return []
+  }
   const node = modulesMap.get(nodeId)
   depth += 1
   if (!node || depth > 20)
     return []
   const result = [node]
+  existingNodeIds.add(nodeId)
   node.mod.deps.forEach((dep) => {
     const node = modulesMap.get(dep)
     if (node)
-      result.push(...recursivelyGetGraphNodeData(node.mod.id, depth))
+      result.push(...recursivelyGetGraphNodeData(node.mod.id, existingNodeIds, depth))
   })
   // unique result
   return result.reduce<GraphNodesTotalData[]>((prev, node) => {
