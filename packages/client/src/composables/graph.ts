@@ -205,35 +205,65 @@ function updateGraph() {
   graphEdges.clear()
   closeDrawer()
 
-  // Pathfinding mode: find and display paths between two nodes
-  if (graphPathfindingMode.value && graphPathfindingStart.value && graphPathfindingEnd.value) {
-    // Search for modules matching the input text
-    const startModules = searchModulesByText(graphPathfindingStart.value)
-    const endModules = searchModulesByText(graphPathfindingEnd.value)
+  // // Pathfinding mode: find and display paths between two nodes
+  // if (graphPathfindingMode.value && graphPathfindingStart.value && graphPathfindingEnd.value) {
+  //   // Search for modules matching the input text
+  //   const startModules = searchModulesByText(graphPathfindingStart.value, 2)
+  //   const endModules = searchModulesByText(graphPathfindingEnd.value, 4)
 
-    // Find paths between all matching start and end modules
-    const allPaths: PathInfo[] = []
-    for (const startId of startModules) {
-      for (const endId of endModules) {
-        const paths = findAllPaths(startId, endId)
-        allPaths.push(...paths)
-      }
-    }
+  //   // Find paths between all matching start and end modules
+  //   const allPaths: PathInfo[] = []
+  //   for (const startId of startModules) {
+  //     const paths = findAllPaths(startId, endModules)
+  //     allPaths.push(...paths)
+  //   }
 
-    graphPathfindingResults.value = allPaths
+  //   graphPathfindingResults.value = allPaths
 
-    if (allPaths.length > 0) {
-      const { nodes, edges } = getPathNodesAndEdges(allPaths)
-      graphNodes.add(uniqueNodes(nodes))
-      graphEdges.add(uniqueEdges(edges))
-    }
-    toggleGraphDrawer(true)
-    return
-  }
+  //   if (allPaths.length > 0) {
+  //     const { nodes, edges } = getPathNodesAndEdges(allPaths)
+  //     graphNodes.add(uniqueNodes(nodes))
+  //     graphEdges.add(uniqueEdges(edges))
+  //   }
+  //   toggleGraphDrawer(true)
+  //   return
+  // }
 
   const matchedNodes: Node[] = []
   const matchedSearchNodes: SearcherNode[] = []
   const matchedEdges: Edge[] = []
+
+  if (graphPathfindingMode.value && graphPathfindingStart.value && graphPathfindingEnd.value) {
+    // Search for modules matching the input text
+    const startModules = searchModulesByText(graphPathfindingStart.value, 2)
+    const endModules = searchModulesByText(graphPathfindingEnd.value, 4)
+
+    const allNodes: GraphNodesTotalData[] = []
+    const allEdges: Edge[] = []
+    for (const startId of startModules) {
+      const { nodes, edges } = findAllNodes(startId, endModules)
+      allNodes.push(...nodes)
+      allEdges.push(...edges)
+    }
+
+    const startModulesSet = new Set(startModules)
+    const endModulesSet = new Set(endModules)
+    allNodes.forEach(({ node, edges, mod }) => {
+      const nodeId = mod.id
+      if (startModulesSet.has(nodeId)) {
+        node = markNode(node, 'start')
+      }
+      else if (endModulesSet.has(nodeId)) {
+        node = markNode(node, 'end')
+      }
+      matchedNodes.push(node)
+      // matchedEdges.push(...edges)
+    })
+
+    graphNodes.add(uniqueNodes(matchedNodes))
+    graphEdges.add(uniqueEdges(allEdges))
+    return
+  }
 
   // reuse cache instead of parse every time
   const filterDataset = getGraphFilterDataset()
@@ -547,32 +577,95 @@ function recursivelyGetGraphNodeData(nodeId: string, existingNodeIds: Set<string
  * Search for module IDs that match the given search text
  * Returns array of full module IDs that contain the search text
  */
-function searchModulesByText(searchText: string): string[] {
+function searchModulesByText(searchText: string, maxItems = -1): string[] {
   const results: string[] = []
+  const search = searchText.toLowerCase()
 
-  modulesMap.forEach((nodeData, moduleId) => {
-    // Search in both full path and display name
+  for (const [moduleId, nodeData] of modulesMap) {
+    if (maxItems !== -1 && results.length >= maxItems) {
+      break
+    }
     const displayName = nodeData.info.displayName.toLowerCase()
     const fullPath = moduleId.toLowerCase()
-    const search = searchText.toLowerCase()
 
     if (displayName.includes(search) || fullPath.includes(search)) {
       results.push(moduleId)
     }
-  })
+  }
 
   return results
+}
+
+export function findAllNodes(startId: string, endIds: string[]): {
+  nodes: GraphNodesTotalData[]
+  edges: Edge[]
+} {
+  const node = modulesMap.get(startId)
+  if (!node) {
+    return {
+      nodes: [],
+      edges: [],
+    }
+  }
+
+  const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set<GraphNodesTotalData>(), new Set<Edge>()]
+
+  dfs(node, new Set(endIds), new Set(), modulesMap, result)
+
+  return {
+    nodes: Array.from(result[0]),
+    edges: Array.from(result[1]),
+  }
+}
+
+function dfs(node: GraphNodesTotalData, targetIds: Set<string>, existingNodeIds: Set<GraphNodesTotalData>, modulesMap: Map<string, GraphNodesTotalData>, result: [Set<GraphNodesTotalData>, Set<Edge>]): boolean {
+  if (!node) {
+    return false
+  }
+  const [resNodes, resEdges] = result
+  if (existingNodeIds.has(node)) {
+    return resNodes.has(node)
+  }
+  existingNodeIds.add(node)
+
+  const nodeId = node.mod.id
+  const isTarget = targetIds.has(nodeId)
+  let hasTarget = isTarget
+
+  node.mod.deps.forEach((dep) => {
+    const childNode = modulesMap.get(dep)
+    if (childNode && checkIsValidModule(childNode.mod)) {
+      const isFound = dfs(childNode, targetIds, existingNodeIds, modulesMap, result)
+      if (isFound) {
+        node.edges.find((edge) => {
+          if (edge.to === childNode.mod.id) {
+            resEdges.add(edge)
+            return true
+          }
+          return false
+        })
+      }
+      hasTarget ||= isFound
+    }
+  })
+
+  if (hasTarget) {
+    resNodes.add(node)
+  }
+
+  return hasTarget
 }
 
 /**
  * Find all paths from start node to end node using DFS
  * Returns array of paths, where each path is an array of module IDs
  */
-export function findAllPaths(startId: string, endId: string, maxDepth = 20): PathInfo[] {
+export function findAllPaths(startId: string, endIds: string[], maxDepth = 40): PathInfo[] {
   const paths: PathInfo[] = []
+  const theNodes: Set<GraphNodesTotalData> = new Set()
   const visited = new Set<string>()
 
-  function dfs(currentId: string, targetId: string, currentPath: string[], depth: number) {
+  function dfs(currentId: string, targetIds: Set<string>, currentPath: string[], depth: number) {
     // Prevent infinite loops and limit depth
     if (depth > maxDepth || visited.has(currentId)) {
       return
@@ -581,8 +674,11 @@ export function findAllPaths(startId: string, endId: string, maxDepth = 20): Pat
     // Add current node to path
     currentPath.push(currentId)
 
+    // Mark as visited for this path
+    visited.add(currentId)
+
     // Found the target
-    if (currentId === targetId) {
+    if (targetIds.has(currentId)) {
       // Convert to display format
       const displayPath = currentPath.map((id) => {
         const node = modulesMap.get(id)
@@ -592,29 +688,24 @@ export function findAllPaths(startId: string, endId: string, maxDepth = 20): Pat
         path: [...currentPath],
         displayPath,
       })
-      currentPath.pop()
-      return
     }
-
-    // Mark as visited for this path
-    visited.add(currentId)
 
     // Get current node's dependencies
     const node = modulesMap.get(currentId)
     if (node) {
       for (const dep of node.mod.deps) {
         if (!visited.has(dep) && checkIsValidModule(modulesMap.get(dep)!.mod!)) {
-          dfs(dep, targetId, currentPath, depth + 1)
+          dfs(dep, targetIds, currentPath, depth + 1)
         }
       }
     }
 
     // Backtrack
-    visited.delete(currentId)
+    // visited.delete(currentId)
     currentPath.pop()
   }
 
-  dfs(startId, endId, [], 0)
+  dfs(startId, new Set(endIds), [], 0)
   return paths
 }
 
@@ -686,5 +777,32 @@ function getPathNodesAndEdges(paths: PathInfo[]): { nodes: Node[], edges: Edge[]
     nodes: Array.from(allNodes.values()),
     edges: Array.from(allEdges.values()),
   }
+}
+
+function markNode(node: Node, type: 'start' | 'end') {
+  node = deepClone(node)
+
+  // Highlight nodes in the path
+  if (!node.font) {
+    node.font = {}
+  }
+
+  // Use different colors for start, end, and intermediate nodes
+  if (type === 'start') {
+    // Start node - green
+    (node.font as Font).color = '#10b981'
+    node.borderWidth = 3
+    node.color = { border: '#10b981' }
+  }
+  else if (type === 'end') {
+    // End node - red
+    (node.font as Font).color = '#ef4444'
+    node.borderWidth = 3
+    node.color = { border: '#ef4444' }
+  }
+
+  node.label = `<b>${node.label}</b>`
+
+  return node
 }
 // #endregion
