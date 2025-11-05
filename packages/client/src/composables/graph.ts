@@ -276,6 +276,10 @@ function updateGraph() {
   nodeData.forEach(({ node, edges, mod }) => {
     if (checkIsValidModule(mod) && checkReferenceIsValid(mod.id)) {
       const shortId = mod.id.match(EXTRACT_LAST_THREE_MOD_ID_RE)?.[0] ?? mod.id
+
+      if (graphFilterNodeId.value && mod.id === graphFilterNodeId.value)
+        node = markNode(node, 'start')
+
       matchedNodes.push(node)
       matchedSearchNodes.push({
         // only search the exactly name(last 3 segments), instead of full path
