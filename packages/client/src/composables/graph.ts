@@ -150,10 +150,15 @@ interface GraphNodesTotalData {
 export const projectRoot = ref('')
 export const graphNodes = new DataSet<Node>([])
 export const graphEdges = new DataSet<Edge>([])
+export const graphNodeCount = ref(0)
+export const graphEdgeCount = ref(0)
 const graphNodesTotal = shallowRef<GraphNodesTotalData[]>([])
 const graphNodesTotalMap = new Map<string, GraphNodesTotalData>()
 const modulesMap = new Map<string, GraphNodesTotalData>()
 const moduleReferences = new Map<string, { path: string, displayPath: string, mod: ModuleInfo }[]>()
+
+graphNodes.on('*', () => graphNodeCount.value = graphNodes.length)
+graphEdges.on('*', () => graphEdgeCount.value = graphEdges.length)
 
 const uniqueNodes = (nodes: Node[]) => nodes.reduce<Node[]>((prev, node) => {
   if (!prev.some(n => n.id === node.id))

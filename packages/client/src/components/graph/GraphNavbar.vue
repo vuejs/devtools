@@ -17,6 +17,8 @@ const filterId = graphFilterNodeId
 const pathfindingMode = graphPathfindingMode
 const pathfindingStart = graphPathfindingStart
 const pathfindingEnd = graphPathfindingEnd
+const nodesCount = graphNodeCount
+const edgesCount = graphEdgeCount
 
 function togglePathfindingMode() {
   pathfindingMode.value = !pathfindingMode.value
@@ -61,6 +63,9 @@ function swapStartAndEnd() {
       <span :class="{ 'text-gray-400 dark:text-gray-600': !settings[item[0]] }">Show {{ item[1] ?? item[0] }}</span>
     </div>
     <div flex-auto />
+    <div>
+      nodes: {{ nodesCount }} | edges: {{ edgesCount }}
+    </div>
     <button v-if="!pathfindingMode && filterId" rounded-full bg-gray:20 py1 pl3 pr2 text-xs op50 hover:op100 @click="filterId = ''">
       Clear filter
       <div i-carbon-close mb2px />
