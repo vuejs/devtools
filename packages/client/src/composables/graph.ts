@@ -264,6 +264,11 @@ function getEdge(modId: string, dep: string) {
         enabled: true,
         scaleFactor: 0.8,
       },
+      from: {
+        enabled: true,
+        type: 'circle',
+        scaleFactor: 0.8,
+      },
     },
   }
 }
