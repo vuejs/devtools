@@ -343,6 +343,11 @@ function getEdge(modId: string, dep: string) {
         enabled: true,
         scaleFactor: 0.8,
       },
+      from: {
+        enabled: true,
+        type: 'circle',
+        scaleFactor: 0.8,
+      },
     },
   }
 }
@@ -782,21 +787,20 @@ function getPathNodesAndEdges(paths: PathInfo[]): { nodes: Node[], edges: Edge[]
 function markNode(node: Node, type: 'start' | 'end') {
   node = deepClone(node)
 
-  // Highlight nodes in the path
-  if (!node.font) {
+  if (!node.font || typeof node.font !== 'object') {
     node.font = {}
   }
 
   // Use different colors for start, end, and intermediate nodes
   if (type === 'start') {
     // Start node - green
-    (node.font as Font).color = '#10b981'
+    node.font.color = '#f59e0b'
     node.borderWidth = 3
-    node.color = { border: '#10b981' }
+    node.color = { border: '#f59e0b' }
   }
   else if (type === 'end') {
     // End node - red
-    (node.font as Font).color = '#ef4444'
+    node.font.color = '#ef4444'
     node.borderWidth = 3
     node.color = { border: '#ef4444' }
   }
