@@ -4,7 +4,7 @@ import StateFieldViewer from './StateFieldViewer.vue'
 
 withDefaults(defineProps<{
   data: CustomInspectorState[]
-  depth: number
+  depth?: number
   index: string
   expandedStateId?: string
 }>(), {
