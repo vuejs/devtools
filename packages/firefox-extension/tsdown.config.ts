@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsdown'
 
 const NO_EXTERNAL = ['@vue/devtools-core', '@vue/devtools-kit', '@vue/devtools-shared']
 function createIIFEConfig(entry: string) {
@@ -37,4 +37,5 @@ export default defineConfig([{
   },
   clean: false,
   noExternal: NO_EXTERNAL,
+  hash: false,
 }, createIIFEConfig('src/proxy.ts'), createIIFEConfig('src/injection.ts'), createIIFEConfig('src/devtools-overlay.ts'), createIIFEConfig('src/user-app.ts')])

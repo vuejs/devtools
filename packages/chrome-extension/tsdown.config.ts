@@ -34,5 +34,6 @@ export default defineConfig([{
     '__VUE_PROD_DEVTOOLS__': 'true',
   },
   clean: false,
+  hash: false,
   noExternal: NO_EXTERNAL,
 }, createIIFEConfig('src/proxy.ts'), createIIFEConfig('src/prepare.ts'), createIIFEConfig('src/devtools-overlay.ts')])
