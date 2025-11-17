@@ -3,7 +3,7 @@
 > We provide a Vite plugin for running Vue DevTools. If your project uses Vite, we highly recommend using it as the preferred option for running DevTools, as it offers more powerful features.
 
 :::tip Compatibility Note
-Vue DevTools requires **Vite v3.1 or higher**.
+Vue DevTools requires **Vite v7.0 or higher**.
 :::
 
 ## Installation
