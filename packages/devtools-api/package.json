@@ -1,7 +1,7 @@
 {
   "name": "@vue/devtools-api",
   "type": "module",
-  "version": "8.0.3",
+  "version": "8.0.4",
   "author": "webfansplz",
   "license": "MIT",
   "repository": {
