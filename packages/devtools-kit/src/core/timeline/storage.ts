@@ -10,7 +10,7 @@ export function addTimelineLayersStateToStorage(state: Record<string, boolean | 
 }
 
 export function getTimelineLayersStateFromStorage() {
-  if (!isBrowser || typeof localStorage === 'undefined' || localStorage === null) {
+  if (typeof window === 'undefined' || !isBrowser || typeof localStorage === 'undefined' || localStorage === null) {
     return {
       recordingState: false,
       mouseEventEnabled: false,
