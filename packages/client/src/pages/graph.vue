@@ -45,9 +45,7 @@ function mountNetwork() {
   })
 
   network.on('deselectNode', () => {
-    if (!graphPathfindingMode.value)
-      toggleGraphDrawer(false)
-    graphDrawerData.value = undefined
+    toggleGraphDrawer(false)
   })
 
   watch(() => graphFilterNodeId.value, (id) => {
