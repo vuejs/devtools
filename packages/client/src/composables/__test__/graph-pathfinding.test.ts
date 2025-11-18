@@ -1,7 +1,9 @@
 import type { ModuleInfo } from '@vue/devtools-core'
+import type { Edge } from 'vis-network'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { dfs } from '../graph'
 
-// Mock test data setup
+// Mock test data
 interface GraphNodesTotalData {
   mod: ModuleInfo
   info: {
@@ -9,13 +11,8 @@ interface GraphNodesTotalData {
     displayPath: string
   }
   node: any
-  edges: any[]
+  edges: Edge[]
 }
-
-// Test module graph structure:
-// main.ts -> App.vue -> Header.vue -> utils.ts
-//        \-> router.ts -> routes.ts -> utils.ts
-const mockModulesMap = new Map<string, GraphNodesTotalData>()
 
 function createMockModule(id: string, displayName: string, deps: string[]): GraphNodesTotalData {
   return {
@@ -32,284 +29,242 @@ function createMockModule(id: string, displayName: string, deps: string[]): Grap
       id,
       label: displayName,
     },
-    edges: [],
+    edges: deps.map(dep => ({
+      from: id,
+      to: dep,
+      arrows: { to: { enabled: true } },
+    })),
   }
 }
 
-describe('graph Pathfinding', () => {
-  // Helper function to search modules by text
-  function searchModulesByText(searchText: string, modulesMap: Map<string, GraphNodesTotalData>): string[] {
-    const results: string[] = []
-
-    modulesMap.forEach((nodeData, moduleId) => {
-      const displayName = nodeData.info.displayName.toLowerCase()
-      const fullPath = moduleId.toLowerCase()
-      const search = searchText.toLowerCase()
-
-      if (displayName.includes(search) || fullPath.includes(search)) {
-        results.push(moduleId)
-      }
-    })
-
-    return results
-  }
+describe('dfs - graph pathfinding', () => {
+  let modulesMap: Map<string, GraphNodesTotalData>
 
   beforeEach(() => {
-    // Clear and setup mock data
-    mockModulesMap.clear()
+    // Build dependency graph:
+    // main.ts → App.vue → Header.vue → utils.ts
+    //       └→ router.ts → routes.ts → utils.ts
+    modulesMap = new Map()
 
-    // Build a simple dependency graph:
-    // main.ts imports App.vue and router.ts
-    // App.vue imports Header.vue
-    // Header.vue imports utils.ts
-    // router.ts imports routes.ts
-    // routes.ts imports utils.ts
-
-    mockModulesMap.set('/src/main.ts', createMockModule(
+    modulesMap.set('/src/main.ts', createMockModule(
       '/src/main.ts',
       'main.ts',
       ['/src/App.vue', '/src/router.ts'],
     ))
 
-    mockModulesMap.set('/src/App.vue', createMockModule(
+    modulesMap.set('/src/App.vue', createMockModule(
       '/src/App.vue',
       'App.vue',
       ['/src/components/Header.vue'],
     ))
 
-    mockModulesMap.set('/src/components/Header.vue', createMockModule(
+    modulesMap.set('/src/components/Header.vue', createMockModule(
       '/src/components/Header.vue',
       'Header.vue',
       ['/src/utils/utils.ts'],
     ))
 
-    mockModulesMap.set('/src/router.ts', createMockModule(
+    modulesMap.set('/src/router.ts', createMockModule(
       '/src/router.ts',
       'router.ts',
       ['/src/routes.ts'],
     ))
 
-    mockModulesMap.set('/src/routes.ts', createMockModule(
+    modulesMap.set('/src/routes.ts', createMockModule(
       '/src/routes.ts',
       'routes.ts',
       ['/src/utils/utils.ts'],
     ))
 
-    mockModulesMap.set('/src/utils/utils.ts', createMockModule(
+    modulesMap.set('/src/utils/utils.ts', createMockModule(
       '/src/utils/utils.ts',
       'utils.ts',
       [],
     ))
   })
 
-  describe('module Search', () => {
-    it('should find module by exact display name', () => {
-      const results = searchModulesByText('main.ts', mockModulesMap)
+  it('should find all nodes and edges in a single path', () => {
+    const startNode = modulesMap.get('/src/main.ts')!
+    const targetIds = new Set(['/src/components/Header.vue'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-      expect(results).toHaveLength(1)
-      expect(results[0]).toBe('/src/main.ts')
-    })
+    const found = dfs(startNode, targetIds, new Set(), modulesMap, result)
 
-    it('should find module by partial name', () => {
-      const results = searchModulesByText('App', mockModulesMap)
+    expect(found).toBe(true)
 
-      expect(results).toHaveLength(1)
-      expect(results[0]).toBe('/src/App.vue')
-    })
+    const [nodes, edges] = result
+    const nodeIds = Array.from(nodes).map(n => n.mod.id).sort()
 
-    it('should find module by path segment', () => {
-      const results = searchModulesByText('components', mockModulesMap)
-
-      expect(results).toHaveLength(1)
-      expect(results[0]).toBe('/src/components/Header.vue')
-    })
-
-    it('should find multiple modules with common name', () => {
-      const results = searchModulesByText('utils', mockModulesMap)
-
-      expect(results).toHaveLength(1)
-      expect(results[0]).toBe('/src/utils/utils.ts')
-    })
-
-    it('should be case insensitive', () => {
-      const results = searchModulesByText('MAIN.TS', mockModulesMap)
-
-      expect(results).toHaveLength(1)
-      expect(results[0]).toBe('/src/main.ts')
-    })
-  })
-
-  // Simple DFS pathfinding implementation for testing
-  function findAllPaths(
-    startId: string,
-    endId: string,
-    modulesMap: Map<string, GraphNodesTotalData>,
-    maxDepth = 20,
-  ) {
-    const paths: { path: string[], displayPath: string[] }[] = []
-    const visited = new Set<string>()
-
-    function dfs(currentId: string, targetId: string, currentPath: string[], depth: number) {
-      if (depth > maxDepth || visited.has(currentId)) {
-        return
-      }
-
-      currentPath.push(currentId)
-
-      if (currentId === targetId) {
-        const displayPath = currentPath.map((id) => {
-          const node = modulesMap.get(id)
-          return node?.info.displayName ?? id.split('/').at(-1) ?? id
-        })
-        paths.push({
-          path: [...currentPath],
-          displayPath,
-        })
-        currentPath.pop()
-        return
-      }
-
-      visited.add(currentId)
-
-      const node = modulesMap.get(currentId)
-      if (node) {
-        for (const dep of node.mod.deps) {
-          if (!visited.has(dep)) {
-            dfs(dep, targetId, currentPath, depth + 1)
-          }
-        }
-      }
-
-      visited.delete(currentId)
-      currentPath.pop()
-    }
-
-    dfs(startId, endId, [], 0)
-    return paths
-  }
-
-  it('should find a single path from main.ts to Header.vue', () => {
-    const paths = findAllPaths('/src/main.ts', '/src/components/Header.vue', mockModulesMap)
-
-    expect(paths).toHaveLength(1)
-    expect(paths[0].path).toEqual([
-      '/src/main.ts',
+    // Should contain path: main.ts → App.vue → Header.vue
+    expect(nodeIds).toEqual([
       '/src/App.vue',
       '/src/components/Header.vue',
+      '/src/main.ts',
     ])
-    expect(paths[0].displayPath).toEqual([
-      'main.ts',
-      'App.vue',
-      'Header.vue',
+
+    // Should contain 2 edges
+    const edgeDescriptions = Array.from(edges).map(e => `${e.from}→${e.to}`).sort()
+    expect(edgeDescriptions).toEqual([
+      '/src/App.vue→/src/components/Header.vue',
+      '/src/main.ts→/src/App.vue',
     ])
   })
 
-  it('should find multiple paths from main.ts to utils.ts', () => {
-    const paths = findAllPaths('/src/main.ts', '/src/utils/utils.ts', mockModulesMap)
+  it('should find all nodes and edges across multiple paths without duplicates', () => {
+    const startNode = modulesMap.get('/src/main.ts')!
+    const targetIds = new Set(['/src/utils/utils.ts'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-    expect(paths).toHaveLength(2)
+    const found = dfs(startNode, targetIds, new Set(), modulesMap, result)
 
-    // Path 1: main.ts -> App.vue -> Header.vue -> utils.ts
-    expect(paths[0].path).toEqual([
-      '/src/main.ts',
+    expect(found).toBe(true)
+
+    const [nodes, edges] = result
+    const nodeIds = Array.from(nodes).map(n => n.mod.id).sort()
+
+    // Should contain nodes from both paths:
+    // Path 1: main.ts → App.vue → Header.vue → utils.ts
+    // Path 2: main.ts → router.ts → routes.ts → utils.ts
+    expect(nodeIds).toEqual([
       '/src/App.vue',
       '/src/components/Header.vue',
-      '/src/utils/utils.ts',
-    ])
-
-    // Path 2: main.ts -> router.ts -> routes.ts -> utils.ts
-    expect(paths[1].path).toEqual([
       '/src/main.ts',
       '/src/router.ts',
       '/src/routes.ts',
       '/src/utils/utils.ts',
     ])
+
+    // Should contain edges from both paths
+    const edgeDescriptions = Array.from(edges).map(e => `${e.from}→${e.to}`).sort()
+    expect(edgeDescriptions).toEqual([
+      '/src/App.vue→/src/components/Header.vue',
+      '/src/components/Header.vue→/src/utils/utils.ts',
+      '/src/main.ts→/src/App.vue',
+      '/src/main.ts→/src/router.ts',
+      '/src/router.ts→/src/routes.ts',
+      '/src/routes.ts→/src/utils/utils.ts',
+    ])
   })
 
-  it('should return empty array when no path exists', () => {
-    const paths = findAllPaths('/src/utils/utils.ts', '/src/main.ts', mockModulesMap)
+  it('should return empty result when no path exists', () => {
+    // utils.ts has no dependencies, cannot reach main.ts
+    const startNode = modulesMap.get('/src/utils/utils.ts')!
+    const targetIds = new Set(['/src/main.ts'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-    expect(paths).toHaveLength(0)
+    const found = dfs(startNode, targetIds, new Set(), modulesMap, result)
+
+    expect(found).toBe(false)
+
+    const [nodes, edges] = result
+    expect(nodes.size).toBe(0)
+    expect(edges.size).toBe(0)
   })
 
-  it('should handle same start and end node', () => {
-    const paths = findAllPaths('/src/main.ts', '/src/main.ts', mockModulesMap)
+  it('should return only the start node when it is also the target', () => {
+    const startNode = modulesMap.get('/src/main.ts')!
+    const targetIds = new Set(['/src/main.ts'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-    expect(paths).toHaveLength(1)
-    expect(paths[0].path).toEqual(['/src/main.ts'])
+    const found = dfs(startNode, targetIds, new Set(), modulesMap, result)
+
+    expect(found).toBe(true)
+
+    const [nodes, edges] = result
+    expect(nodes.size).toBe(1)
+    expect(Array.from(nodes)[0].mod.id).toBe('/src/main.ts')
+    expect(edges.size).toBe(0) // No edges, no traversal needed
   })
 
-  it('should handle non-existent nodes', () => {
-    const paths = findAllPaths('/src/nonexistent.ts', '/src/main.ts', mockModulesMap)
-
-    expect(paths).toHaveLength(0)
-  })
-
-  it('should prevent infinite loops with max depth', () => {
-    // Create a circular dependency
+  it('should handle circular dependencies without infinite loop', () => {
+    // Build circular dependency: a → b → c → a
     const circularMap = new Map<string, GraphNodesTotalData>()
     circularMap.set('/src/a.ts', createMockModule('/src/a.ts', 'a.ts', ['/src/b.ts']))
     circularMap.set('/src/b.ts', createMockModule('/src/b.ts', 'b.ts', ['/src/c.ts']))
     circularMap.set('/src/c.ts', createMockModule('/src/c.ts', 'c.ts', ['/src/a.ts']))
 
-    const paths = findAllPaths('/src/a.ts', '/src/nonexistent.ts', circularMap, 3)
+    const startNode = circularMap.get('/src/a.ts')!
+    const targetIds = new Set(['/src/c.ts'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-    // Should not crash and return empty paths
-    expect(paths).toHaveLength(0)
+    const found = dfs(startNode, targetIds, new Set(), circularMap, result)
+
+    expect(found).toBe(true)
+
+    const [nodes, edges] = result
+    const nodeIds = Array.from(nodes).map(n => n.mod.id).sort()
+
+    // Should contain a → b → c
+    expect(nodeIds).toEqual(['/src/a.ts', '/src/b.ts', '/src/c.ts'])
+
+    // Should not loop infinitely
+    const edgeDescriptions = Array.from(edges).map(e => `${e.from}→${e.to}`).sort()
+    expect(edgeDescriptions).toEqual([
+      '/src/a.ts→/src/b.ts',
+      '/src/b.ts→/src/c.ts',
+    ])
   })
 
-  describe('integration: Search + Pathfinding', () => {
-    it('should find paths using partial file names', () => {
-      // Search for modules
-      const startModules = searchModulesByText('main', mockModulesMap)
-      const endModules = searchModulesByText('utils', mockModulesMap)
+  it('should support multiple target nodes', () => {
+    const startNode = modulesMap.get('/src/main.ts')!
+    // Set two targets: Header.vue and routes.ts
+    const targetIds = new Set(['/src/components/Header.vue', '/src/routes.ts'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-      // Find paths
-      const allPaths: any[] = []
-      for (const startId of startModules) {
-        for (const endId of endModules) {
-          const paths = findAllPaths(startId, endId, mockModulesMap)
-          allPaths.push(...paths)
-        }
-      }
+    const found = dfs(startNode, targetIds, new Set(), modulesMap, result)
 
-      // Should find 2 paths from main.ts to utils.ts
-      expect(allPaths).toHaveLength(2)
-    })
+    expect(found).toBe(true)
 
-    it('should handle case-insensitive search in pathfinding', () => {
-      const startModules = searchModulesByText('MAIN.TS', mockModulesMap)
-      const endModules = searchModulesByText('HEADER.VUE', mockModulesMap)
+    const [nodes, edges] = result
+    const nodeIds = Array.from(nodes).map(n => n.mod.id).sort()
 
-      const allPaths: any[] = []
-      for (const startId of startModules) {
-        for (const endId of endModules) {
-          const paths = findAllPaths(startId, endId, mockModulesMap)
-          allPaths.push(...paths)
-        }
-      }
+    // Should contain paths to both targets
+    expect(nodeIds).toEqual([
+      '/src/App.vue',
+      '/src/components/Header.vue',
+      '/src/main.ts',
+      '/src/router.ts',
+      '/src/routes.ts',
+    ])
 
-      expect(allPaths).toHaveLength(1)
-      expect(allPaths[0].path).toEqual([
-        '/src/main.ts',
-        '/src/App.vue',
-        '/src/components/Header.vue',
-      ])
-    })
+    const edgeDescriptions = Array.from(edges).map(e => `${e.from}→${e.to}`).sort()
+    expect(edgeDescriptions).toEqual([
+      '/src/App.vue→/src/components/Header.vue',
+      '/src/main.ts→/src/App.vue',
+      '/src/main.ts→/src/router.ts',
+      '/src/router.ts→/src/routes.ts',
+    ])
+  })
 
-    it('should return empty when search finds no modules', () => {
-      const startModules = searchModulesByText('nonexistent', mockModulesMap)
-      const endModules = searchModulesByText('utils', mockModulesMap)
+  it('should return false when node is null', () => {
+    const targetIds = new Set(['/src/main.ts'])
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
 
-      const allPaths: any[] = []
-      for (const startId of startModules) {
-        for (const endId of endModules) {
-          const paths = findAllPaths(startId, endId, mockModulesMap)
-          allPaths.push(...paths)
-        }
-      }
+    const found = dfs(null as any, targetIds, new Set(), modulesMap, result)
 
-      expect(allPaths).toHaveLength(0)
-    })
+    expect(found).toBe(false)
+    expect(result[0].size).toBe(0)
+    expect(result[1].size).toBe(0)
+  })
+
+  it('should return cached result for already visited nodes', () => {
+    const startNode = modulesMap.get('/src/main.ts')!
+    const targetIds = new Set(['/src/utils/utils.ts'])
+    const existingNodeIds = new Set<GraphNodesTotalData>()
+    const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set(), new Set()]
+
+    // First call
+    dfs(startNode, targetIds, existingNodeIds, modulesMap, result)
+
+    const firstCallNodeCount = result[0].size
+    const firstCallEdgeCount = result[1].size
+
+    // Second call with same start node
+    const found = dfs(startNode, targetIds, existingNodeIds, modulesMap, result)
+
+    // Should return cached result without adding duplicates
+    expect(found).toBe(true)
+    expect(result[0].size).toBe(firstCallNodeCount)
+    expect(result[1].size).toBe(firstCallEdgeCount)
   })
 })
