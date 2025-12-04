@@ -307,7 +307,7 @@ const { iframe, getIframe } = useIframe(clientUrl, async () => {
 }
 
 @media print {
-  #vue-devtools-anchor {
+  .vue-devtools__anchor {
     display: none;
   }
 }
