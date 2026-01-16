@@ -115,9 +115,15 @@ export class ComponentWalker {
 
     // capture children
     if (depth < this.maxDepth! || instance.type.__isKeepAlive || parents.some(parent => parent.type.__isKeepAlive)) {
-      treeNode.children = await Promise.all(children
-        .map(child => this.capture(child, depth + 1))
-        .filter(Boolean))
+      if (this.componentFilter.isNegative) {
+        const childrenNodes = await Promise.all(children.map(child => this.findQualifiedChildren(child, depth + 1)))
+        treeNode.children = Array.prototype.concat.apply([], childrenNodes)
+      }
+      else {
+        treeNode.children = await Promise.all(children
+          .map(child => this.capture(child, depth + 1))
+          .filter(Boolean))
+      }
     }
 
     // keep-alive

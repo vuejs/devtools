@@ -4,9 +4,21 @@ import { getInstanceName } from '../utils'
 
 export class ComponentFilter {
   filter: string
+  isNegative: boolean = false
+  private matchName: string = ''
 
   constructor(filter: string) {
     this.filter = filter || ''
+    const trimmed = this.filter.trim()
+
+    if (trimmed.startsWith('-')) {
+      this.isNegative = true
+      this.matchName = trimmed.slice(1).trim().toLowerCase()
+    }
+    else {
+      this.isNegative = false
+      this.matchName = trimmed.toLowerCase()
+    }
   }
 
   /**
@@ -17,8 +29,18 @@ export class ComponentFilter {
    */
   isQualified(instance: VueAppInstance): boolean {
     const name = getInstanceName(instance)
-    return classify(name).toLowerCase().includes(this.filter)
-      || kebabize(name).toLowerCase().includes(this.filter)
+    const normalizedName = classify(name).toLowerCase()
+    const kebabName = kebabize(name).toLowerCase()
+
+    if (this.isNegative) {
+      if (!this.matchName)
+        return true
+
+      return !(normalizedName.includes(this.matchName) || kebabName.includes(this.matchName))
+    }
+
+    return normalizedName.includes(this.matchName)
+      || kebabName.includes(this.matchName)
   }
 }
 
