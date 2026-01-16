@@ -10,22 +10,18 @@ export class ComponentFilter {
   constructor(filter: string) {
     this.filter = filter || ''
     const tokens = this.filter.trim().split(/\s+/).filter(Boolean)
-
     tokens.forEach((token) => {
-      const lowerToken = token.toLowerCase()
-      if (lowerToken.startsWith('-')) {
-        const key = lowerToken.slice(1)
-        if (key) {
-          this.negativeFilters.push(key)
-        }
+      const lower = token.toLowerCase()
+      if (lower.startsWith('-') && lower.length > 1) {
+        this.negativeFilters.push(lower.slice(1))
       }
       else {
-        this.positiveFilters.push(lowerToken)
+        this.positiveFilters.push(lower)
       }
     })
   }
 
-  get hasNegativeFilters(): boolean {
+  get hasNegativeFilters() {
     return this.negativeFilters.length > 0
   }
 
@@ -35,7 +31,7 @@ export class ComponentFilter {
    * @param {Vue|Vnode} instance
    * @return {boolean}
    */
-  isQualified(instance: VueAppInstance): boolean {
+  isQualified(instance: VueAppInstance, checkPositive = true): boolean {
     const name = getInstanceName(instance)
     const normalizedName = classify(name).toLowerCase()
     const kebabName = kebabize(name).toLowerCase()
@@ -48,9 +44,12 @@ export class ComponentFilter {
         return false
     }
 
-    if (this.positiveFilters.length === 0) {
+    if (!checkPositive) {
       return true
     }
+
+    if (this.positiveFilters.length === 0)
+      return true
 
     return this.positiveFilters.some(pos =>
       normalizedName.includes(pos) || kebabName.includes(pos),

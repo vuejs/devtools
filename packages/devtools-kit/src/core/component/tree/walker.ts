@@ -116,7 +116,9 @@ export class ComponentWalker {
     // capture children
     if (depth < this.maxDepth! || instance.type.__isKeepAlive || parents.some(parent => parent.type.__isKeepAlive)) {
       if (this.componentFilter.hasNegativeFilters) {
-        const childrenNodes = await Promise.all(children.map(child => this.findQualifiedChildren(child, depth + 1)))
+        const childrenNodes = await Promise.all(
+          children.map(child => this.findQualifiedChildren(child, depth + 1, false)), // false = 不再强制检查正向词
+        )
         treeNode.children = Array.prototype.concat.apply([], childrenNodes)
       }
       else {
@@ -184,8 +186,8 @@ export class ComponentWalker {
    * @param {Vue|Vnode} instance
    * @return {Vue|Array}
    */
-  private async findQualifiedChildren(instance: VueAppInstance, depth: number): Promise<ComponentTreeNode[]> {
-    if (this.componentFilter.isQualified(instance) && !instance.type.devtools?.hide) {
+  private async findQualifiedChildren(instance: VueAppInstance, depth: number, checkPositive = true): Promise<ComponentTreeNode[]> {
+    if (this.componentFilter.isQualified(instance, checkPositive) && !instance.type.devtools?.hide) {
       return [await this.capture(instance, depth)]
     }
     else if (instance.subTree) {
@@ -193,7 +195,7 @@ export class ComponentWalker {
       const list = this.isKeepAlive(instance)
         ? this.getKeepAliveCachedInstances(instance)
         : this.getInternalInstanceChildren(instance.subTree)
-      return this.findQualifiedChildrenFromList(list, depth)
+      return this.findQualifiedChildrenFromList(list, depth, checkPositive)
     }
     else {
       return []
@@ -209,14 +211,12 @@ export class ComponentWalker {
    * @param {Array} instances
    * @return {Array}
    */
-  private async findQualifiedChildrenFromList(instances: VueAppInstance[], depth: number): Promise<ComponentTreeNode[]> {
+  private async findQualifiedChildrenFromList(instances: VueAppInstance[], depth: number, checkPositive: boolean): Promise<ComponentTreeNode[]> {
     instances = instances
       .filter(child => !isBeingDestroyed(child) && !child.type.devtools?.hide)
-    if (!this.componentFilter.filter)
-      return Promise.all(instances.map(child => this.capture(child, depth)))
 
-    else
-      return Array.prototype.concat.apply([], await Promise.all(instances.map(i => this.findQualifiedChildren(i, depth))))
+    return Array.prototype.concat.apply([], await Promise.all(instances.map(i => this.findQualifiedChildren(i, depth, checkPositive))),
+    )
   }
 
   /**
