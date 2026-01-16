@@ -4,21 +4,29 @@ import { getInstanceName } from '../utils'
 
 export class ComponentFilter {
   filter: string
-  isNegative: boolean = false
-  private matchName: string = ''
+  positiveFilters: string[] = []
+  negativeFilters: string[] = []
 
   constructor(filter: string) {
     this.filter = filter || ''
-    const trimmed = this.filter.trim()
+    const tokens = this.filter.trim().split(/\s+/).filter(Boolean)
 
-    if (trimmed.startsWith('-')) {
-      this.isNegative = true
-      this.matchName = trimmed.slice(1).trim().toLowerCase()
-    }
-    else {
-      this.isNegative = false
-      this.matchName = trimmed.toLowerCase()
-    }
+    tokens.forEach((token) => {
+      const lowerToken = token.toLowerCase()
+      if (lowerToken.startsWith('-')) {
+        const key = lowerToken.slice(1)
+        if (key) {
+          this.negativeFilters.push(key)
+        }
+      }
+      else {
+        this.positiveFilters.push(lowerToken)
+      }
+    })
+  }
+
+  get hasNegativeFilters(): boolean {
+    return this.negativeFilters.length > 0
   }
 
   /**
@@ -32,15 +40,21 @@ export class ComponentFilter {
     const normalizedName = classify(name).toLowerCase()
     const kebabName = kebabize(name).toLowerCase()
 
-    if (this.isNegative) {
-      if (!this.matchName)
-        return true
-
-      return !(normalizedName.includes(this.matchName) || kebabName.includes(this.matchName))
+    if (this.hasNegativeFilters) {
+      const isExcluded = this.negativeFilters.some(neg =>
+        normalizedName.includes(neg) || kebabName.includes(neg),
+      )
+      if (isExcluded)
+        return false
     }
 
-    return normalizedName.includes(this.matchName)
-      || kebabName.includes(this.matchName)
+    if (this.positiveFilters.length === 0) {
+      return true
+    }
+
+    return this.positiveFilters.some(pos =>
+      normalizedName.includes(pos) || kebabName.includes(pos),
+    )
   }
 }
 

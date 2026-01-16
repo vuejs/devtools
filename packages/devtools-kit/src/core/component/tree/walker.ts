@@ -115,7 +115,7 @@ export class ComponentWalker {
 
     // capture children
     if (depth < this.maxDepth! || instance.type.__isKeepAlive || parents.some(parent => parent.type.__isKeepAlive)) {
-      if (this.componentFilter.isNegative) {
+      if (this.componentFilter.hasNegativeFilters) {
         const childrenNodes = await Promise.all(children.map(child => this.findQualifiedChildren(child, depth + 1)))
         treeNode.children = Array.prototype.concat.apply([], childrenNodes)
       }
