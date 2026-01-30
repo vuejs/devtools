@@ -8,7 +8,6 @@
   ],
   "ignoreDeps": [
     "node",
-    "nanoid",
     "vite-plugin-inspect"
   ],
   "labels": [

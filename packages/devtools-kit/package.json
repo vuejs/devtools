@@ -31,7 +31,6 @@
     "@vue/devtools-shared": "workspace:^",
     "birpc": "^2.6.1",
     "hookable": "^5.5.3",
-    "mitt": "catalog:",
     "perfect-debounce": "catalog:",
     "speakingurl": "^14.0.1",
     "superjson": "^2.2.2"

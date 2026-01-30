@@ -12,7 +12,6 @@ catalog:
   '@vueuse/integrations': ^13.9.0
   colord: ^2.9.3
   floating-vue: 5.2.2
-  mitt: ^3.0.1
   pathe: ^2.0.3
   perfect-debounce: ^2.0.0
   pinia: ^3.0.3
