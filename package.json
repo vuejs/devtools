@@ -116,7 +116,7 @@
     "unbuild": "3.6.1",
     "unocss": "^66.5.4",
     "vite": "^7.1.10",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.18",
     "vue": "^3.5.22"
   },
   "simple-git-hooks": {
