@@ -18,6 +18,8 @@
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
+  "unpkg": "dist/vue-devtools-api.global.js",
+  "jsdelivr": "dist/vue-devtools-api.global.js",
   "files": [
     "dist"
   ],
