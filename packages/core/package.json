@@ -31,11 +31,7 @@
   },
   "dependencies": {
     "@vue/devtools-kit": "workspace:^",
-    "@vue/devtools-shared": "workspace:^",
-    "mitt": "catalog:",
-    "nanoid": "^5.1.5",
-    "pathe": "catalog:",
-    "vite-hot-client": "catalog:"
+    "@vue/devtools-shared": "workspace:^"
   },
   "devDependencies": {
     "vue": "catalog:"
