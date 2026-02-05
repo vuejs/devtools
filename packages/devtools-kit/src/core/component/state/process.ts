@@ -3,7 +3,7 @@ import type { InspectorState } from '../types'
 import { camelize } from '@vue/devtools-shared'
 import { ensurePropertyExists, returnError } from '../utils'
 import { vueBuiltins } from './constants'
-import { getPropType, getSetupStateType, toRaw } from './util'
+import { escape, getPropType, getSetupStateType, toRaw } from './util'
 
 function mergeOptions(
   to: any,
@@ -297,7 +297,7 @@ function processEventListeners(instance: VueAppInstance) {
             displayText: isDeclared ? '✅ Declared' : '⚠️ Not declared',
             key: isDeclared ? '✅ Declared' : '⚠️ Not declared',
             value: isDeclared ? '✅ Declared' : '⚠️ Not declared',
-            tooltipText: !isDeclared ? `The event <code>${eventName}</code> is not declared in the <code>emits</code> option. It will leak into the component's attributes (<code>$attrs</code>).` : null,
+            tooltipText: !isDeclared ? `The event <code>${escape(eventName)}</code> is not declared in the <code>emits</code> option. It will leak into the component's attributes (<code>$attrs</code>).` : null,
           },
         },
       })
