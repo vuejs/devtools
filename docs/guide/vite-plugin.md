@@ -66,7 +66,7 @@ interface VitePluginVueDevToolsOptions {
   /**
    * Target editor when open in editor (v7.2.0+)
    *
-   * @default code (Visual Studio Code)
+   * @default It will be predicted (fork from https://github.com/yyx990803/launch-editor/blob/master/packages/launch-editor/guess.js) based on the IDEs you've launched, and the backup is 'code' (Visual Studio Code)
    */
   launchEditor?: 'appcode' | 'atom' | 'atom-beta' | 'brackets' | 'clion' | 'code' | 'code-insiders' | 'codium' | 'emacs' | 'idea' | 'notepad++' | 'pycharm' | 'phpstorm' | 'rubymine' | 'sublime' | 'vim' | 'visualstudio' | 'webstorm' | 'rider' | string
 }
