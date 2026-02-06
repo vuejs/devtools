@@ -279,6 +279,15 @@ function processRefs(instance: VueAppInstance) {
     }))
 }
 
+const vnodeEvents = new Set([
+  'vnode-before-mount',
+  'vnode-mounted',
+  'vnode-before-update',
+  'vnode-updated',
+  'vnode-before-unmount',
+  'vnode-unmounted',
+])
+
 function processEventListeners(instance: VueAppInstance) {
   const emitsDefinition = instance.type.emits
   const declaredEmits = Array.isArray(emitsDefinition) ? emitsDefinition : Object.keys(emitsDefinition ?? {})
@@ -288,16 +297,18 @@ function processEventListeners(instance: VueAppInstance) {
     const [prefix, ...eventNameParts] = key.split(/(?=[A-Z])/)
     if (prefix === 'on') {
       const eventName = eventNameParts.join('-').toLowerCase()
+      const isBuiltIn = vnodeEvents.has(eventName)
       const isDeclared = declaredEmits.includes(eventName)
+      const text = isBuiltIn ? '✅ Built-in' : isDeclared ? '✅ Declared' : '⚠️ Not declared'
       result.push({
         type: 'event listeners',
         key: eventName,
         value: {
           _custom: {
-            displayText: isDeclared ? '✅ Declared' : '⚠️ Not declared',
-            key: isDeclared ? '✅ Declared' : '⚠️ Not declared',
-            value: isDeclared ? '✅ Declared' : '⚠️ Not declared',
-            tooltipText: !isDeclared ? `The event <code>${escape(eventName)}</code> is not declared in the <code>emits</code> option. It will leak into the component's attributes (<code>$attrs</code>).` : null,
+            displayText: text,
+            key: text,
+            value: text,
+            tooltipText: isBuiltIn ? `The event <code>${escape(eventName)}</code> is part of Vue and doesn't need to be declared by the component` : !isDeclared ? `The event <code>${escape(eventName)}</code> is not declared in the <code>emits</code> option. It will leak into the component's attributes (<code>$attrs</code>).` : null,
           },
         },
       })

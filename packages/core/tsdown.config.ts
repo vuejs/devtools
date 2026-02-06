@@ -7,9 +7,6 @@ export default defineConfig({
   external: [
     'vue',
   ],
-  noExternal: [
-    'vite-hot-client',
-  ],
   // clean: true,
   format: ['esm', 'cjs'],
   dts: true,
