@@ -23,7 +23,7 @@ export function getFunctionDetails(func: Function) {
     _custom: {
       type: 'function' satisfies customTypeEnums,
       displayText: `<span style="opacity:.8;margin-right:5px;">function</span> <span style="white-space:nowrap;">${escape(name)}${args}</span>`,
-      tooltipText: string.trim() ? `<pre>${string}</pre>` : null,
+      tooltipText: string.trim() ? `<pre>${escape(string)}</pre>` : null,
     },
   }
 }
@@ -249,7 +249,7 @@ export function getObjectDetails(object: Record<string, any>) {
         type: stateTypeName?.toLowerCase(),
         stateTypeName,
         value,
-        ...raw ? { tooltipText: `<span class="font-mono">${raw}</span>` } : {},
+        ...raw ? { tooltipText: `<pre>${escape(raw)}</pre>` } : {},
       },
     }
   }

@@ -80,6 +80,25 @@ const normalizedDisplayedValue = computed(() => {
   }
 })
 
+const valueTooltip = computed(() => {
+  const tooltip = {
+    content: '',
+    disabled: true,
+    html: true,
+  }
+
+  if (type.value === 'custom') {
+    const tooltipText = (props.data.value as InspectorCustomState)?._custom?.tooltipText
+
+    if (tooltipText) {
+      tooltip.content = tooltipText
+      tooltip.disabled = false
+    }
+  }
+
+  return tooltip
+})
+
 // normalized display children
 const normalizedDisplayedChildren = computed(() => {
   const { value, inherit, customType } = raw.value
@@ -205,7 +224,7 @@ async function submitDrafting() {
       <span mx1>:</span>
       <StateFieldInputEditor v-if="editing" v-model="editingText" class="mr-1" :custom-type="raw.customType" @cancel="toggleEditing" @submit="submit" />
       <span :class="stateFormatClass" class="flex whitespace-nowrap dark:text-#bdc6cf">
-        <span class="flex" v-html="normalizedDisplayedValue" />
+        <span v-tooltip="valueTooltip" class="flex" v-html="normalizedDisplayedValue" />
       </span>
       <StateFieldEditor
         :hovering="isHovering" :disable-edit="state.disableEdit || editing"
