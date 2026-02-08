@@ -19,6 +19,6 @@
     "typescript": "catalog:",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vue-tsc": "^3.1.1"
+    "vue-tsc": "^3.2.4"
   }
 }
