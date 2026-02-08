@@ -16,7 +16,7 @@ const hostEnv = useHostEnv()
  */
 const enableFeatureSettings = hostEnv === 'iframe' || hostEnv === 'separate-window'
 
-const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar, reduceMotion } = toRefs(toReactive(devtoolsClientState))
+const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar, reduceMotion, flashUpdates } = toRefs(toReactive(devtoolsClientState))
 
 // #region settings
 const scaleOptions = [
@@ -202,6 +202,11 @@ const minimizePanelInteractiveLabel = computed(() => {
             <div class="flex items-center gap2 text-sm">
               <VueCheckbox v-model="showPanel" />
               <span op75>Always show the floating panel</span>
+            </div>
+
+            <div class="flex items-center gap2 text-sm">
+              <VueCheckbox v-model="flashUpdates" />
+              <span op75>Highlight Component Re Rendering</span>
             </div>
 
             <div mx--2 my1 h-1px border="b base" op75 />
