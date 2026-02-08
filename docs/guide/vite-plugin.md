@@ -59,6 +59,8 @@ interface VitePluginVueDevToolsOptions {
   /**
    * Enable vue component inspector
    *
+   * The VitePluginInspectorOptions you can see https://github.com/webfansplz/vite-plugin-vue-inspector?tab=readme-ov-file#options
+   *
    * @default true
    */
   componentInspector?: boolean | VitePluginInspectorOptions
