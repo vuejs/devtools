@@ -393,16 +393,16 @@ importers:
       perfect-debounce:
         specifier: 'catalog:'
         version: 2.0.0
+    devDependencies:
+      '@types/speakingurl':
+        specifier: ^13.0.6
+        version: 13.0.6
       speakingurl:
         specifier: ^14.0.1
         version: 14.0.1
       superjson:
         specifier: ^2.2.2
         version: 2.2.2
-    devDependencies:
-      '@types/speakingurl':
-        specifier: ^13.0.6
-        version: 13.0.6
       vue:
         specifier: 'catalog:'
         version: 3.5.22(typescript@5.9.3)
@@ -787,14 +787,13 @@ importers:
         version: 10.5.0(@stylistic/eslint-plugin@5.4.0(eslint@9.37.0(jiti@2.5.1)))(@typescript-eslint/parser@8.46.1(eslint@9.37.0(jiti@2.5.1))(typescript@5.9.3))(eslint@9.37.0(jiti@2.5.1))(vue-eslint-parser@10.2.0(eslint@9.37.0(jiti@2.5.1)))
 
   packages/shared:
-    dependencies:
-      rfdc:
-        specifier: ^1.4.1
-        version: 1.4.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 24.7.2
+      rfdc:
+        specifier: ^1.4.1
+        version: 1.4.1
 
   packages/ui:
     dependencies:

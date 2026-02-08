@@ -9,5 +9,4 @@ export default defineConfig({
   dts: true,
   shims: true,
   hash: false,
-  noExternal: ['rfdc'],
 })

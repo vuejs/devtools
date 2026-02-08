@@ -25,10 +25,8 @@
     "prepare:type": "tsdown --dts-only",
     "stub": "tsdown --watch --onSuccess 'tsdown --dts-only'"
   },
-  "dependencies": {
-    "rfdc": "^1.4.1"
-  },
   "devDependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "rfdc": "^1.4.1"
   }
 }
