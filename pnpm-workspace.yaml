@@ -40,3 +40,8 @@ onlyBuiltDependencies:
   - electron
   - esbuild
   - vue-demi
+
+shamefullyHoist: true
+strictPeerDependencies: false
+sideEffectsCache: false
+shellEmulator: true
