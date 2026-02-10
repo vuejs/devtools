@@ -12,4 +12,5 @@ export default defineConfig({
   dts: true,
   shims: true,
   hash: false,
+  ignoreWatch: ['.turbo'],
 })

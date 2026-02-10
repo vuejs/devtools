@@ -8,4 +8,5 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   hash: false,
   dts: true,
+  ignoreWatch: ['.turbo'],
 })
