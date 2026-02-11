@@ -7,6 +7,7 @@ const baseConfig = defineConfig({
   ],
   shims: true,
   hash: false,
+  ignoreWatch: ['.turbo'],
 })
 
 const esmBundlerConfig = defineConfig({
