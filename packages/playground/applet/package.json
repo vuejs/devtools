@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@iconify/json": "catalog:",
-    "@tresjs/core": "^4.3.6",
+    "@tresjs/core": "^5.4.1",
     "@vueuse/core": "catalog:",
     "pinia": "catalog:",
     "three": "^0.180.0",
