@@ -92,7 +92,7 @@
     "degit": "^2.8.4",
     "eslint": "^9.37.0",
     "eslint-plugin-format": "^1.0.2",
-    "eslint-vitest-rule-tester": "^2.2.2",
+    "eslint-vitest-rule-tester": "^3.1.0",
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.2",
     "jsdom": "^26.1.0",
