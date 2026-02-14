@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entryPoints: [
+  entry: [
     'src/index.ts',
     'src/hook.ts',
   ],
