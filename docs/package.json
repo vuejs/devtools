@@ -10,7 +10,7 @@
   "devDependencies": {
     "@unocss/reset": "catalog:",
     "@vueuse/core": "catalog:",
-    "unplugin-vue-components": "^29.1.0",
+    "unplugin-vue-components": "^29.2.0",
     "vitepress": "1.6.4",
     "vue": "catalog:"
   }
