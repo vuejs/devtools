@@ -11,13 +11,13 @@
     "@tresjs/core": "^4.3.6",
     "@vueuse/core": "catalog:",
     "pinia": "catalog:",
-    "three": "^0.180.0",
+    "three": "^0.182.0",
     "unplugin-auto-import": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"
   },
   "devDependencies": {
-    "@types/three": "^0.180.0",
+    "@types/three": "^0.182.0",
     "@vitejs/plugin-vue": "catalog:",
     "@vue/devtools-applet": "workspace:*",
     "@vue/devtools-core": "workspace:*",

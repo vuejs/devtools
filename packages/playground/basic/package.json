@@ -7,9 +7,9 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@tanstack/vue-query": "^5.90.3",
+    "@tanstack/vue-query": "^5.92.9",
     "@vueuse/core": "catalog:",
-    "element-plus": "^2.11.4",
+    "element-plus": "^2.13.2",
     "pinia": "catalog:",
     "unplugin-auto-import": "catalog:",
     "vee-validate": "^4.15.1",
@@ -18,8 +18,8 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.7",
-    "@tanstack/vue-query-devtools": "^5.90.2",
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@tanstack/vue-query-devtools": "^5.91.0",
     "@vitejs/plugin-vue": "catalog:",
     "@vue/devtools": "workspace:^",
     "sass-embedded": "catalog:",
