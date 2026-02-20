@@ -298,7 +298,7 @@ function processEventListeners(instance: VueAppInstance) {
     if (prefix === 'on') {
       const eventName = eventNameParts.join('-').toLowerCase()
       const isBuiltIn = vnodeEvents.has(eventName)
-      const isDeclared = declaredEmits.includes(eventName)
+      const isDeclared = declaredEmits.includes(eventName) || declaredEmits.includes(camelize(eventName))
       const text = isBuiltIn ? '✅ Built-in' : isDeclared ? '✅ Declared' : '⚠️ Not declared'
       result.push({
         type: 'event listeners',
