@@ -26,11 +26,8 @@ function mergeOptions(
 
   for (const key of ['computed', 'inject']) {
     if (Object.prototype.hasOwnProperty.call(from, key)) {
-      if (!to[key])
-        to[key] = from[key]
-
-      else
-        Object.assign(to[key], from[key])
+      to[key] ??= {}
+      Object.assign(to[key], from[key])
     }
   }
   return to
