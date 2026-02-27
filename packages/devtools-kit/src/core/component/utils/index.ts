@@ -2,6 +2,9 @@ import type { AppRecord, VueAppInstance } from '../../../types'
 import { basename, classify } from '@vue/devtools-shared'
 
 function getComponentTypeName(options: VueAppInstance['type']) {
+  if (typeof options === 'function') {
+    return options.displayName || options.name || options.__VUE_DEVTOOLS_COMPONENT_GUSSED_NAME__ || ''
+  }
   const name = options.name || options._componentTag || options.__VUE_DEVTOOLS_COMPONENT_GUSSED_NAME__ || options.__name
   if (name === 'index' && options.__file?.endsWith('index.vue')) {
     return ''
