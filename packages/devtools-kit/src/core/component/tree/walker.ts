@@ -99,6 +99,7 @@ export class ComponentWalker {
       renderKey: getRenderKey(instance.vnode ? instance.vnode.key : null),
       inactive,
       children: [],
+      hasChildren: !!children.length,
       isFragment: isFragment(instance),
       tags: typeof instance.type !== 'function'
         ? []
