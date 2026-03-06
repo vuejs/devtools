@@ -2,20 +2,6 @@ import { functions, onRpcConnected } from '@vue/devtools-core'
 import { createRpcClient } from '@vue/devtools-kit'
 import { disconnectDevToolsClient, initDevTools, reloadDevToolsClient } from '../client/devtools-panel'
 
-const connectionInfo: {
-  retryTimer: NodeJS.Timeout | null
-  count: number
-  disconnected: boolean
-  port: chrome.runtime.Port
-  listeners: Array<() => void>
-} = {
-  retryTimer: null,
-  count: 0,
-  disconnected: false,
-  port: null!,
-  listeners: [],
-}
-
 function init() {
   injectScript(chrome.runtime.getURL('dist/user-app.js'), () => {
     initDevTools()

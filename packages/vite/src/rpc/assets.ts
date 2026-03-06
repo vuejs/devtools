@@ -7,37 +7,6 @@ import { join, relative, resolve } from 'pathe'
 import { debounce } from 'perfect-debounce'
 import { RpcFunctionCtx } from './types'
 
-const defaultAllowedExtensions = [
-  'png',
-  'jpg',
-  'jpeg',
-  'gif',
-  'svg',
-  'webp',
-  'ico',
-  'mp4',
-  'ogg',
-  'mp3',
-  'wav',
-  'mov',
-  'mkv',
-  'mpg',
-  'txt',
-  'ttf',
-  'woff',
-  'woff2',
-  'eot',
-  'json',
-  'js',
-  'jsx',
-  'ts',
-  'tsx',
-  'md',
-  'mdx',
-  'vue',
-  'webm',
-]
-
 function guessType(path: string): AssetType {
   if (/\.(?:png|jpe?g|jxl|gif|svg|webp|avif|ico|bmp|tiff?)$/i.test(path))
     return 'image'

@@ -129,8 +129,6 @@ export const devtoolsState: DevToolsState = new Proxy(global[STATE_KEY], {
     return true
   },
   set(target, property, value) {
-    const oldState = { ...global[STATE_KEY] }
-
     target[property] = value
     global[STATE_KEY][property] = value
 

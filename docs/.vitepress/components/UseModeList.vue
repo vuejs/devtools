@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { useRouter } from 'vitepress'
-
-const router = useRouter()
 const list = [
   {
     name: 'Vite Plugin',

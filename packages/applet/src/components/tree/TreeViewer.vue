@@ -5,10 +5,9 @@ import { vTooltip } from '@vue/devtools-ui'
 import NodeTag from '~/components/basic/NodeTag.vue'
 import ToggleExpanded from '~/components/basic/ToggleExpanded.vue'
 import ComponentTreeViewer from '~/components/tree/TreeViewer.vue'
-import { useSelect } from '~/composables/select'
 import { useToggleExpanded } from '~/composables/toggle-expanded'
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   data: ComponentTreeNode[] | InspectorTree[]
   depth: number
   withTag: boolean
@@ -19,7 +18,6 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits(['hover', 'leave'])
 const selectedNodeId = defineModel()
 const { expanded, toggleExpanded } = useToggleExpanded()
-const { select: _select } = useSelect()
 
 function normalizeLabel(item: ComponentTreeNode | InspectorTree) {
   return ('name' in item && item?.name) || ('label' in item && item.label)
