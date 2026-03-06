@@ -18,6 +18,7 @@ export interface ComponentTreeNode {
   tags: InspectorNodeTag[]
   autoOpen: boolean
   meta?: any
+  file?: string
 }
 
 type ComponentBuiltinCustomStateTypes = 'function' | 'map' | 'set' | 'reference' | 'component' | 'component-definition' | 'router' | 'store'

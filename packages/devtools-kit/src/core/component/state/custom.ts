@@ -241,7 +241,7 @@ export function getObjectDetails(object: Record<string, any>) {
     const value = toRaw(info.reactive ? object : tryGetRefValue(object))
 
     const raw = ensurePropertyExists(object, 'effect')
-      ? object.effect?.raw?.toString() || object.effect?.fn?.toString()
+      ? (object.effect as any)?.raw?.toString() || (object.effect as any)?.fn?.toString()
       : null
 
     return {
