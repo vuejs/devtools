@@ -53,6 +53,7 @@
     "lint": "NODE_OPTIONS=--import=tsx eslint --config=eslint.config.ts .",
     "lint:fix": "pnpm lint --fix",
     "lint:packages": "pnpm -r --filter='./packages/{core,devtools,devtools-api,devtools-kit,electron,shared,applet}' exec publint && pnpm -r --filter='./packages/{core,devtools,devtools-api,devtools-kit,electron,shared,applet}' exec attw --pack",
+    "type-check": "tsc --project ./tsconfig.ci.json",
     "prepublishOnly": "npm run build",
     "release": "bumpp -r",
     "dep:up": "taze -I major -r",
