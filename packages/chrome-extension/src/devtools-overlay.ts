@@ -1,6 +1,4 @@
 if (document instanceof HTMLDocument) {
-  const body = document.getElementsByTagName('body')[0]
-
   // create detector script
   const detector = document.createElement('script')
   detector.src = chrome.runtime.getURL('dist/detector.js')

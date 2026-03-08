@@ -6,7 +6,6 @@ import { Pane, Splitpanes } from 'splitpanes'
 useDevToolsColorMode()
 const router = useRouter()
 const route = useRoute()
-const hostEnv = useHostEnv()
 const { connected, clientConnected, activeAppRecordId: _activeAppRecordId, appRecords: _appRecords } = useDevToolsState()
 const clientState = devtoolsClientState
 

@@ -39,7 +39,7 @@ target.__VUE_DEVTOOLS_TOGGLE_OVERLAY__ = (visible: boolean) => {
   overlayVisible.value = visible
 }
 
-const { updateState, state } = useFrameState()
+const { state } = useFrameState()
 function waitForClientInjection(iframe: HTMLIFrameElement, retry = 50, timeout = 200): Promise<void> | void {
   return new Promise((resolve) => {
     iframe?.contentWindow?.postMessage('__VUE_DEVTOOLS_CREATE_CLIENT__', '*')
@@ -88,7 +88,7 @@ function enableVueInspector() {
   vueInspector.value.enable()
 }
 
-const { iframe, getIframe } = useIframe(clientUrl, async () => {
+const { getIframe } = useIframe(clientUrl, async () => {
   const iframe = getIframe()
   setIframeServerContext(iframe)
   await waitForClientInjection(iframe)

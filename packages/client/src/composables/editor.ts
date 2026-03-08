@@ -9,10 +9,7 @@ export function useCopy() {
   const { copy: _copy, copied } = useClipboard()
 
   const copy = (text: string, options: CopyOptions = {}) => {
-    const {
-      silent = false,
-      type = '',
-    } = options
+    const { silent = false } = options
     _copy(text).then(() => {
       if (!silent) {
         showVueNotification({

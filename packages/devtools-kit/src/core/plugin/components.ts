@@ -86,7 +86,7 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
       api.sendInspectorState(INSPECTOR_ID)
     }, 120)
 
-    const componentAddedCleanup = hook.on.componentAdded(async (app, uid, parentUid, component) => {
+    hook.on.componentAdded(async (app, uid, parentUid, component) => {
       if (devtoolsState.highPerfModeEnabled)
         return
 
@@ -121,7 +121,7 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
       debounceSendInspectorTree()
     })
 
-    const componentUpdatedCleanup = hook.on.componentUpdated(async (app, uid, parentUid, component) => {
+    hook.on.componentUpdated(async (app, uid, parentUid, component) => {
       if (devtoolsState.highPerfModeEnabled)
         return
 
@@ -156,7 +156,7 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
       debounceSendInspectorTree()
       debounceSendInspectorState()
     })
-    const componentRemovedCleanup = hook.on.componentRemoved(async (app, uid, parentUid, component) => {
+    hook.on.componentRemoved(async (app, uid, parentUid, component) => {
       if (devtoolsState.highPerfModeEnabled)
         return
 

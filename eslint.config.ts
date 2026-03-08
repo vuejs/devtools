@@ -19,7 +19,11 @@ export default antfu({
 
     'no-console': 'off',
     'antfu/top-level-function': 'off',
-    'unused-imports/no-unused-vars': 'off',
+    'unused-imports/no-unused-vars': ['error', {
+      args: 'none',
+      caughtErrors: 'none',
+      ignoreRestSiblings: true,
+    }],
 
     'node/prefer-global/process': 'off',
 
@@ -36,6 +40,11 @@ export default antfu({
   plugins: { devtools },
   rules: {
     'devtools/no-vue-runtime-import': ['error', { prefer: 'shared/stub-vue' }],
+  },
+}, {
+  files: ['packages/playground/**/*.vue', '**/*.md/*'],
+  rules: {
+    'unused-imports/no-unused-vars': 'off',
   },
 }, {
   ignores: [

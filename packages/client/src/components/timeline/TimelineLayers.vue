@@ -13,8 +13,7 @@ const devtoolsState = useDevToolsState()
 const recordingState = computed(() => devtoolsState.timelineLayersState.value.recordingState)
 const timelineLayersState = computed(() => devtoolsState.timelineLayersState.value)
 const recordingTooltip = computed(() => recordingState.value ? 'Stop recording' : 'Start recording')
-const { colorMode } = useDevToolsColorMode()
-const isDark = computed(() => colorMode.value === 'dark')
+useDevToolsColorMode()
 const selected = defineModel()
 function select(id: string) {
   selected.value = id

@@ -41,7 +41,7 @@ const routes = computed(() => {
   ].filter(Boolean) as VirtualRoute[]
 })
 
-const { VirtualRouterView, restoreRouter } = registerVirtualRouter(routes, {
+const { VirtualRouterView } = registerVirtualRouter(routes, {
   defaultRoutePath: '/store',
 })
 

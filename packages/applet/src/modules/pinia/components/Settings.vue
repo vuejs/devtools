@@ -11,7 +11,6 @@ const settings = inject<Ref<{
 }>>('pluginSettings')!
 const options = computed(() => settings.value.options)
 const values = computed(() => settings.value.values)
-const inspectorId = 'pinia'
 
 function update(_settings) {
   settings.value = _settings

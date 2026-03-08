@@ -17,7 +17,6 @@ function address() {
 function init() {
   const localhost = `http://localhost:${port}`
   const socket = io(localhost)
-  let reload: Function | null = null
 
   const app = createConnectionApp('#app', {
     local: localhost,
@@ -35,7 +34,6 @@ function init() {
 
   function shutdown() {
     app.unmount()
-    reload = null
     socket.close()
     init()
   }
