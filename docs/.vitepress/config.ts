@@ -1,5 +1,6 @@
 import type { DefaultTheme } from 'vitepress'
 import { defineConfig } from 'vitepress'
+import { groupIconMdPlugin } from 'vitepress-plugin-group-icons'
 import vite from './vite.config'
 
 const GETTING_STARTED: DefaultTheme.NavItemWithLink[] = [
@@ -38,6 +39,9 @@ export default defineConfig({
     theme: {
       light: 'vitesse-light',
       dark: 'vitesse-dark',
+    },
+    config(md) {
+      md.use(groupIconMdPlugin)
     },
   },
 

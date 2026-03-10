@@ -30,9 +30,7 @@ $ bun add -D vite-plugin-vue-devtools
 
 ## Usage
 
-```ts
-//  Configuration Vite
-
+```ts [vite.config.ts]
 import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 

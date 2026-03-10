@@ -10,7 +10,7 @@ Starting from **v7.2.0**, you can specify the editor by `launchEditor` option:
 
 This is a list of [supported editors](https://github.com/yyx990803/launch-editor?tab=readme-ov-file#supported-editors), please ensure that the editor's environment variables are correctly configured beforehand.
 
-```ts
+```ts [vite.config.ts]
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
@@ -25,7 +25,7 @@ export default defineConfig({
 
 ## How to work with Laravel Vite Plugin?
 
-```ts
+```ts [vite.config.ts]
 import laravel from 'laravel-vite-plugin'
 import { defineConfig } from 'vite'
 import VueDevTools from 'vite-plugin-vue-devtools'
@@ -48,9 +48,7 @@ export default defineConfig({
 We still recommend using [Nuxt DevTools](https://github.com/nuxt/devtools) for a better development experience.
 :::
 
-```ts
-// nuxt.config.ts
-
+```ts [nuxt.config.ts]
 export default defineNuxtConfig({
   vite: {
     plugins: [
@@ -64,7 +62,7 @@ export default defineNuxtConfig({
 
 ## How to work with [Vite Ruby](https://vite-ruby.netlify.app/)?
 
-```ts
+```ts [vite.config.ts]
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import RubyPlugin from 'vite-plugin-ruby'
@@ -83,8 +81,7 @@ export default defineConfig({
 
 ## How to work with [WXT](https://wxt.dev/)?
 
-```ts
-// wxt.config.ts
+```ts [wxt.config.ts]
 import devtools from 'vite-plugin-vue-devtools'
 import { defineConfig } from 'wxt'
 
