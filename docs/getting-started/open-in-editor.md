@@ -12,7 +12,7 @@ Starting from **v7.2.0**, you can specify the editor by `launchEditor` option:
 
 This is a list of [supported editors](https://github.com/yyx990803/launch-editor?tab=readme-ov-file#supported-editors), please ensure that the editor's environment variables are correctly configured beforehand.
 
-```ts
+```ts [vite.config.ts]
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({

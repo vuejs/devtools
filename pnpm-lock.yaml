@@ -6,9 +6,81 @@ settings:
 
 catalogs:
   default:
+    '@iconify/json':
+      specifier: ^2.2.395
+      version: 2.2.395
+    '@types/node':
+      specifier: ^24.7.2
+      version: 24.7.2
+    '@unocss/reset':
+      specifier: ^66.5.4
+      version: 66.5.4
+    '@vitejs/plugin-vue':
+      specifier: ^6.0.1
+      version: 6.0.1
+    '@vueuse/core':
+      specifier: ^13.9.0
+      version: 13.9.0
+    '@vueuse/integrations':
+      specifier: ^13.9.0
+      version: 13.9.0
+    colord:
+      specifier: ^2.9.3
+      version: 2.9.3
+    floating-vue:
+      specifier: 5.2.2
+      version: 5.2.2
+    pathe:
+      specifier: ^2.0.3
+      version: 2.0.3
+    perfect-debounce:
+      specifier: ^2.0.0
+      version: 2.0.0
+    pinia:
+      specifier: ^3.0.3
+      version: 3.0.3
+    sass-embedded:
+      specifier: ^1.93.2
+      version: 1.93.2
+    serve:
+      specifier: ^14.2.5
+      version: 14.2.5
+    shiki:
+      specifier: ^3.13.0
+      version: 3.13.0
+    splitpanes:
+      specifier: ^4.0.4
+      version: 4.0.4
+    typescript:
+      specifier: ^5.9.3
+      version: 5.9.3
+    unocss:
+      specifier: ^66.5.4
+      version: 66.5.4
+    unplugin-auto-import:
+      specifier: ^20.2.0
+      version: 20.2.0
+    vite:
+      specifier: ^7.1.10
+      version: 7.1.10
+    vite-hot-client:
+      specifier: ^2.1.0
+      version: 2.1.0
+    vite-plugin-dts:
+      specifier: ^4.5.4
+      version: 4.5.4
+    vite-plugin-inspect:
+      specifier: ^11.3.3
+      version: 11.3.3
     vue:
       specifier: ^3.5.22
       version: 3.5.22
+    vue-router:
+      specifier: ^4.6.0
+      version: 4.6.0
+    vue-virtual-scroller:
+      specifier: 2.0.0-beta.8
+      version: 2.0.0-beta.8
 
 importers:
 
@@ -164,6 +236,9 @@ importers:
       vitepress:
         specifier: 1.6.4
         version: 1.6.4(@algolia/client-search@5.37.0)(@types/node@24.7.2)(async-validator@4.2.5)(change-case@5.4.4)(fuse.js@7.1.0)(postcss@8.5.6)(sass-embedded@1.93.2)(sass@1.93.2)(search-insights@2.17.3)(terser@5.44.0)(typescript@5.9.3)
+      vitepress-plugin-group-icons:
+        specifier: ^1.7.1
+        version: 1.7.1(vite@5.4.20(@types/node@24.7.2)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0))
       vue:
         specifier: 'catalog:'
         version: 3.5.22(typescript@5.9.3)
@@ -2214,8 +2289,14 @@ packages:
   '@iconify-json/ic@1.2.4':
     resolution: {integrity: sha512-pzPMmrZrBQuwT7nmtrYdkttun8KalRGgZPIL1Ny9KpF2zjRGIUPN+npTfuD3lrgO/OnSwAoJWuekQwBpt/Cqrw==}
 
+  '@iconify-json/logos@1.2.10':
+    resolution: {integrity: sha512-qxaXKJ6fu8jzTMPQdHtNxlfx6tBQ0jXRbHZIYy5Ilh8Lx9US9FsAdzZWUR8MXV8PnWTKGDFO4ZZee9VwerCyMA==}
+
   '@iconify-json/simple-icons@1.2.51':
     resolution: {integrity: sha512-vFH0QEHFG3rt9hZOR3oE/ZfAKFA7cS11UXttD/IphClEbiSTsPbpeeJ4kRYGDBUDmAKhBzk6jxHNG8VipwA69Q==}
+
+  '@iconify-json/vscode-icons@1.2.45':
+    resolution: {integrity: sha512-ow+ueibMIq79ueM1kv6cOWgHx8jfh1XJQi2RrqMHb4HLbvIBlxpy5PCMvOJXlA68R6fBAHpWQeh6uWx7VKEVsA==}
 
   '@iconify/json@2.2.395':
     resolution: {integrity: sha512-XSYOnlGqiZhJkFFBUiVK4C5VIiv4rxyKtCmkQ9nS4zfMpS4xT0BF9+qWUKOHYgeCzCLghyWfrm6Eti3Sv5kfqQ==}
@@ -2225,6 +2306,9 @@ packages:
 
   '@iconify/utils@3.0.2':
     resolution: {integrity: sha512-EfJS0rLfVuRuJRn4psJHtK2A9TqVnkxPpHY6lYHiB9+8eSuudsxbwMiavocG45ujOo6FJ+CIRlRnlOGinzkaGQ==}
+
+  '@iconify/utils@3.1.0':
+    resolution: {integrity: sha512-Zlzem1ZXhI1iHeeERabLNzBHdOa4VhQbqAcOQaMKuTuyZCpwKbC2R4Dd0Zo3g9EAc+Y4fiarO8HIHRAth7+skw==}
 
   '@isaacs/balanced-match@4.0.1':
     resolution: {integrity: sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==}
@@ -9037,6 +9121,14 @@ packages:
       yaml:
         optional: true
 
+  vitepress-plugin-group-icons@1.7.1:
+    resolution: {integrity: sha512-3ZPcIqwHNBg1btrOOSecOqv8yJxHdu3W2ugxE5LusclDF005LAm60URMEmBQrkgl4JvM32AqJirqghK6lGIk8g==}
+    peerDependencies:
+      vite: '>=3'
+    peerDependenciesMeta:
+      vite:
+        optional: true
+
   vitepress@1.6.4:
     resolution: {integrity: sha512-+2ym1/+0VVrbhNyRoFFesVvBvHAVMZMK0rw60E3X/5349M1GuVdKeazuksqopEdvkKwKGs21Q729jX81/bkBJg==}
     hasBin: true
@@ -10964,7 +11056,15 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
+  '@iconify-json/logos@1.2.10':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/simple-icons@1.2.51':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/vscode-icons@1.2.45':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -10987,6 +11087,12 @@ snapshots:
       mlly: 1.8.0
     transitivePeerDependencies:
       - supports-color
+
+  '@iconify/utils@3.1.0':
+    dependencies:
+      '@antfu/install-pkg': 1.1.0
+      '@iconify/types': 2.0.0
+      mlly: 1.8.0
 
   '@isaacs/balanced-match@4.0.1': {}
 
@@ -18667,6 +18773,14 @@ snapshots:
       terser: 5.44.0
       tsx: 4.20.6
       yaml: 2.8.1
+
+  vitepress-plugin-group-icons@1.7.1(vite@5.4.20(@types/node@24.7.2)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)):
+    dependencies:
+      '@iconify-json/logos': 1.2.10
+      '@iconify-json/vscode-icons': 1.2.45
+      '@iconify/utils': 3.1.0
+    optionalDependencies:
+      vite: 5.4.20(@types/node@24.7.2)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)
 
   vitepress@1.6.4(@algolia/client-search@5.37.0)(@types/node@24.7.2)(async-validator@4.2.5)(change-case@5.4.4)(fuse.js@7.1.0)(postcss@8.5.6)(sass-embedded@1.93.2)(sass@1.93.2)(search-insights@2.17.3)(terser@5.44.0)(typescript@5.9.3):
     dependencies:

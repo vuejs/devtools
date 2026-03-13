@@ -8,8 +8,7 @@ If you see devtools render as follows:
 
 And you are using `vite-plugin-html`, please make sure register `vite-plugin-vue-devtools` before `vite-plugin-html`.
 
-```ts
-// vite.config.ts
+```ts [vite.config.ts]
 import { defineConfig } from 'vite'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import vueDevTools from 'vite-plugin-vue-devtools'
