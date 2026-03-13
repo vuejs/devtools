@@ -447,7 +447,7 @@ function closeComponentRenderCode() {
         <div class="h-full flex flex-col p2">
           <div class="flex py2">
             <!-- component name -->
-            <span v-if="activeTreeNode?.name" class="font-state-field flex items-center px-1 text-3.5">
+            <span v-if="activeTreeNode?.name" class="flex items-center px-1 text-3.5 font-state-field">
               <span class="text-gray-400 dark:text-gray-600">&lt;</span>
               <span group-hover:text-white class="max-w-40 of-hidden text-ellipsis ws-nowrap [.active_&]:(text-white)">{{ activeTreeNode.name }}</span>
               <span class="text-gray-400 dark:text-gray-600">&gt;</span>

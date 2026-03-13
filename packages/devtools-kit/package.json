@@ -29,14 +29,14 @@
   },
   "dependencies": {
     "@vue/devtools-shared": "workspace:^",
-    "birpc": "^2.6.1",
+    "birpc": "^2.9.0",
     "hookable": "^5.5.3",
     "perfect-debounce": "catalog:"
   },
   "devDependencies": {
     "@types/speakingurl": "^13.0.6",
     "speakingurl": "^14.0.1",
-    "superjson": "^2.2.2",
+    "superjson": "^2.2.6",
     "vue": "catalog:",
     "vue-router": "catalog:"
   }
