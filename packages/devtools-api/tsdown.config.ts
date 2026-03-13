@@ -2,9 +2,11 @@ import { defineConfig } from 'tsdown'
 
 const baseConfig = defineConfig({
   entry: 'src/index.ts',
-  external: [
-    'vue',
-  ],
+  deps: {
+    neverBundle: [
+      'vue',
+    ],
+  },
   shims: true,
   hash: false,
   ignoreWatch: ['.turbo'],
@@ -13,19 +15,24 @@ const baseConfig = defineConfig({
 const esmBundlerConfig = defineConfig({
   ...baseConfig,
   format: 'esm',
+  fixedExtension: false,
   dts: true,
 })
 
 const cjsConfig = defineConfig({
   ...baseConfig,
   format: 'cjs',
+  fixedExtension: false,
   dts: true,
 })
 
 const iifeConfig = defineConfig({
   ...baseConfig,
   format: 'iife',
-  noExternal: ['@vue/devtools-kit'],
+  deps: {
+    ...baseConfig.deps,
+    alwaysBundle: ['@vue/devtools-kit'],
+  },
   outputOptions: {
     name: 'VueDevToolsApi',
     entryFileNames: 'vue-devtools-api.global.js',
@@ -35,7 +42,10 @@ const iifeConfig = defineConfig({
 const esmBrowserConfig = defineConfig({
   ...baseConfig,
   format: 'esm',
-  noExternal: ['@vue/devtools-kit'],
+  deps: {
+    ...baseConfig.deps,
+    alwaysBundle: ['@vue/devtools-kit'],
+  },
   outputOptions: {
     entryFileNames: 'vue-devtools-api.esm-browser.js',
   },

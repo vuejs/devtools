@@ -6,6 +6,7 @@ export default defineConfig({
   ],
   clean: true,
   format: ['esm', 'cjs'],
+  fixedExtension: false,
   hash: false,
   dts: true,
   ignoreWatch: ['.turbo'],

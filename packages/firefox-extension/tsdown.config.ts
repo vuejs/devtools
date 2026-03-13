@@ -6,6 +6,7 @@ function createIIFEConfig(entry: string) {
     entry: [entry],
     clean: false,
     format: 'iife' as const,
+    fixedExtension: false,
     outputOptions: {
       entryFileNames: '[name].js',
     },
@@ -16,7 +17,9 @@ function createIIFEConfig(entry: string) {
       '__VUE_OPTIONS_API__': 'true',
       '__VUE_PROD_DEVTOOLS__': 'true',
     },
-    noExternal: NO_EXTERNAL,
+    deps: {
+      alwaysBundle: NO_EXTERNAL,
+    },
   }
 }
 
@@ -36,6 +39,9 @@ export default defineConfig([{
     '__VUE_PROD_DEVTOOLS__': 'true',
   },
   clean: false,
-  noExternal: NO_EXTERNAL,
+  fixedExtension: false,
+  deps: {
+    alwaysBundle: NO_EXTERNAL,
+  },
   hash: false,
 }, createIIFEConfig('src/proxy.ts'), createIIFEConfig('src/injection.ts'), createIIFEConfig('src/devtools-overlay.ts'), createIIFEConfig('src/user-app.ts')])

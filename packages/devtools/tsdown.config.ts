@@ -5,11 +5,14 @@ export default defineConfig({
     'src/index.ts',
     'src/hook.ts',
   ],
-  external: [
-    'vue',
-  ],
+  deps: {
+    neverBundle: [
+      'vue',
+    ],
+  },
   clean: true,
   format: ['esm', 'cjs'],
+  fixedExtension: false,
   dts: true,
   shims: true,
   hash: false,
