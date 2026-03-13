@@ -207,7 +207,7 @@ async function submitDrafting() {
   <div>
     <div
       ref="containerRef"
-      class="font-state-field flex items-center text-3.5"
+      class="flex items-center text-3.5 font-state-field"
       :class="[hasChildren && 'cursor-pointer hover:(bg-active)']"
       :style="{ paddingLeft: `${depth * 15 + 4}px` }"
       @click="toggleExpanded(`${depth}-${index}`)"
@@ -240,7 +240,7 @@ async function submitDrafting() {
         </template>
       </VueButton>
       <div v-if="draftingNewProp.enable" :style="{ paddingLeft: `${(depth + 1) * 15 + 4}px` }">
-        <span overflow-hidden text-ellipsis whitespace-nowrap state-key>
+        <span state-key overflow-hidden text-ellipsis whitespace-nowrap>
           <StateFieldInputEditor v-model="draftingNewProp.key" :show-actions="false" />
         </span>
         <span mx-1>:</span>

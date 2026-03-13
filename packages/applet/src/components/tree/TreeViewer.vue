@@ -53,7 +53,7 @@ function select(id: string) {
       />
       <!-- placeholder -->
       <span v-else pl5 />
-      <span font-state-field text-3.5>
+      <span text-3.5 font-state-field>
         <span v-if="withTag" class="text-gray-400 dark:text-gray-600 group-hover:(text-white op50) [.active_&]:(op50 text-white!)">&lt;</span>
         <span group-hover:text-white class="ws-nowrap [.active_&]:(text-white)">{{ normalizeLabel(item) }}</span>
         <!-- @vue-expect-error skip type check -->
