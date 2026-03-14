@@ -20,13 +20,6 @@ export default defineConfig({
       ignore: ['h'],
     }),
   ],
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern-compiler',
-      },
-    },
-  },
   server: {
     port: 3000,
   },
