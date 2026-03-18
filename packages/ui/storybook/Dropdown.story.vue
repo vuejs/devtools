@@ -18,10 +18,9 @@ const disabled = ref(false)
         v-model="placement"
         title="Placement"
         :options="placements.reduce((acc, placement) => {
-          // @ts-expect-error
           acc[placement] = placement
           return acc
-        }, {})"
+        }, {} as Record<Placement, Placement>)"
       />
       <HstCheckbox v-model="disabled" title="Disabled" />
     </template>

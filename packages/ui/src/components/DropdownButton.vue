@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ComputedGetter } from 'vue'
+import type { ComputedRef } from 'vue'
 import type { ButtonProps } from './Button.vue'
 import { vClosePopper } from 'floating-vue'
 import { inject } from 'vue'
@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<ButtonProps & {
   keepOpen: false,
 })
 
-const disabled = inject<ComputedGetter<boolean> | undefined>('$ui-dropdown-disabled', undefined)!
+const disabled = inject<ComputedRef<boolean> | undefined>('$ui-dropdown-disabled', undefined)!
 </script>
 
 <template>
