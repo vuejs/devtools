@@ -9,4 +9,5 @@ export default defineConfig({
   shims: true,
   hash: false,
   ignoreWatch: ['.turbo'],
+  external: ['vue', 'vue-router'],
 })
