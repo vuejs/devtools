@@ -53,7 +53,7 @@
     "@vue/devtools-shared": "workspace:^",
     "sirv": "^3.0.2",
     "vite-plugin-inspect": "catalog:",
-    "vite-plugin-vue-inspector": "^5.3.2"
+    "vite-plugin-vue-inspector": "^5.4.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",

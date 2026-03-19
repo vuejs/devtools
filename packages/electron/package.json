@@ -39,15 +39,15 @@
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
-    "electron": "^36.9.4",
+    "electron": "^36.9.5",
     "h3": "^1.15.4",
     "pathe": "catalog:",
-    "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "catalog:",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "unbuild": "3.6.1",
     "vue": "catalog:"
   }
