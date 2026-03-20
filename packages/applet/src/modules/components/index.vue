@@ -120,12 +120,34 @@ const { expanded: expandedTreeNodes } = createExpandedContext()
 const { expanded: expandedStateNodes } = createExpandedContext('component-state')
 createSelectedContext()
 
+const activeComponentAncestors = computed(() => activeComponentId.value ? getTargetLinkedNodes(treeNodeLinkedList.value, activeComponentId.value).slice(0, -1) : [])
+const isActiveComponentVisible = computed(() => activeComponentAncestors.value.every(id => expandedTreeNodes.value.includes(id)))
+
+function expandActiveComponentAncestors() {
+  if (!isActiveComponentVisible.value) {
+    expandedTreeNodes.value = [...new Set([...expandedTreeNodes.value, ...activeComponentAncestors.value])]
+  }
+}
+
+function ensureActiveComponent() {
+  if (!activeComponentId.value || !flattenedTreeNodesIds.value.includes(activeComponentId.value)) {
+    activeComponentId.value = tree.value?.[0]?.id ?? ''
+    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
+  }
+}
+
 async function getComponentsInspectorTree(filter = '') {
   return rpc.value.getInspectorTree({ inspectorId, filter }).then((data) => {
-    const res = parse(data)
-    tree.value = res
-    activeComponentId.value = tree.value?.[0]?.id
-    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
+    const wasActiveComponentVisible = isActiveComponentVisible.value
+
+    tree.value = parse(data)
+
+    ensureActiveComponent()
+
+    if (wasActiveComponentVisible) {
+      expandActiveComponentAncestors()
+    }
+
     componentTreeLoaded.value = true
   })
 }
@@ -202,10 +224,7 @@ function onInspectorTreeUpdated(_data: string) {
     tree.value = data.rootNodes
   }
 
-  if (!flattenedTreeNodesIds.value.includes(activeComponentId.value)) {
-    activeComponentId.value = tree.value?.[0]?.id
-    expandedTreeNodes.value = getNodesByDepth(treeNodeLinkedList.value, 1)
-  }
+  ensureActiveComponent()
 }
 
 rpc.functions.on(DevToolsMessagingEvents.INSPECTOR_TREE_UPDATED, onInspectorTreeUpdated)
@@ -257,7 +276,7 @@ async function inspectComponentInspector() {
       expandedTreeNodes.value.push(data.id)
     }
 
-    expandedTreeNodes.value = [...new Set([...expandedTreeNodes.value, ...getTargetLinkedNodes(treeNodeLinkedList.value, data.id)])]
+    expandActiveComponentAncestors()
     scrollToActiveTreeNode()
   }
   finally {
