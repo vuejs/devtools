@@ -51,13 +51,13 @@
     "focus-trap": "^7.6.5"
   },
   "devDependencies": {
-    "@histoire/plugin-vue": "^0.17.17",
+    "@histoire/plugin-vue": "1.0.0-beta.1",
     "@iconify-json/ic": "^1.2.4",
     "@types/node": "catalog:",
     "@unocss/reset": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "floating-vue": "catalog:",
-    "histoire": "^0.17.17",
+    "histoire": "1.0.0-beta.1",
     "unocss": "catalog:",
     "vite-plugin-dts": "catalog:"
   }
