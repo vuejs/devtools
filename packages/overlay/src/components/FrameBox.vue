@@ -31,6 +31,7 @@ onRpcSeverReady(() => {
       updateState({
         minimizePanelInactive: v.minimizePanelInteractive,
         closeOnOutsideClick: v.closeOnOutsideClick,
+        flashUpdates: v.flashUpdates,
         preferShowFloatingPanel: v.showFloatingPanel,
         reduceMotion: v.reduceMotion,
       })
