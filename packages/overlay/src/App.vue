@@ -85,7 +85,7 @@ const vueInspectorEnabled = computed(() => {
 })
 
 function enableVueInspector() {
-  vueInspector.value.toggleEnabled()
+  vueInspector.value.toggleVueInspector()
 }
 
 const { getIframe } = useIframe(clientUrl, async () => {
