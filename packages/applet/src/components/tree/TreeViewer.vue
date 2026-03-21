@@ -9,8 +9,8 @@ import { useToggleExpanded } from '~/composables/toggle-expanded'
 
 withDefaults(defineProps<{
   data: ComponentTreeNode[] | InspectorTree[]
-  depth: number
-  withTag: boolean
+  depth?: number
+  withTag?: boolean
 }>(), {
   depth: 0,
   withTag: false,
