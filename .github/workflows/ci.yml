@@ -42,3 +42,6 @@ jobs:
 
       - name: Test
         run: nr test
+
+      - name: Build ui stories
+        run: nr -C packages/ui story:build
