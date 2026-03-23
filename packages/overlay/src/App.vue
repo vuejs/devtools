@@ -52,6 +52,7 @@ function waitForClientInjection(iframe: HTMLIFrameElement, retry = 50, timeout =
 }
 
 const vueInspector = ref()
+const vueInspectorEnabled = ref(false)
 
 onDevToolsConnected(() => {
   const rpcServer = getRpcServer<typeof functions>()
@@ -65,10 +66,12 @@ onDevToolsConnected(() => {
 
     vueInspector.value.onEnabled = () => {
       previousPanelVisible = panelVisible.value
+      vueInspectorEnabled.value = true
       togglePanelVisible(undefined, false)
     }
 
     vueInspector.value.onDisabled = () => {
+      vueInspectorEnabled.value = false
       togglePanelVisible(undefined, previousPanelVisible)
     }
   })
@@ -80,8 +83,8 @@ addEventListener('keyup', (e) => {
   }
 })
 
-const vueInspectorEnabled = computed(() => {
-  return !!vueInspector.value
+const vueInspectorSupported = computed(() => {
+  return !!(devtools.ctx.state.vitePluginDetected && vueInspector.value)
 })
 
 function toggleVueInspector() {
@@ -123,7 +126,7 @@ const { getIframe } = useIframe(clientUrl, async () => {
           <path fill="#35495E" d="M50.56 0L128 133.12L204.8 0h-47.36L128 51.2L97.92 0H50.56Z" />
         </svg>
       </div>
-      <template v-if="devtools.ctx.state.vitePluginDetected && vueInspectorEnabled">
+      <template v-if="vueInspectorSupported">
         <div class="vue-devtools__panel-content vue-devtools__panel-divider" />
         <div
           class="vue-devtools__anchor-btn vue-devtools__panel-content vue-devtools__inspector-button"
@@ -187,6 +190,7 @@ const { getIframe } = useIframe(clientUrl, async () => {
       align-items: center;
       opacity: 0.8;
       transition: opacity 0.2s ease-in-out;
+      cursor: pointer;
 
       &:hover {
         opacity: 1;
@@ -196,14 +200,9 @@ const { getIframe } = useIframe(clientUrl, async () => {
         width: 14px;
         height: 14px;
       }
-
-      &.active {
-        cursor: pointer;
-      }
     }
 
     .panel-entry-btn {
-      cursor: pointer;
       flex: none;
     }
 
