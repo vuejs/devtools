@@ -9,4 +9,7 @@ export default defineConfig({
   shims: true,
   hash: false,
   ignoreWatch: ['.turbo'],
+  deps: {
+    neverBundle: ['vue', 'vue-router'],
+  },
 })
