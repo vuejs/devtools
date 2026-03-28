@@ -55,7 +55,7 @@ const vueInspector = ref()
 const vueInspectorEnabled = ref(false)
 
 onDevToolsConnected(() => {
-  const rpcServer = getRpcServer<typeof functions>()
+  const rpcServer = getRpcServer<never, typeof functions>()
   rpcServer.functions.on('toggle-panel', (state = !panelVisible) => {
     togglePanelVisible(undefined, state)
   })
