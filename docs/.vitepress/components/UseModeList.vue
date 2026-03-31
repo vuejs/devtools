@@ -13,8 +13,12 @@ const list = [
   {
     name: 'Chrome Extension',
     logo: '/features/chrome-logo.svg',
-    link: 'https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd?utm_source=ext_sidebar',
-    blank: true,
+    link: '/guide/browser-extension',
+  },
+  {
+    name: 'Firefox Extension',
+    logo: '/features/firefox-logo.svg',
+    link: '/guide/browser-extension#firefox',
   },
 ]
 </script>
@@ -25,15 +29,10 @@ const list = [
       v-for="(item, index) in list"
       :key="index"
       class="group cursor-pointer list-none rounded pr-5 hover:b-$vp-c-brand-1"
-      :class="{
-        'opacity-50': item.disabled,
-        'pointer-events-none': item.disabled,
-      }"
       border="~ solid base" flex="~ flex-row items-center"
     >
       <a
         :href="item.link"
-        :target="item.blank ? '_blank' : '_self'"
         class="group text-! h-full w-full flex cursor-pointer list-none items-center rounded pr-5 hover:b-$vp-c-brand-1 text-$vp-c-text-1! decoration-none!"
       >
         <img :src="item.logo" :alt="item.name" class="mx-2 h-10">

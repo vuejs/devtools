@@ -11,9 +11,10 @@
 
 ## Getting Started
 
-- [Chrome Extension](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
 - [Install as Vite plugin](https://devtools.vuejs.org/guide/vite-plugin)
 - [Standalone App](https://devtools.vuejs.org/guide/standalone)
+- [Chrome Extension](https://devtools.vuejs.org/guide/browser-extension)
+- [Firefox Extension](https://devtools.vuejs.org/guide/browser-extension#firefox)
 
 For more details, check out the documentation at [devtools.vuejs.org](https://devtools.vuejs.org).
 
