@@ -83,3 +83,5 @@ function detect(win: Window) {
 if (document instanceof HTMLDocument) {
   detect(window)
 }
+
+export {}
