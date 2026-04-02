@@ -9,3 +9,7 @@ export interface ModuleBuiltinTab extends Pick<CustomTab, 'name' | 'icon' | 'tit
   badge?: () => MaybeRefOrGetter<number | string | undefined>
   onClick?: () => void
 }
+
+export interface CustomInspectorTab extends ModuleBuiltinTab {
+  pluginId: string
+}
