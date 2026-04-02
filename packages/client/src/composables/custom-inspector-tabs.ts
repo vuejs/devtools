@@ -1,13 +1,13 @@
 import type { CustomInspectorType } from '@vue/devtools-applet'
-import type { ModuleBuiltinTab } from '~/types/tab'
+import type { CustomInspectorTab } from '~/types/tab'
 
 import { useCustomInspector } from '@vue/devtools-applet'
 
 export function useCustomInspectorTabs() {
   const { registeredInspector } = useCustomInspector()
 
-  const customInspectorTabs = computed<ModuleBuiltinTab[]>(() => {
-    return registeredInspector.value.map((inspector: CustomInspectorType, index) => {
+  const customInspectorTabs = computed(() => {
+    return registeredInspector.value.map((inspector: CustomInspectorType, index): CustomInspectorTab => {
       return {
         order: index,
         name: inspector.id,

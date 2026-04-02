@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { CustomInspectorTab, ModuleBuiltinTab } from '~/types'
 import { CustomInspector as CustomInspectorComponent } from '@vue/devtools-applet'
 import { CustomTab } from '@vue/devtools-kit'
 import { vTooltip, VueButton, VueCard, VueDropdown } from '@vue/devtools-ui'
-import { ModuleBuiltinTab } from '~/types'
 
 function close() {
   devtoolsClientState.value.splitScreen.enabled = false
@@ -46,18 +46,25 @@ function getRouteTabName() {
   return route.path
 }
 
+function isCustomTab(tab: ModuleBuiltinTab | CustomTab): tab is CustomTab {
+  return !!(tab as CustomTab).view
+}
+
+function isCustomInspectorTab(tab: ModuleBuiltinTab): tab is CustomInspectorTab {
+  return tab.path.startsWith(CUSTOM_INSPECTOR_TAB_VIEW)
+}
+
 watch(
   () => currentTab.value,
   (tab) => {
     if (!tab)
       return
-    // check if is a custom tab
-    if ((tab as CustomTab).view) {
+    if (isCustomTab(tab)) {
       customTabName.value = tab.name
       customTabType.value = 'custom-tab'
       return
     }
-    if ((tab as ModuleBuiltinTab).path.startsWith(CUSTOM_INSPECTOR_TAB_VIEW)) {
+    if (isCustomInspectorTab(tab)) {
       customTabName.value = tab.name
       customPluginId.value = tab.pluginId
       customTabType.value = 'custom-inspector'
@@ -65,7 +72,7 @@ watch(
     }
     customTabName.value = null
     const routes = router.getRoutes()
-    const matched = routes.find(route => route.path === `/${(tab as ModuleBuiltinTab).path}`)
+    const matched = routes.find(route => route.path === `/${tab.path}`)
     const component = matched?.components?.default
     if (typeof component === 'function')
       PageComponent.value = defineAsyncComponent(component as any)
