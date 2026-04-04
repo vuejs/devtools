@@ -48,17 +48,20 @@
     "vite": "^6.0.0 || ^7.0.0 || ^8.0.0"
   },
   "dependencies": {
+    "@vitejs/devtools": "0.1.13",
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^",
     "sirv": "^3.0.2",
-    "vite-plugin-inspect": "catalog:",
-    "vite-plugin-vue-inspector": "^5.3.2"
+    "vite-plugin-inspect": "12.0.0-beta.1",
+    "vite-plugin-vue-inspector": "^5.4.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@vitejs/devtools-kit": "0.1.13",
     "fast-glob": "^3.3.3",
     "image-meta": "^0.2.2",
-    "pathe": "catalog:"
+    "pathe": "catalog:",
+    "vite": "^8.0.0"
   }
 }
