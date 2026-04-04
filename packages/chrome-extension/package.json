@@ -16,9 +16,5 @@
     "@vue/devtools-core": "workspace:^",
     "@vue/devtools-kit": "workspace:^",
     "@vue/devtools-shared": "workspace:^"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "catalog:",
-    "vue": "catalog:"
   }
 }

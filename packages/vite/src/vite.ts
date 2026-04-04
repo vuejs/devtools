@@ -1,8 +1,10 @@
+import type { DevToolsNodeContext, RpcFunctionsHost } from '@vitejs/devtools-kit'
 import type { PluginOption, ResolvedConfig, ViteDevServer } from 'vite'
 import type { VitePluginInspectorOptions } from 'vite-plugin-vue-inspector'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { DevTools as ViteDevTools } from '@vitejs/devtools'
 import { createViteServerRpc } from '@vue/devtools-core'
 import { setViteServerContext } from '@vue/devtools-kit'
 import { bold, cyan, dim, green, yellow } from 'kolorist'
@@ -89,6 +91,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
   const pluginOptions = mergeOptions(options ?? {})
 
   let config: ResolvedConfig
+  let rpc: RpcFunctionsHost | undefined
 
   function configureServer(server: ViteDevServer) {
     const base = (server.config.base) || '/'
@@ -110,9 +113,11 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
     setViteServerContext(server)
 
     const rpcFunctions = getRpcFunctions({
-      rpc: inspect.api.rpc,
       server,
       config,
+      getRpc() {
+        return rpc
+      },
     })
     createViteServerRpc(rpcFunctions)
 
@@ -144,6 +149,11 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
     },
     configureServer(server) {
       configureServer(server)
+    },
+    devtools: {
+      setup(ctx: DevToolsNodeContext) {
+        rpc = ctx.rpc
+      },
     },
     async resolveId(importee: string) {
       if (importee === devtoolsOptionsImportee) {
@@ -216,6 +226,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
   }
 
   return [
+    ViteDevTools(),
     inspect as PluginOption,
     pluginOptions.componentInspector && VueInspector({
       toggleComboKey: '',
