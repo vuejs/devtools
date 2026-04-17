@@ -6,7 +6,7 @@ import { escape, internalStateTokenToString, replaceStringToToken, replaceTokenT
 
 export function getInspectorStateValueType(value, raw = true) {
   const type = typeof value
-  if (value == null || value === UNDEFINED || value === 'undefined') {
+  if (value == null || value === UNDEFINED) {
     return 'null'
   }
   else if (
