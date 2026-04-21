@@ -34,3 +34,5 @@ function createPanelOnVueDetected() {
     },
   )
 }
+
+export {}
