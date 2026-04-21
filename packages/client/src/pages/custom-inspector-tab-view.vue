@@ -6,7 +6,6 @@ const route = useRoute()
 const router = useRouter()
 const loadError = ref(false)
 const customInspectorTabs = useCustomInspectorTabs()
-// @ts-expect-error skip type check
 const pluginId = computed(() => customInspectorTabs.value.find(tab => tab.name === route.params.name)?.pluginId)
 function onLoadError() {
   loadError.value = true
