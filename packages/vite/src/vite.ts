@@ -129,6 +129,10 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
         console.log(`  ${green('➜')}  ${bold('Vue DevTools')}: ${green(`Open ${colorUrl(`${devtoolsUrl}`)} as a separate window`)}`)
       }
       console.log(`  ${green('➜')}  ${bold('Vue DevTools')}: ${green(`Press ${yellow(keys)} in App to toggle the Vue DevTools`)}`)
+      if (pluginOptions.componentInspector) {
+        const inspectorKeys = normalizeComboKeyPrint('option-shift-c')
+        console.log(`  ${green('➜')}  ${bold('Vue DevTools')}: ${green(`Press ${yellow(inspectorKeys)} in App to toggle the Component Inspector`)}`)
+      }
     }
   }
 
