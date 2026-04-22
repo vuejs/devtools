@@ -83,6 +83,14 @@ addEventListener('keyup', (e) => {
   }
 })
 
+// Toggle component inspector with Alt(Option) + Shift + C
+addEventListener('keydown', (e) => {
+  if (e.code === 'KeyC' && e.altKey && e.shiftKey && vueInspectorSupported.value) {
+    e.preventDefault()
+    toggleVueInspector()
+  }
+})
+
 const vueInspectorSupported = computed(() => {
   return !!(devtools.ctx.state.vitePluginDetected && vueInspector.value)
 })
