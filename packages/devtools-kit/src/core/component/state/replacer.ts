@@ -1,6 +1,6 @@
 import { ensurePropertyExists } from '../utils'
 import { INFINITY, MAX_ARRAY_SIZE, MAX_STRING_SIZE, NAN, NEGATIVE_INFINITY, UNDEFINED } from './constants'
-import { getBigIntDetails, getComponentDefinitionDetails, getDateDetails, getFunctionDetails, getHTMLElementDetails, getInstanceDetails, getMapDetails, getObjectDetails, getRouterDetails, getSetDetails, getStoreDetails } from './custom'
+import { getBigIntDetails, getComponentDefinitionDetails, getDateDetails, getFunctionDetails, getHTMLElementDetails, getInstanceDetails, getMapDetails, getObjectDetails, getSetDetails, getStoreDetails } from './custom'
 import { isVueInstance } from './is'
 import { sanitize } from './util'
 
@@ -73,9 +73,6 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
     else if (ensurePropertyExists(val, 'state', true) && ensurePropertyExists(val, '_vm', true)) {
       return getStoreDetails(val)
     }
-    else if (val.constructor && val.constructor.name === 'VueRouter') {
-      return getRouterDetails(val)
-    }
     else if (isVueInstance(val as Record<string, unknown>)) {
       const componentVal = getInstanceDetails(val)
       const parentInstanceDepth = seenInstance?.get(val)
@@ -97,9 +94,6 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
     }
     else if (val.constructor?.name === 'Store' && '_wrappedGetters' in val) {
       return '[object Store]'
-    }
-    else if (ensurePropertyExists(val, 'currentRoute', true)) {
-      return '[object Router]'
     }
     const customDetails = getObjectDetails(val)
     if (customDetails != null)

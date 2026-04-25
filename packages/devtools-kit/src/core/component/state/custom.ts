@@ -140,22 +140,6 @@ export function getStoreDetails(store) {
   }
 }
 
-export function getRouterDetails(router) {
-  return {
-    _custom: {
-      type: 'router',
-      displayText: 'VueRouter',
-      value: {
-        options: router.options,
-        currentRoute: router.currentRoute,
-      },
-      fields: {
-        abstract: true,
-      },
-    },
-  }
-}
-
 // @TODO: fix circular dependency
 export function getInstanceDetails(instance) {
   if (instance._)

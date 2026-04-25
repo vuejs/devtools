@@ -21,7 +21,7 @@ export interface ComponentTreeNode {
   file?: string
 }
 
-type ComponentBuiltinCustomStateTypes = 'function' | 'map' | 'set' | 'reference' | 'component' | 'component-definition' | 'router' | 'store'
+type ComponentBuiltinCustomStateTypes = 'function' | 'map' | 'set' | 'reference' | 'component' | 'component-definition' | 'store'
 
 interface ComponentCustomState extends ComponentStateBase {
   value: CustomState
