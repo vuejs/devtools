@@ -26,8 +26,8 @@
     "serve": "catalog:",
     "typescript": "catalog:",
     "unocss": "catalog:",
-    "vite": "catalog:",
-    "vite-plugin-inspect": "catalog:",
+    "vite": "^8.0.0",
+    "vite-plugin-inspect": "12.0.0-beta.1",
     "vite-plugin-vue-devtools": "workspace:*"
   }
 }

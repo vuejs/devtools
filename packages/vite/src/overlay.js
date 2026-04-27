@@ -29,7 +29,7 @@ addCustomTab({
   icon: 'i-carbon-ibm-watson-discovery',
   view: {
     type: 'iframe',
-    src: normalizeUrl(`__inspect/`),
+    src: normalizeUrl(`.vite-inspect/`),
   },
   category: 'advanced',
 })

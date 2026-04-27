@@ -1,8 +1,8 @@
+import type { RpcFunctionsHost } from '@vitejs/devtools-kit'
 import { ResolvedConfig, ViteDevServer } from 'vite'
-import { ViteInspectAPI } from 'vite-plugin-inspect/index'
 
 export interface RpcFunctionCtx {
-  rpc: ViteInspectAPI['rpc']
+  getRpc: () => RpcFunctionsHost | undefined
   server: ViteDevServer
   config: ResolvedConfig
 }

@@ -117,7 +117,7 @@
     "unocss": "^66.5.4",
     "vite": "^7.1.10",
     "vitest": "^3.2.4",
-    "vue": "^3.5.22"
+    "vue": "^3.5.32"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
