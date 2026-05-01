@@ -51,6 +51,10 @@ watch(devtoolsReady, (v) => {
 useEventListener('keydown', (e) => {
   if (e.code === 'KeyD' && e.altKey && e.shiftKey)
     rpc.value.emit('toggle-panel')
+  if (e.code === 'KeyC' && e.altKey && e.shiftKey && vueInspectorDetected.value) {
+    rpc.value.emit('toggle-panel', false)
+    rpc.value.enableVueInspector()
+  }
 })
 
 watchEffect(() => {
