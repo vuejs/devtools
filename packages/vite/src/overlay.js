@@ -41,7 +41,20 @@ link.href = `${overlayDir}/devtools-overlay.css`
 
 // create script
 const script = document.createElement('script')
-script.src = `${overlayDir}/devtools-overlay.mjs`
+const scriptUrl = `${overlayDir}/devtools-overlay.mjs`
+// Under a `require-trusted-types-for 'script'` CSP, assigning a string to
+// `script.src` is blocked. Wrap the URL in a TrustedScriptURL via a named
+// policy so apps can opt-in by allowing `vue-devtools` in their CSP's
+// `trusted-types` directive.
+if (typeof window !== 'undefined' && window.trustedTypes && typeof window.trustedTypes.createPolicy === 'function') {
+  const policy = window.trustedTypes.createPolicy('vue-devtools', {
+    createScriptURL: input => input,
+  })
+  script.src = policy.createScriptURL(scriptUrl)
+}
+else {
+  script.src = scriptUrl
+}
 script.type = 'module'
 
 // append to head
