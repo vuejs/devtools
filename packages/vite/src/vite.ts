@@ -13,6 +13,7 @@ import VueInspector from 'vite-plugin-vue-inspector'
 import { DIR_CLIENT } from './dir'
 import { getRpcFunctions } from './rpc'
 import { removeUrlQuery } from './utils'
+import { guessEditor } from './guess-editor'
 
 function getVueDevtoolsPath() {
   const pluginPath = normalizePath(path.dirname(fileURLToPath(import.meta.url)))
@@ -50,7 +51,9 @@ export interface VitePluginVueDevToolsOptions {
   /**
    * Target editor when open in editor (v7.2.0+)
    *
-   * @default code (Visual Studio Code)
+   * @default
+   * It will be [predicted](https://github.com/yyx990803/launch-editor/blob/master/packages/launch-editor/guess.js) based on the IDEs you've launched.
+   * And its backup is code (Visual Studio Code).
    */
   launchEditor?: 'appcode' | 'atom' | 'atom-beta' | 'brackets' | 'clion' | 'code' | 'code-insiders' | 'codium' | 'emacs' | 'idea' | 'notepad++' | 'pycharm' | 'phpstorm' | 'rubymine' | 'sublime' | 'vim' | 'visualstudio' | 'webstorm' | 'rider' | string
 
@@ -73,7 +76,7 @@ export interface VitePluginVueDevToolsOptions {
 const defaultOptions: VitePluginVueDevToolsOptions = {
   appendTo: '',
   componentInspector: true,
-  launchEditor: process.env.LAUNCH_EDITOR ?? 'code',
+  launchEditor: guessEditor()[0] ?? process.env.LAUNCH_EDITOR ?? 'code',
 }
 
 function mergeOptions(options: VitePluginVueDevToolsOptions): VitePluginVueDevToolsOptions {
