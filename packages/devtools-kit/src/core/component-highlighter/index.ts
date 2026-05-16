@@ -160,18 +160,22 @@ export function unhighlight() {
 
 let inspectInstance: VueAppInstance = null!
 function inspectFn(e: MouseEvent) {
-  const target = e.target as { __vueParentComponent?: VueAppInstance }
-  if (target) {
+  // Walk up the DOM tree to find the nearest element with a Vue component instance.
+  // JSX/functional components often don't set __vueParentComponent on every child element,
+  // so checking only e.target misses them.
+  let target = e.target as HTMLElement & { __vueParentComponent?: VueAppInstance }
+  while (target && !target.__vueParentComponent) {
+    target = target.parentElement as HTMLElement & { __vueParentComponent?: VueAppInstance }
+  }
+  if (target?.__vueParentComponent) {
     const instance = target.__vueParentComponent
-    if (instance) {
-      inspectInstance = instance
-      const el = instance.vnode.el as HTMLElement | undefined
-      if (el) {
-        const bounds = getComponentBoundingRect(instance)
-        const name = getInstanceName(instance)
-        const container = getContainerElement()
-        container ? update({ bounds, name }) : create({ bounds, name })
-      }
+    inspectInstance = instance
+    const el = instance.vnode.el as HTMLElement | undefined
+    if (el) {
+      const bounds = getComponentBoundingRect(instance)
+      const name = getInstanceName(instance)
+      const container = getContainerElement()
+      container ? update({ bounds, name }) : create({ bounds, name })
     }
   }
 }
