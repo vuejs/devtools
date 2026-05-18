@@ -216,9 +216,12 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
   }
 
   // @vitejs/plugin-vue-jsx injects `__hmrId` on every component it recognises
-  // but never injects `__file`, so devtools cannot show the "Open in Editor"
-  // button for JSX/TSX components. This post-transform piggybacks on those
-  // `__hmrId` assignments to add `__file` on the same binding.
+  // (defineComponent-based only) but never injects `__file`, so devtools cannot
+  // show the "Open in Editor" button for JSX/TSX components.
+  // This post-transform covers two cases:
+  //   1. Components already tagged with __hmrId (defineComponent pattern)
+  //   2. Plain function/arrow exports whose name matches the PascalCase file name
+  //      (the common convention for React-style functional components in Vue TSX)
   const jsxFileInjection: PluginOption = {
     name: 'vite-plugin-vue-devtools:jsx-file-injection',
     enforce: 'post',
@@ -227,11 +230,28 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
       const filename = id.split('?')[0]
       if (!/\.[jt]sx$/.test(filename))
         return
-      const fileJson = JSON.stringify(normalizePath(filename))
-      const transformed = code.replace(
+
+      const normalizedPath = normalizePath(filename)
+      const fileJson = JSON.stringify(normalizedPath)
+      let transformed = code
+
+      // Case 1: piggyback on __hmrId assignments from @vitejs/plugin-vue-jsx
+      transformed = transformed.replace(
         /\b(\w+)\.__hmrId\s*=/g,
         (match, localName) => `${localName}.__file = ${fileJson}\n${match}`,
       )
+
+      // Case 2: plain exports — derive component name from file name (PascalCase)
+      // and inject __file on it if it exists and hasn't already been handled above.
+      const componentName = path.basename(filename, path.extname(filename))
+      if (
+        componentName
+        && /^[A-Z]/.test(componentName)
+        && !transformed.includes(`${componentName}.__file`)
+      ) {
+        transformed += `\ntypeof ${componentName} !== "undefined" && (${componentName}.__file = ${fileJson})`
+      }
+
       return transformed === code ? undefined : transformed
     },
   }
