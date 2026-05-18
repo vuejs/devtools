@@ -215,6 +215,27 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
     },
   }
 
+  // @vitejs/plugin-vue-jsx injects `__hmrId` on every component it recognises
+  // but never injects `__file`, so devtools cannot show the "Open in Editor"
+  // button for JSX/TSX components. This post-transform piggybacks on those
+  // `__hmrId` assignments to add `__file` on the same binding.
+  const jsxFileInjection: PluginOption = {
+    name: 'vite-plugin-vue-devtools:jsx-file-injection',
+    enforce: 'post',
+    apply: 'serve',
+    transform(code, id) {
+      const filename = id.split('?')[0]
+      if (!/\.[jt]sx$/.test(filename))
+        return
+      const fileJson = JSON.stringify(normalizePath(filename))
+      const transformed = code.replace(
+        /\b(\w+)\.__hmrId\s*=/g,
+        (match, localName) => `${localName}.__file = ${fileJson}\n${match}`,
+      )
+      return transformed === code ? undefined : transformed
+    },
+  }
+
   return [
     inspect as PluginOption,
     pluginOptions.componentInspector && VueInspector({
@@ -227,5 +248,6 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
       appendTo: pluginOptions.appendTo || 'manually',
     }) as PluginOption,
     plugin,
+    jsxFileInjection,
   ].filter(Boolean)
 }
