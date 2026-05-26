@@ -9,6 +9,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
