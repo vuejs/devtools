@@ -28,7 +28,7 @@
     "./*": "./*"
   },
   "main": "dist/vite.cjs",
-  "module": "dist/vite.mjs",
+  "module": "dist/vite.js",
   "files": [
     "*.d.ts",
     "./src/overlay.js",
