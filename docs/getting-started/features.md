@@ -1,6 +1,8 @@
 # Features
 
-Discover all the features of the Vue DevTools
+Discover all the features of the Vue DevTools.
+
+If you are using Vite plugin, you can open or close Vue DevTools with `Shift+Alt+D` or `Shift+Option+D` shortcut.
 
 ## Overview
 
@@ -52,7 +54,7 @@ Graph tab shows the relationship between modules.
 
 ## Settings
 
-Settings tab provides some options to customize the DevTools.
+Settings tab provides some options to customize the DevTools. Here you can manage the Tab bar, enable or disable some features, and hide Vue Devtools.
 
 ![settings](/features/settings.png)
 
@@ -64,7 +66,7 @@ Inspect expose the [vite-plugin-inspect](https://github.com/antfu/vite-plugin-in
 
 ## Inspector（Vite only）
 
-Inspector expose the [vite-plugin-vue-inspector](https://github.com/webfansplz/vite-plugin-vue-inspector) integration, you can inspect your app's DOM tree and see which component is rendering it. Finding the place to make changes are much easier.
+Inspector expose the [vite-plugin-vue-inspector](https://github.com/webfansplz/vite-plugin-vue-inspector) integration, you can inspect your app's DOM tree and see which component is rendering it. Finding the place to make changes are much easier. You can active it with `Ctrl+Shift` or `Cmd+Shift` shortcut. When activated, you can use `Esc` shortcut to exit. You can customize shortcut by [`Options.componentInspector.toggleComboKey`](/guide/vite-plugin#options)
 
 ![inspector](/features/inspector.png)
 
