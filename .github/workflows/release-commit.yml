@@ -1,0 +1,12 @@
+name: Publish Any Commit
+on: [push, pull_request]
+
+permissions: {}
+
+jobs:
+  release:
+    if: github.repository == 'vuejs/devtools'
+    uses: sxzz/workflows/.github/workflows/release-commit.yml@v1
+    with:
+      packages: "'./packages/*'"
+      compact: true
