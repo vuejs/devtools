@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="Value extends number | string, Label, M extends boolean">
 import type { ButtonProps } from './Button.vue'
 import { vClosePopper } from 'floating-vue'
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 import VueButton from './Button.vue'
 import VueDropdown from './Dropdown.vue'
 
@@ -29,11 +29,10 @@ const emit = defineEmits<{
   'update:modelValue': [value: M extends true ? Value[] : Value]
 }>()
 
-defineSlots<{
-  item: (props: { item: { label: Label, value: Value }, active: boolean, disabled: boolean }) => any
-  button: () => any
+const slots = defineSlots<{
+  item?: (props: { item: { label: Label, value: Value }, active: boolean, disabled: boolean }) => any
+  button?: () => any
 }>()
-const slots = useSlots()
 
 const value = computed({
   get: () => props.modelValue,

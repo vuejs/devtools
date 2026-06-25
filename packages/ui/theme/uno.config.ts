@@ -5,7 +5,8 @@ import {
   transformerDirectives,
   transformerVariantGroup,
 } from 'unocss'
-import { theme } from './theme'
+// @ts-expect-error config files are loaded directly by tsx in CI.
+import { theme } from './theme.ts'
 
 export const unoConfig = {
   presets: [
