@@ -5,7 +5,7 @@ import {
   transformerDirectives,
   transformerVariantGroup,
 } from 'unocss'
-import { theme } from './theme'
+import { theme } from './theme.ts'
 
 export const unoConfig = {
   presets: [
