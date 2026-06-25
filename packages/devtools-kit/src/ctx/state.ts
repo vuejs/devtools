@@ -16,6 +16,7 @@ export interface DevToolsState {
   tabs: CustomTab[]
   commands: CustomCommand[]
   highPerfModeEnabled: boolean
+  flashUpdates: boolean
   devtoolsClientDetected: {
     [key: string]: boolean
   }
@@ -40,6 +41,7 @@ function initStateFactory() {
     tabs: [],
     commands: [],
     highPerfModeEnabled: true,
+    flashUpdates: true,
     devtoolsClientDetected: {},
     perfUniqueGroupId: 0,
     timelineLayersState: getTimelineLayersStateFromStorage(),
