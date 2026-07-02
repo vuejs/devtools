@@ -82,7 +82,7 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
       seenInstance?.set(val, depth!)
       return componentVal
     }
-    else if (ensurePropertyExists(val, 'render', true) && typeof val.render === 'function') {
+    else if (Object.prototype.hasOwnProperty.call(val, 'render') && typeof (val as Record<string, unknown>).render === 'function') {
       return getComponentDefinitionDetails(val)
     }
     else if (val.constructor && val.constructor.name === 'VNode') {
