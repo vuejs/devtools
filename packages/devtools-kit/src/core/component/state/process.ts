@@ -231,11 +231,16 @@ function processProvide(instance: VueAppInstance) {
     }))
 }
 
+const hasOwnProperty = Object.prototype.hasOwnProperty
+const hasOwn = (
+  val: object,
+  key: string | symbol,
+): key is keyof typeof val => hasOwnProperty.call(val, key)
+
 function processInject(instance: VueAppInstance, mergedType: Record<string, unknown>) {
   if (!mergedType?.inject)
     return []
-  let keys: any[] = []
-  let defaultValue
+  let keys: any[]
   if (Array.isArray(mergedType.inject)) {
     keys = mergedType.inject.map(key => ({
       key,
@@ -250,8 +255,7 @@ function processInject(instance: VueAppInstance, mergedType: Record<string, unkn
         originalKey = value
       }
       else {
-        originalKey = value.from
-        defaultValue = value.default
+        originalKey = value.from ?? key
       }
       return {
         key,
@@ -261,9 +265,8 @@ function processInject(instance: VueAppInstance, mergedType: Record<string, unkn
   }
   return keys.map(({ key, originalKey }) => ({
     type: 'injected',
-    key: originalKey && key !== originalKey ? `${originalKey.toString()} ➞ ${key.toString()}` : key.toString(),
-    // eslint-disable-next-line no-prototype-builtins
-    value: returnError(() => instance.ctx.hasOwnProperty(key) ? instance.ctx[key] : instance.provides.hasOwnProperty(originalKey) ? instance.provides[originalKey] : defaultValue),
+    key: key !== originalKey ? `${String(originalKey)} ➞ ${String(key)}` : String(key),
+    value: returnError(() => hasOwn(instance.ctx, key) ? instance.ctx[key] : undefined),
   }))
 }
 
