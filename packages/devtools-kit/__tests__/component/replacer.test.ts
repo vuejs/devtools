@@ -7,8 +7,6 @@ function replace(value: unknown) {
 }
 
 describe('stringifyReplacer: component definition detection', () => {
-  // #1100: Pinia store state can hold plain class instances that happen to
-  // expose a `render` method. Those must not be reported as Vue components.
   it('does not treat a plain class instance with a render method as a component', () => {
     class Chart {
       data = [1, 2, 3]
@@ -36,8 +34,6 @@ describe('stringifyReplacer: component definition detection', () => {
     expect(result?._custom?.displayText).toBe('MyButton')
   })
 
-  // #1100: Pinia store state is always wrapped in `reactive()`. A reactive
-  // object with an own `render` method must not be reported as a component.
   it('does not treat a reactive object with a render method as a component', () => {
     const store = reactive({
       data: [1, 2, 3],
