@@ -35,4 +35,19 @@ describe('stringifyReplacer: component definition detection', () => {
     expect(result?._custom?.type).toBe('component-definition')
     expect(result?._custom?.displayText).toBe('MyButton')
   })
+
+  // #1100: Pinia store state is always wrapped in `reactive()`. A reactive
+  // object with an own `render` method must not be reported as a component.
+  it('does not treat a reactive object with a render method as a component', () => {
+    const store = reactive({
+      data: [1, 2, 3],
+      render() {
+        return 'draw the chart'
+      },
+    })
+
+    const result = replace(store)
+
+    expect(result?._custom?.type).not.toBe('component-definition')
+  })
 })
