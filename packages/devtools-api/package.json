@@ -12,6 +12,10 @@
   "sideEffects": false,
   "exports": {
     ".": {
+      "node": {
+        "import": "./dist/index-node.js",
+        "require": "./dist/index-node.cjs"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }

@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 
 const baseConfig = defineConfig({
-  entry: 'src/index.ts',
+  entry: ['src/index.ts', 'src/index-node.ts'],
   deps: {
     neverBundle: [
       'vue',
@@ -28,6 +28,7 @@ const cjsConfig = defineConfig({
 
 const iifeConfig = defineConfig({
   ...baseConfig,
+  entry: 'src/index.ts',
   format: 'iife',
   deps: {
     ...baseConfig.deps,
@@ -41,6 +42,7 @@ const iifeConfig = defineConfig({
 
 const esmBrowserConfig = defineConfig({
   ...baseConfig,
+  entry: 'src/index.ts',
   format: 'esm',
   deps: {
     ...baseConfig.deps,
