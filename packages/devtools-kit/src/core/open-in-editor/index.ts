@@ -29,7 +29,12 @@ export function openInEditor(options: OpenInEditorOptions = {}) {
     }
     else if (devtoolsState.vitePluginDetected) {
       const _baseUrl = target.__VUE_DEVTOOLS_OPEN_IN_EDITOR_BASE_URL__ ?? baseUrl
-      target.__VUE_INSPECTOR__.openInEditor(_baseUrl, file, line, column)
+      if (target.__VUE_INSPECTOR__) {
+        target.__VUE_INSPECTOR__.openInEditor(_baseUrl, file, line, column)
+      }
+      else {
+        console.warn('[Vue DevTools] Component inspector is not available. If you have disabled the Options API, the component inspector may not be initialized.')
+      }
     }
   }
 }
