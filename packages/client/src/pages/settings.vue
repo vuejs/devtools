@@ -124,20 +124,16 @@ const minimizePanelInteractiveLabel = computed(() => {
                   <div flex-auto />
                   <template v-if="pinnedTabs.includes(tab.name)">
                     <button
-                      class="flex items-center px1 py1 text-sm op65 hover:(bg-active op100)"
-                      @click.stop="() => {
-                        if (pinnedTabs.indexOf(tab.name) === 0) return
-                        pinMove(tab.name, -1)
-                      }"
+                      class="flex items-center px1 py1 text-sm op65 disabled:(cursor-not-allowed op30) not-disabled:hover:(bg-active op100)"
+                      :disabled="pinnedTabs[0] === tab.name"
+                      @click.stop="pinMove(tab.name, -1)"
                     >
                       <div class="i-carbon-caret-up" />
                     </button>
                     <button
-                      class="flex items-center px1 py1 text-sm op65 hover:(bg-active op100)"
-                      @click.stop="() => {
-                        if (pinnedTabs.indexOf(tab.name) === pinnedTabs.length - 1) return
-                        pinMove(tab.name, 1)
-                      }"
+                      class="flex items-center px1 py1 text-sm op65 disabled:(cursor-not-allowed op30) not-disabled:hover:(bg-active op100)"
+                      :disabled="pinnedTabs[pinnedTabs.length - 1] === tab.name"
+                      @click.stop="pinMove(tab.name, 1)"
                     >
                       <div class="i-carbon-caret-down" />
                     </button>
