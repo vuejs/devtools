@@ -1,5 +1,3 @@
-import type { ModuleNode } from 'vite'
-
 // assets
 export type AssetType = 'image' | 'font' | 'video' | 'audio' | 'text' | 'json' | 'wasm' | 'other'
 export interface AssetInfo {
@@ -19,7 +17,10 @@ export interface ImageMeta {
   mimeType?: string
 }
 
-export type AssetImporter = Pick<ModuleNode, 'url' | 'id'>
+export interface AssetImporter {
+  url: string
+  id: string | null
+}
 
 export interface AssetEntry {
   path: string

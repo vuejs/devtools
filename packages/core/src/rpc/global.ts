@@ -1,4 +1,4 @@
-import type { DevToolsV6PluginAPIHookKeys, DevToolsV6PluginAPIHookPayloads, OpenInEditorOptions } from '@vue/devtools-kit'
+import type { DevToolsV6PluginAPIHookKeys, DevToolsV6PluginAPIHookPayloads, OpenInEditorOptions, Router, RouterInfo } from '@vue/devtools-kit'
 import { devtools, DevToolsContextHookKeys, DevToolsMessagingHookKeys, devtoolsRouter, devtoolsRouterInfo, getActiveInspectors, getInspector, getInspectorActions, getInspectorInfo, getInspectorNodeActions, getRpcClient, getRpcServer, stringify, toggleClientConnected, updateDevToolsClientDetected, updateTimelineLayersState } from '@vue/devtools-kit'
 import { createHooks } from 'hookable'
 
@@ -135,10 +135,10 @@ export const functions = {
   getRouterInfo() {
     return devtoolsRouterInfo
   },
-  navigate(path: string) {
-    return devtoolsRouter.value?.push(path).catch(() => ({}))
+  navigate(path: string): Promise<Awaited<ReturnType<Router['push']>> | Record<string, never>> | undefined {
+    return devtoolsRouter.value?.push(path).catch((): Record<string, never> => ({}))
   },
-  getMatchedRoutes(path: string) {
+  getMatchedRoutes(path: string): RouterInfo['routes'] {
     const c = console.warn
     console.warn = () => {}
     const matched = devtoolsRouter.value?.resolve?.({
