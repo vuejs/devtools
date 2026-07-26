@@ -117,8 +117,13 @@ const { getIframe } = useIframe(clientUrl, async () => {
     <!-- panel -->
     <div ref="panelEle" class="vue-devtools__panel" :style="panelStyle" @pointerdown="onPointerDown">
       <div
-        class="vue-devtools__anchor-btn panel-entry-btn" title="Toggle Vue DevTools" aria-label="Toggle devtools panel"
-        :style="panelVisible ? '' : 'filter:saturate(0)'" @click="togglePanelVisible"
+        role="button"
+        class="vue-devtools__anchor-btn panel-entry-btn"
+        title="Toggle Vue DevTools"
+        aria-label="Toggle devtools panel"
+        :aria-pressed="panelVisible"
+        :style="panelVisible ? '' : 'filter:saturate(0)'"
+        @click="togglePanelVisible"
       >
         <svg viewBox="0 0 256 198" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill="#41B883" d="M204.8 0H256L128 220.8L0 0h97.92L128 51.2L157.44 0h47.36Z" />
@@ -129,8 +134,11 @@ const { getIframe } = useIframe(clientUrl, async () => {
       <template v-if="vueInspectorSupported">
         <div class="vue-devtools__panel-content vue-devtools__panel-divider" />
         <div
+          role="button"
           class="vue-devtools__anchor-btn vue-devtools__panel-content vue-devtools__inspector-button"
           title="Toggle Component Inspector"
+          aria-label="Toggle component inspector"
+          :aria-pressed="vueInspectorEnabled"
           :class="{ active: vueInspectorEnabled }"
           @click="toggleVueInspector"
         >
