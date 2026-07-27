@@ -5,6 +5,7 @@ import { isReactive, isRef, toRaw } from '../../../shared/stub-vue'
 import { EditStatePayload } from '../../../types'
 
 import { getComponentInstance } from '../utils'
+import { hasOwn } from './util'
 
 export type Recordable = Record<PropertyKey, any>
 
@@ -70,7 +71,7 @@ export class StateEditor {
       if (this.refEditor.isRef(object))
         object = this.refEditor.get(object)
     }
-    return object != null && Object.prototype.hasOwnProperty.call(object, sections[0])
+    return object != null && hasOwn(object, sections[0])
   }
 
   createDefaultSetCallback(state: EditStatePayload) {

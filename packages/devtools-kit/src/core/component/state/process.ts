@@ -3,7 +3,7 @@ import type { InspectorState } from '../types'
 import { camelize } from '@vue/devtools-shared'
 import { ensurePropertyExists, returnError } from '../utils'
 import { vueBuiltins } from './constants'
-import { escape, getPropType, getSetupStateType, toRaw } from './util'
+import { escape, getPropType, getSetupStateType, hasOwn, toRaw } from './util'
 
 function mergeOptions(
   to: any,
@@ -25,7 +25,7 @@ function mergeOptions(
   )
 
   for (const key of ['computed', 'inject']) {
-    if (Object.prototype.hasOwnProperty.call(from, key)) {
+    if (hasOwn(from, key)) {
       to[key] ??= {}
       Object.assign(to[key], from[key])
     }
@@ -230,12 +230,6 @@ function processProvide(instance: VueAppInstance) {
       value: returnError(() => instance.provides[key]),
     }))
 }
-
-const hasOwnProperty = Object.prototype.hasOwnProperty
-const hasOwn = (
-  val: object,
-  key: string | symbol,
-): key is keyof typeof val => hasOwnProperty.call(val, key)
 
 function processInject(instance: VueAppInstance, mergedType: Record<string, unknown>) {
   if (!mergedType?.inject)
