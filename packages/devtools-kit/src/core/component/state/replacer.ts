@@ -1,7 +1,7 @@
 import { ensurePropertyExists } from '../utils'
 import { INFINITY, MAX_ARRAY_SIZE, MAX_STRING_SIZE, NAN, NEGATIVE_INFINITY, UNDEFINED } from './constants'
 import { getBigIntDetails, getComponentDefinitionDetails, getDateDetails, getFunctionDetails, getHTMLElementDetails, getInstanceDetails, getMapDetails, getObjectDetails, getSetDetails, getStoreDetails } from './custom'
-import { isVueInstance } from './is'
+import { isReactive, isVueInstance } from './is'
 import { sanitize } from './util'
 
 export type Replacer = (this: any, key: string | number, value: any, depth?: number, seenInstance?: Map<any, /* depth */number>) => any
@@ -82,7 +82,7 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
       seenInstance?.set(val, depth!)
       return componentVal
     }
-    else if (ensurePropertyExists(val, 'render', true) && typeof val.render === 'function') {
+    else if (Object.prototype.hasOwnProperty.call(val, 'render') && typeof (val as Record<string, unknown>).render === 'function' && !isReactive(val)) {
       return getComponentDefinitionDetails(val)
     }
     else if (val.constructor && val.constructor.name === 'VNode') {
