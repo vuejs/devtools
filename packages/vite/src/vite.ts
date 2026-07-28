@@ -30,15 +30,17 @@ function normalizeComboKeyPrint(toggleComboKey: string) {
 
 const devtoolsNextResourceSymbol = '?__vue-devtools-next-resource'
 
+type AppendToTarget = string | RegExp
+
 export interface VitePluginVueDevToolsOptions {
   /**
-   * append an import to the module id ending with `appendTo` instead of adding a script into body
+   * append an import to the module id matching `appendTo` instead of adding a script into body
    * useful for projects that do not use html file as an entry
    *
    * WARNING: only set this if you know exactly what it does.
    * @default ''
    */
-  appendTo?: string | RegExp
+  appendTo?: AppendToTarget | AppendToTarget[]
 
   /**
    * Enable vue component inspector
@@ -80,6 +82,22 @@ function mergeOptions(options: VitePluginVueDevToolsOptions): VitePluginVueDevTo
   return Object.assign({}, defaultOptions, options)
 }
 
+function normalizeAppendTo(appendTo: VitePluginVueDevToolsOptions['appendTo']) {
+  if (!appendTo)
+    return []
+
+  return (Array.isArray(appendTo) ? appendTo : [appendTo]).filter(Boolean)
+}
+
+function matchesAppendTo(filename: string, appendTo: VitePluginVueDevToolsOptions['appendTo']) {
+  return normalizeAppendTo(appendTo).some((target) => {
+    if (typeof target === 'string')
+      return filename.endsWith(target)
+
+    return target.test(filename)
+  })
+}
+
 export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOptions): PluginOption {
   const vueDevtoolsPath = getVueDevtoolsPath()
   const inspect = Inspect({
@@ -87,6 +105,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
   })
 
   const pluginOptions = mergeOptions(options ?? {})
+  const hasAppendToTarget = normalizeAppendTo(pluginOptions.appendTo).length > 0
 
   let config: ResolvedConfig
 
@@ -174,17 +193,19 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
       const { appendTo } = pluginOptions
       const [filename] = id.split('?', 2)
 
-      if (appendTo
-        && (
-          (typeof appendTo === 'string' && filename.endsWith(appendTo))
-          || (appendTo instanceof RegExp && appendTo.test(filename)))) {
-        code = `import 'virtual:vue-devtools-path:overlay.js';\n${code}`
+      if (matchesAppendTo(filename, appendTo)) {
+        const imports = [
+          `import 'virtual:vue-devtools-path:overlay.js';`,
+          pluginOptions.componentInspector && `import 'virtual:vue-inspector-path:load.js';`,
+        ].filter(Boolean).join('\n')
+
+        code = `${imports}\n${code}`
       }
 
       return code
     },
     transformIndexHtml(html) {
-      if (pluginOptions.appendTo)
+      if (hasAppendToTarget)
         return
 
       return {
@@ -224,7 +245,7 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
       ...typeof pluginOptions.componentInspector === 'boolean'
         ? {}
         : pluginOptions.componentInspector,
-      appendTo: pluginOptions.appendTo || 'manually',
+      appendTo: hasAppendToTarget ? 'manually' : pluginOptions.appendTo || 'manually',
     }) as PluginOption,
     plugin,
   ].filter(Boolean)
