@@ -46,13 +46,13 @@ export default defineConfig({
 ```ts
 interface VitePluginVueDevToolsOptions {
   /**
-   * append an import to the module id ending with `appendTo` instead of adding a script into body
+   * append an import to the module id matching `appendTo` instead of adding a script into body
    * useful for projects that do not use html file as an entry
    *
    * WARNING: only set this if you know exactly what it does.
    * @default ''
    */
-  appendTo?: string | RegExp
+  appendTo?: string | RegExp | (string | RegExp)[]
 
   /**
    * Enable vue component inspector
@@ -68,4 +68,13 @@ interface VitePluginVueDevToolsOptions {
    */
   launchEditor?: 'appcode' | 'atom' | 'atom-beta' | 'brackets' | 'clion' | 'code' | 'code-insiders' | 'codium' | 'emacs' | 'idea' | 'notepad++' | 'pycharm' | 'phpstorm' | 'rubymine' | 'sublime' | 'vim' | 'visualstudio' | 'webstorm' | 'rider' | string
 }
+```
+
+```ts [vite.config.ts]
+vueDevTools({
+  appendTo: [
+    'resources/js/app.js',
+    'resources/js/admin.js',
+  ],
+})
 ```
