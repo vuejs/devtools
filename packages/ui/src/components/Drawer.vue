@@ -88,7 +88,15 @@ onMounted(() => isMount.value = true)
           class="drawer pointer-events-auto absolute min-w-25 of-auto $ui-border-base transition-transform transition-duration-300"
           @click.stop
         >
-          <div v-if="closable" class="i-carbon-close absolute right-1.5 top-1.5 $ui-z-max cursor-pointer p1 text-lg $ui-text" @click="show = false" />
+          <button
+            v-if="closable"
+            type="button"
+            aria-label="Close drawer"
+            class="absolute right-1.5 top-1.5 $ui-z-max cursor-pointer border-none bg-transparent p1 text-lg $ui-text"
+            @click="show = false"
+          >
+            <div class="i-carbon-close" aria-hidden="true" />
+          </button>
           <slot />
         </div>
       </Overlay>

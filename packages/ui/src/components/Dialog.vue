@@ -77,9 +77,15 @@ onMounted(() => isMount.value = true)
                 {{ props.title }}
               </slot>
             </div>
-            <div v-if="closable" class="h6 w6 $ui-fcc cursor-pointer rounded-full transition-colors hover:bg-primary-100 dark:hover:bg-gray-700" @click="close">
-              <div class="i-carbon-close" />
-            </div>
+            <button
+              v-if="closable"
+              type="button"
+              aria-label="Close dialog"
+              class="h6 w6 $ui-fcc cursor-pointer rounded-full border-none bg-transparent p0 transition-colors hover:bg-primary-100 dark:hover:bg-gray-700"
+              @click="close"
+            >
+              <div class="i-carbon-close" aria-hidden="true" />
+            </button>
           </div>
           <div class="content transition-all transition-duration-300">
             <slot />
