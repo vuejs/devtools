@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { functions, getDevToolsClientUrl } from '@vue/devtools-core'
 import { devtools, getRpcServer, onDevToolsConnected, setIframeServerContext } from '@vue/devtools-kit'
-import { target } from '@vue/devtools-shared'
+import { isMacOS, target } from '@vue/devtools-shared'
 import { useDevToolsColorMode } from '@vue/devtools-ui'
 import { computed, ref } from 'vue'
 import FrameBox from '~/components/FrameBox.vue'
@@ -83,6 +83,12 @@ addEventListener('keyup', (e) => {
   }
 })
 
+addEventListener('keydown', (e) => {
+  if (e.code === 'KeyC' && e.altKey && e.shiftKey && vueInspectorSupported.value) {
+    toggleVueInspector()
+  }
+})
+
 const vueInspectorSupported = computed(() => {
   return !!(devtools.ctx.state.vitePluginDetected && vueInspector.value)
 })
@@ -117,7 +123,7 @@ const { getIframe } = useIframe(clientUrl, async () => {
     <!-- panel -->
     <div ref="panelEle" class="vue-devtools__panel" :style="panelStyle" @pointerdown="onPointerDown">
       <div
-        class="vue-devtools__anchor-btn panel-entry-btn" title="Toggle Vue DevTools" aria-label="Toggle devtools panel"
+        class="vue-devtools__anchor-btn panel-entry-btn" :title="`Toggle Vue DevTools (${isMacOS() ? '⌥' : 'Alt'}+Shift+D)`" aria-label="Toggle devtools panel"
         :style="panelVisible ? '' : 'filter:saturate(0)'" @click="togglePanelVisible"
       >
         <svg viewBox="0 0 256 198" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -130,7 +136,7 @@ const { getIframe } = useIframe(clientUrl, async () => {
         <div class="vue-devtools__panel-content vue-devtools__panel-divider" />
         <div
           class="vue-devtools__anchor-btn vue-devtools__panel-content vue-devtools__inspector-button"
-          title="Toggle Component Inspector"
+          :title="`Toggle Component Inspector (${isMacOS() ? '⌥' : 'Alt'}+Shift+C)`"
           :class="{ active: vueInspectorEnabled }"
           @click="toggleVueInspector"
         >
