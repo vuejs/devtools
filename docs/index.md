@@ -21,9 +21,6 @@ hero:
     alt: Vue DevTools
 
 features:
-  - icon: ⚡️
-    title: Developer experience
-    details: Enhance your Vue development journey with an amazing experience!
   - icon: 🎛
     title: Extensive App
     details: Vite Plugin, Browser Extension, Standalone App, There always one for you.
