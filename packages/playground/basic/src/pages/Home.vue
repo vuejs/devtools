@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Foo from '../components/Foo.vue'
 import IndexComponent from '../components/IndexComponent/index.vue'
+import Post from '../components/Post.vue'
 
 const emit = defineEmits(['update'])
 const visible = ref(false)
@@ -31,6 +32,13 @@ const topLevelProxy = new Proxy({
     return target[key]()
   },
 })
+
+const postId = ref(-1)
+const visitedPosts = ref(new Set())
+const setPostId = (id: number) => {
+  visitedPosts.value.add(id)
+  postId.value = id
+}
 </script>
 
 <template>
@@ -41,6 +49,7 @@ const topLevelProxy = new Proxy({
     </button>
     <Foo v-if="visible" />
     <IndexComponent v-if="visible" />
+    <Post v-if="visible" :post-id="postId" @set-post-id="setPostId" />
     <img src="/vite.svg" alt="Vite Logo">
     <button class="w-30 cursor-pointer" @click="visible = !visible">
       Toggle Foo

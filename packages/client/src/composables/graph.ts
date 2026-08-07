@@ -3,6 +3,7 @@ import type { Edge, Node, Options } from 'vis-network'
 import { deepClone } from '@vue/devtools-shared'
 import { useDevToolsColorMode } from '@vue/devtools-ui'
 import { DataSet } from 'vis-network/standalone'
+import { devtoolsClientState } from './state'
 
 // #region file types
 export const fileTypes = {
@@ -106,11 +107,27 @@ interface SearcherNode {
   node: Node
   edges: Edge[]
   deps: string[]
+  normalizedId: string
+  normalizedFullId: string
 }
 
 export const graphSearchText = ref('')
 
-watchDebounced(graphSearchText, () => {
+// #region pathfinding
+export interface PathInfo {
+  path: string[] // array of module IDs
+  displayPath: string[] // array of display names
+}
+
+export const graphPathfindingMode = ref(false)
+export const graphPathfindingStart = ref('')
+export const graphPathfindingEnd = ref('')
+export const graphPathfindingResults = ref<PathInfo[]>([])
+export const graphFilterNodeId = ref('')
+export const graphDrawerData = ref<DrawerData>()
+export const [graphDrawerShow, toggleGraphDrawer] = useToggle(false)
+
+watchDebounced([graphSearchText, graphPathfindingMode, graphPathfindingStart, graphPathfindingEnd], () => {
   updateGraph()
 }, {
   debounce: 350,
@@ -134,10 +151,15 @@ interface GraphNodesTotalData {
 export const projectRoot = ref('')
 export const graphNodes = new DataSet<Node>([])
 export const graphEdges = new DataSet<Edge>([])
+export const graphNodeCount = ref(0)
+export const graphEdgeCount = ref(0)
 const graphNodesTotal = shallowRef<GraphNodesTotalData[]>([])
 const graphNodesTotalMap = new Map<string, GraphNodesTotalData>()
 const modulesMap = new Map<string, GraphNodesTotalData>()
 const moduleReferences = new Map<string, { path: string, displayPath: string, mod: ModuleInfo }[]>()
+
+graphNodes.on('*', () => graphNodeCount.value = graphNodes.length)
+graphEdges.on('*', () => graphEdgeCount.value = graphEdges.length)
 
 const uniqueNodes = (nodes: Node[]) => nodes.reduce<Node[]>((prev, node) => {
   if (!prev.some(n => n.id === node.id))
@@ -157,6 +179,10 @@ export function cleanupGraphRelatedStates() {
   graphEdges.clear()
   modulesMap.clear()
   moduleReferences.clear()
+  graphPathfindingMode.value = false
+  graphPathfindingStart.value = ''
+  graphPathfindingEnd.value = ''
+  graphPathfindingResults.value = []
 }
 
 function checkIsValidModule(module: ModuleInfo) {
@@ -189,19 +215,57 @@ function updateGraph() {
   const matchedSearchNodes: SearcherNode[] = []
   const matchedEdges: Edge[] = []
 
+  if (graphPathfindingMode.value && graphPathfindingStart.value && graphPathfindingEnd.value) {
+    // Search for modules matching the input text
+    const startModules = searchModulesByText(graphPathfindingStart.value, 2)
+    const endModules = searchModulesByText(graphPathfindingEnd.value, 4)
+
+    const allNodes: GraphNodesTotalData[] = []
+    const allEdges: Edge[] = []
+    for (const startId of startModules) {
+      const { nodes, edges } = findAllNodes(startId, endModules)
+      allNodes.push(...nodes)
+      allEdges.push(...edges)
+    }
+
+    const startModulesSet = new Set(startModules)
+    const endModulesSet = new Set(endModules)
+    allNodes.forEach(({ node, edges, mod }) => {
+      const nodeId = mod.id
+      if (startModulesSet.has(nodeId)) {
+        node = markNode(node, 'start')
+      }
+      else if (endModulesSet.has(nodeId)) {
+        node = markNode(node, 'end')
+      }
+      matchedNodes.push(node)
+    })
+
+    graphNodes.add(uniqueNodes(matchedNodes))
+    graphEdges.add(uniqueEdges(allEdges))
+    return
+  }
+
   // reuse cache instead of parse every time
   const filterDataset = getGraphFilterDataset()
-  const nodeData = filterDataset ? filterDataset.slice() : graphNodesTotal.value.slice()
+  const nodeData = !graphPathfindingMode.value && filterDataset ? filterDataset.slice() : graphNodesTotal.value.slice()
   nodeData.forEach(({ node, edges, mod }) => {
     if (checkIsValidModule(mod) && checkReferenceIsValid(mod.id)) {
+      const shortId = mod.id.match(EXTRACT_LAST_THREE_MOD_ID_RE)?.[0] ?? mod.id
+
+      if (graphFilterNodeId.value && mod.id === graphFilterNodeId.value)
+        node = markNode(node, 'start')
+
       matchedNodes.push(node)
       matchedSearchNodes.push({
         // only search the exactly name(last 3 segments), instead of full path
-        id: mod.id.match(EXTRACT_LAST_THREE_MOD_ID_RE)?.[0] ?? mod.id,
+        id: shortId,
         fullId: mod.id,
         node,
         edges,
         deps: mod.deps,
+        normalizedId: shortId.toLowerCase(),
+        normalizedFullId: mod.id.toLowerCase(),
       })
       matchedEdges.push(...edges)
     }
@@ -210,7 +274,7 @@ function updateGraph() {
   // TODO: [fuzzy search graph node] use include, instead of fuse.js, for performance reasons
   // if someone need it, we can add it back
   const searchText = graphSearchText.value
-  if (searchText.trim().length) {
+  if (!graphPathfindingMode.value && searchText.trim().length) {
     const result = matchedSearchNodes.filter(({ id }) => id.includes(searchText))
     matchedEdges.length = 0
     matchedNodes.length = 0
@@ -408,9 +472,6 @@ export interface DrawerData {
   deps: { path: string, displayPath: string }[]
 }
 
-export const graphDrawerData = ref<DrawerData>()
-export const [graphDrawerShow, toggleGraphDrawer] = useToggle(false)
-
 function closeDrawer() {
   toggleGraphDrawer(false)
 }
@@ -458,7 +519,6 @@ export function updateGraphDrawerData(nodeId: string): DrawerData | undefined {
 // #endregion
 
 // #region graph filter
-export const graphFilterNodeId = ref('')
 
 watch(graphFilterNodeId, () => {
   updateGraph()
@@ -499,5 +559,116 @@ function recursivelyGetGraphNodeData(nodeId: string, existingNodeIds: Set<string
       prev.push(node)
     return prev
   }, [])
+}
+// #endregion
+
+// #region pathfinding functions
+/**
+ * Search for module IDs that match the given search text
+ * Returns array of full module IDs that contain the search text
+ */
+function searchModulesByText(searchText: string, maxItems = -1): string[] {
+  const results: string[] = []
+  const search = searchText.toLowerCase()
+
+  for (const [moduleId, nodeData] of modulesMap) {
+    if (maxItems !== -1 && results.length >= maxItems) {
+      break
+    }
+    const displayName = nodeData.info.displayName.toLowerCase()
+    const fullPath = moduleId.toLowerCase()
+
+    if (displayName.includes(search) || fullPath.includes(search)) {
+      results.push(moduleId)
+    }
+  }
+
+  return results
+}
+
+export function findAllNodes(startId: string, endIds: string[]): {
+  nodes: GraphNodesTotalData[]
+  edges: Edge[]
+} {
+  const node = modulesMap.get(startId)
+  if (!node) {
+    return {
+      nodes: [],
+      edges: [],
+    }
+  }
+
+  const result: [Set<GraphNodesTotalData>, Set<Edge>] = [new Set<GraphNodesTotalData>(), new Set<Edge>()]
+
+  dfs(node, new Set(endIds), new Set(), modulesMap, result)
+
+  return {
+    nodes: Array.from(result[0]),
+    edges: Array.from(result[1]),
+  }
+}
+
+export function dfs(node: GraphNodesTotalData, targetIds: Set<string>, existingNodeIds: Set<GraphNodesTotalData>, modulesMap: Map<string, GraphNodesTotalData>, result: [Set<GraphNodesTotalData>, Set<Edge>]): boolean {
+  if (!node) {
+    return false
+  }
+  const [resNodes, resEdges] = result
+  if (existingNodeIds.has(node)) {
+    return resNodes.has(node)
+  }
+  existingNodeIds.add(node)
+
+  const nodeId = node.mod.id
+  const isTarget = targetIds.has(nodeId)
+  let hasTarget = isTarget
+
+  node.mod.deps.forEach((dep) => {
+    const childNode = modulesMap.get(dep)
+    if (childNode && checkIsValidModule(childNode.mod)) {
+      const isFound = dfs(childNode, targetIds, existingNodeIds, modulesMap, result)
+      if (isFound) {
+        node.edges.find((edge) => {
+          if (edge.to === childNode.mod.id) {
+            resEdges.add(edge)
+            return true
+          }
+          return false
+        })
+      }
+      hasTarget ||= isFound
+    }
+  })
+
+  if (hasTarget) {
+    resNodes.add(node)
+  }
+
+  return hasTarget
+}
+
+function markNode(node: Node, type: 'start' | 'end') {
+  node = deepClone(node)
+
+  if (!node.font || typeof node.font !== 'object') {
+    node.font = {}
+  }
+
+  // Use different colors for start, end, and intermediate nodes
+  if (type === 'start') {
+    // Start node - green
+    node.font.color = '#f59e0b'
+    node.borderWidth = 3
+    node.color = { border: '#f59e0b' }
+  }
+  else if (type === 'end') {
+    // End node - red
+    node.font.color = '#ef4444'
+    node.borderWidth = 3
+    node.color = { border: '#ef4444' }
+  }
+
+  node.label = `<b>${node.label}</b>`
+
+  return node
 }
 // #endregion
