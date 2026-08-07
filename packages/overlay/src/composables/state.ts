@@ -15,6 +15,7 @@ interface DevToolsFrameState {
   minimizePanelInactive: number
   preferShowFloatingPanel: boolean
   reduceMotion: boolean
+  flashUpdates: boolean
 }
 
 export interface UseFrameStateReturn {
@@ -35,6 +36,7 @@ const state = useLocalStorage<DevToolsFrameState>('__vue-devtools-frame-state__'
   minimizePanelInactive: 5000,
   preferShowFloatingPanel: true,
   reduceMotion: false,
+  flashUpdates: false,
 })
 
 export function useFrameState(): UseFrameStateReturn {

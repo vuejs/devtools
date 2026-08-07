@@ -6,6 +6,7 @@ import { ComponentWalker } from '../../core/component/tree/walker'
 import { getAppRecord, getComponentId, getComponentInstance } from '../../core/component/utils'
 import { activeAppRecord, devtoolsContext, devtoolsState, DevToolsV6PluginAPIHookKeys } from '../../ctx'
 import { hook } from '../../hook'
+import { flashComponent } from '../component-flash'
 import { setupBuiltinTimelineLayers } from '../timeline'
 import { exposeInstanceToWindow } from '../vm'
 
@@ -115,6 +116,10 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
         }
       }
 
+      if (devtoolsState.flashUpdates) {
+        flashComponent(component)
+      }
+
       if (!appRecord)
         return
 
@@ -150,6 +155,10 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
         }
       }
 
+      if (devtoolsState.flashUpdates) {
+        flashComponent(component)
+      }
+
       if (!appRecord)
         return
 
@@ -165,6 +174,10 @@ export function createComponentsDevToolsPlugin(app: App): [PluginDescriptor, Plu
 
       if (!app || (typeof uid !== 'number' && !uid) || !component)
         return
+
+      if (devtoolsState.flashUpdates) {
+        flashComponent(component)
+      }
 
       const appRecord = await getAppRecord(app)
 
