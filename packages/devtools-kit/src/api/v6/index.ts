@@ -20,39 +20,58 @@ export class DevToolsV6PluginAPI {
     return {
       // component inspector
       visitComponentTree: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.VISIT_COMPONENT_TREE]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.VISIT_COMPONENT_TREE, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.VISIT_COMPONENT_TREE, handler)
       },
       inspectComponent: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.INSPECT_COMPONENT]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.INSPECT_COMPONENT, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.INSPECT_COMPONENT, handler)
       },
       editComponentState: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.EDIT_COMPONENT_STATE]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.EDIT_COMPONENT_STATE, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.EDIT_COMPONENT_STATE, handler)
       },
 
       // custom inspector
       getInspectorTree: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.GET_INSPECTOR_TREE]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.GET_INSPECTOR_TREE, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.GET_INSPECTOR_TREE, handler)
       },
       getInspectorState: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.GET_INSPECTOR_STATE]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.GET_INSPECTOR_STATE, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.GET_INSPECTOR_STATE, handler)
       },
       editInspectorState: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.EDIT_INSPECTOR_STATE]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.EDIT_INSPECTOR_STATE, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.EDIT_INSPECTOR_STATE, handler)
       },
 
       // timeline
       inspectTimelineEvent: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.INSPECT_TIMELINE_EVENT]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.INSPECT_TIMELINE_EVENT, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.INSPECT_TIMELINE_EVENT, handler)
       },
       timelineCleared: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.TIMELINE_CLEARED]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.TIMELINE_CLEARED, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.TIMELINE_CLEARED, handler)
       },
 
       // settings
       setPluginSettings: (handler: DevToolsV6PluginAPIHooks[DevToolsV6PluginAPIHookKeys.SET_PLUGIN_SETTINGS]) => {
-        this.hooks.hook(DevToolsV6PluginAPIHookKeys.SET_PLUGIN_SETTINGS, handler)
+        this.addHook(DevToolsV6PluginAPIHookKeys.SET_PLUGIN_SETTINGS, handler)
       },
     }
+  }
+
+  private addHook<H extends DevToolsV6PluginAPIHookKeys>(hook: H, handler: DevToolsV6PluginAPIHooks[H]) {
+    const wrapper: any = (...args: [any]) => {
+      const payload = args[0]
+      const { app, id, disableAppScope, disablePluginScope } = this.plugin.descriptor
+
+      if (!disableAppScope && payload.app != null && app !== payload.app) {
+        return
+      }
+
+      if (!disablePluginScope && payload.pluginId != null && id !== payload.pluginId) {
+        return
+      }
+
+      return handler(...args)
+    }
+
+    this.hooks.hook(hook, wrapper)
   }
 
   // component inspector
