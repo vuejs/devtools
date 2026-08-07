@@ -19,10 +19,12 @@
       "vite/client",
       "vitest/globals"
     ],
+    "allowImportingTsExtensions": true,
     "allowJs": true,
     "strict": true,
     "strictNullChecks": true,
     "noImplicitAny": false,
+    "noEmit": true,
     // We use tsup/vite instead of tsc to build the package, so we don't need to care about this option.
     // Add outDir option to avoid tsconfig error in monorepo.
     "outDir": "dist",
