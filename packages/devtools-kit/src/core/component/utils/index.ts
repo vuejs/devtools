@@ -6,7 +6,8 @@ function getComponentTypeName(options: VueAppInstance['type']) {
     return options.displayName || options.name || options.__VUE_DEVTOOLS_COMPONENT_GUSSED_NAME__ || ''
   }
   const name = options.name || options._componentTag || options.__VUE_DEVTOOLS_COMPONENT_GUSSED_NAME__ || options.__name
-  if (name === 'index' && options.__file?.endsWith('index.vue')) {
+  const file = options.__file
+  if (name === 'index' && file && (file.endsWith('index.vue') || file.endsWith('index.jsx') || file.endsWith('index.tsx'))) {
     return ''
   }
   return name
@@ -14,8 +15,14 @@ function getComponentTypeName(options: VueAppInstance['type']) {
 
 function getComponentFileName(options: VueAppInstance['type']) {
   const file = options.__file
-  if (file)
+  if (!file)
+    return
+  if (file.endsWith('.vue'))
     return classify(basename(file, '.vue'))
+  if (file.endsWith('.jsx'))
+    return classify(basename(file, '.jsx'))
+  if (file.endsWith('.tsx'))
+    return classify(basename(file, '.tsx'))
 }
 
 export function getComponentName(options: VueAppInstance['type']) {

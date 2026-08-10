@@ -11,6 +11,7 @@ import { normalizePath } from 'vite'
 import Inspect from 'vite-plugin-inspect'
 import VueInspector from 'vite-plugin-vue-inspector'
 import { DIR_CLIENT } from './dir'
+import { injectJsxFile } from './jsx-file-injection'
 import { getRpcFunctions } from './rpc'
 import { removeUrlQuery } from './utils'
 
@@ -215,6 +216,17 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
     },
   }
 
+  // Attach `__file` to JSX/TSX components so devtools can offer "Open in
+  // Editor" for them, the way it already can for SFCs. See jsx-file-injection.ts.
+  const jsxFileInjection: PluginOption = {
+    name: 'vite-plugin-vue-devtools:jsx-file-injection',
+    enforce: 'post',
+    apply: 'serve',
+    transform(code, id) {
+      return injectJsxFile(code, id)
+    },
+  }
+
   return [
     inspect as PluginOption,
     pluginOptions.componentInspector && VueInspector({
@@ -227,5 +239,6 @@ export default function VitePluginVueDevTools(options?: VitePluginVueDevToolsOpt
       appendTo: pluginOptions.appendTo || 'manually',
     }) as PluginOption,
     plugin,
+    jsxFileInjection,
   ].filter(Boolean)
 }
