@@ -20,12 +20,12 @@ function getVueDevtoolsPath() {
 }
 
 const toggleComboKeysMap = {
-  option: process.platform === 'darwin' ? 'Option(⌥)' : 'Alt(⌥)',
-  meta: 'Command(⌘)',
-  shift: 'Shift(⇧)',
+  option: process.platform === 'darwin' ? 'Option' : 'Alt',
+  meta: 'Command',
+  shift: 'Shift',
 }
 function normalizeComboKeyPrint(toggleComboKey: string) {
-  return toggleComboKey.split('-').map(key => toggleComboKeysMap[key] || key[0].toUpperCase() + key.slice(1)).join(dim('+'))
+  return toggleComboKey.split('-').map(key => toggleComboKeysMap[key] || key[0].toUpperCase() + key.slice(1)).join(dim(' + '))
 }
 
 const devtoolsNextResourceSymbol = '?__vue-devtools-next-resource'
