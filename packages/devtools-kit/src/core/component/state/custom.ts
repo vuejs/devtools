@@ -52,6 +52,76 @@ export function getDateDetails(val: Date) {
   }
 }
 
+export function getPlainDateDetails(val: Temporal.PlainDate) {
+  return {
+    _custom: {
+      type: 'plaindate',
+      displayText: Temporal.PlainDate.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
+export function getPlainTimeDetails(val: Temporal.PlainTime) {
+  return {
+    _custom: {
+      type: 'plaintime',
+      displayText: Temporal.PlainTime.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
+export function getPlainDateTimeDetails(val: Temporal.PlainDateTime) {
+  return {
+    _custom: {
+      type: 'plaindatetime',
+      displayText: Temporal.PlainDateTime.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
+export function getZonedDateTimeDetails(val: Temporal.ZonedDateTime) {
+  return {
+    _custom: {
+      type: 'zoneddatetime',
+      displayText: Temporal.ZonedDateTime.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
+export function getDurationDetails(val: Temporal.Duration) {
+  return {
+    _custom: {
+      type: 'duration',
+      displayText: Temporal.Duration.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
+export function getPlainMonthDayDetails(val: Temporal.PlainMonthDay) {
+  return {
+    _custom: {
+      type: 'plainmonthday',
+      displayText: Temporal.PlainMonthDay.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
+export function getPlainYearMonthDetails(val: Temporal.PlainYearMonth) {
+  return {
+    _custom: {
+      type: 'plainyearmonth',
+      displayText: Temporal.PlainYearMonth.prototype.toString.call(val),
+      value: val.toString(),
+    }
+  }
+}
+
 export function getMapDetails(val: Map<string, unknown>) {
   const list: Record<string, unknown> = Object.fromEntries(val)
   return {

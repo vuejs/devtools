@@ -1,6 +1,6 @@
 import { ensurePropertyExists } from '../utils'
 import { INFINITY, MAX_ARRAY_SIZE, MAX_STRING_SIZE, NAN, NEGATIVE_INFINITY, UNDEFINED } from './constants'
-import { getBigIntDetails, getComponentDefinitionDetails, getDateDetails, getFunctionDetails, getHTMLElementDetails, getInstanceDetails, getMapDetails, getObjectDetails, getSetDetails, getStoreDetails } from './custom'
+import { getBigIntDetails, getComponentDefinitionDetails, getDateDetails, getDurationDetails, getFunctionDetails, getHTMLElementDetails, getInstanceDetails, getMapDetails, getObjectDetails, getPlainDateDetails, getPlainDateTimeDetails, getPlainMonthDayDetails, getPlainTimeDetails, getPlainYearMonthDetails, getSetDetails, getStoreDetails, getZonedDateTimeDetails } from './custom'
 import { isVueInstance } from './is'
 import { sanitize } from './util'
 
@@ -66,6 +66,27 @@ export function stringifyReplacer(key: string | number, _value: any, depth?: num
     }
     else if (proto === '[object Date]') {
       return getDateDetails(val as Date)
+    }
+    else if (proto === '[object Temporal.PlainDate]') {
+      return getPlainDateDetails(val as Temporal.PlainDate);
+    }
+    else if (proto === '[object Temporal.PlainDateTime]') {
+      return getPlainDateTimeDetails(val as Temporal.PlainDateTime);
+    }
+    else if (proto === '[object Temporal.PlainTime]') {
+      return getPlainTimeDetails(val as Temporal.PlainTime);
+    }
+    else if (proto === '[object Temporal.ZonedDateTime]') {
+      return getZonedDateTimeDetails(val as Temporal.ZonedDateTime);
+    }
+    else if (proto === '[object Temporal.Duration]') {
+      return getDurationDetails(val as Temporal.Duration);
+    }
+    else if (proto === '[object Temporal.PlainMonthDay]') {
+      return getPlainMonthDayDetails(val as Temporal.PlainMonthDay);
+    }
+    else if (proto === '[object Temporal.PlainYearMonth]') {
+      return getPlainYearMonthDetails(val as Temporal.PlainYearMonth);
     }
     else if (proto === '[object Error]') {
       return `[native Error ${(val as Error).message}<>${(val as Error).stack}]`
