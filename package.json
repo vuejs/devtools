@@ -76,7 +76,7 @@
     "@antfu/eslint-config": "^5.4.1",
     "@antfu/ni": "^27.0.1",
     "@arethetypeswrong/cli": "^0.18.2",
-    "@clack/prompts": "^0.11.0",
+    "@clack/prompts": "^1.8.1",
     "@types/chrome": "^0.1.24",
     "@types/degit": "^2.8.6",
     "@types/fs-extra": "^11.0.4",
