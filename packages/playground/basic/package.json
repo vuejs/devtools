@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.7",
-    "@tanstack/vue-query-devtools": "^5.90.2",
+    "@tanstack/vue-query-devtools": "^6.2.3",
     "@vitejs/plugin-vue": "catalog:",
     "@vue/devtools": "workspace:^",
     "sass-embedded": "catalog:",
