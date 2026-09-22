@@ -7,10 +7,12 @@ on:
 
 jobs:
   release:
+    if: github.repository == 'vuejs/devtools'
     uses: sxzz/workflows/.github/workflows/release.yml@v1
     with:
       publish: true
       build: pnpm run build
+      tag: ${{ contains(github.ref_name, '-') && 'beta' || 'latest' }}
     permissions:
       contents: write
       id-token: write

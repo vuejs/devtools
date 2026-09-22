@@ -1,31 +1,28 @@
 import type { DefaultTheme } from 'vitepress'
 import { defineConfig } from 'vitepress'
 import { groupIconMdPlugin } from 'vitepress-plugin-group-icons'
-import vite from './vite.config'
+import vite from './vite.config.ts'
 
-const GETTING_STARTED: DefaultTheme.NavItemWithLink[] = [
+const GETTING_STARTED = [
   { text: 'Introduction', link: '/getting-started/introduction' },
   { text: 'Installation', link: '/getting-started/installation' },
   { text: 'Features', link: '/getting-started/features' },
   { text: 'Open in editor', link: '/getting-started/open-in-editor' },
-]
+] satisfies DefaultTheme.NavItemWithLink[]
 
-const GUIDES: DefaultTheme.NavItemWithLink[] = [
+const GUIDES = [
   { text: 'Vite Plugin', link: '/guide/vite-plugin' },
   { text: 'Browser Extension', link: '/guide/browser-extension' },
-  { text: 'Standalone App', link: '/guide/standalone' },
-]
+] satisfies DefaultTheme.NavItemWithLink[]
 
-const HELP: DefaultTheme.NavItemWithLink[] = [
+const HELP = [
   { text: 'Migration Guide', link: '/guide/migration' },
   { text: 'Contributing', link: '/help/contributing' },
   { text: 'FAQ', link: '/help/faq' },
   { text: 'Troubleshooting', link: '/help/troubleshooting' },
-]
+] satisfies DefaultTheme.NavItemWithLink[]
 
-const PLUGINS: DefaultTheme.NavItemWithLink[] = [
-  { text: 'API', link: '/plugins/api' },
-]
+const PLUGINS = [{ text: 'API', link: '/plugins/api' }] satisfies DefaultTheme.NavItemWithLink[]
 
 // const VERSIONS: DefaultTheme.NavItemWithLink[] = [
 //   { text: `v${version} (current)`, link: 'https://github.com/vuejs/devtools/releases' },
@@ -41,7 +38,7 @@ export default defineConfig({
       dark: 'vitesse-dark',
     },
     config(md) {
-      md.use(groupIconMdPlugin)
+      md.use(groupIconMdPlugin as never)
     },
   },
 
@@ -117,7 +114,6 @@ export default defineConfig({
         //   },
         // ],
       },
-
     ),
 
     editLink: {
@@ -128,9 +124,7 @@ export default defineConfig({
       provider: 'local',
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/devtools' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/vuejs/devtools' }],
 
     footer: {
       message: 'Released under the MIT License.',
@@ -149,6 +143,9 @@ export default defineConfig({
     ['meta', { property: 'og:description', content: 'Unleash Vue Developer Experience' }],
     ['meta', { name: 'og:type', content: 'website' }],
     ['meta', { name: 'og:locale', content: 'en' }],
-    ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1.0, viewport-fit=cover' }],
+    [
+      'meta',
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, viewport-fit=cover' },
+    ],
   ],
 })

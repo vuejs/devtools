@@ -1,0 +1,55 @@
+{
+  "action": {
+    "default_icon": {
+      "16": "icons/16-gray.png",
+      "48": "icons/48-gray.png",
+      "128": "icons/128-gray.png"
+    },
+    "default_popup": "app/popups/not-found.html",
+    "default_title": "Vue DevTools"
+  },
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "js": ["dist/backend.js"],
+      "match_origin_as_fallback": true,
+      "matches": ["<all_urls>"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "all_frames": true,
+      "js": ["dist/detector.js"],
+      "match_origin_as_fallback": true,
+      "matches": ["<all_urls>"],
+      "run_at": "document_start"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "description": "DevTools browser extension for Vue.js",
+  "devtools_page": "app/background/devtools-background.html",
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "manifest_version": 3,
+  "name": "Vue.js devtools",
+  "permissions": ["scripting"],
+  "version": "9.0.0.0",
+  "version_name": "9.0.0 beta 0",
+  "web_accessible_resources": [
+    {
+      "extension_ids": [],
+      "matches": ["<all_urls>"],
+      "resources": ["app/background/*", "app/popups/*", "dist/*", "dist/assets/*", "icons/*"]
+    }
+  ]
+}

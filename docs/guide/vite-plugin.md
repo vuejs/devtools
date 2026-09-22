@@ -1,9 +1,9 @@
 # Vite Plugin
 
-> We provide a Vite plugin for running Vue DevTools. If your project uses Vite, we highly recommend using it as the preferred option for running DevTools, as it offers more powerful features.
+> If your project uses Vite, we recommend the Vue DevTools Vite plugin for its additional features.
 
 :::tip Compatibility Note
-Vue DevTools requires **Vite v6 or higher**.
+Vue DevTools v9 requires **Vite 8.3.0+**. The setup below covers both v9 and earlier versions.
 :::
 
 ## Installation
@@ -28,44 +28,138 @@ $ bun add -D vite-plugin-vue-devtools
 
 :::
 
+To stay on v8, use `vite-plugin-vue-devtools@8` in the commands above.
+
+### Additional dependencies for v9
+
+If you are using v9, also install `@vitejs/devtools` in your project and upgrade Vite to 8.3.0+:
+
+::: code-group
+
+```sh [npm]
+$ npm add -D vite@^8.3.0 @vitejs/devtools
+```
+
+```sh [pnpm]
+$ pnpm add -D vite@^8.3.0 @vitejs/devtools
+```
+
+```sh [yarn]
+$ yarn add -D vite@^8.3.0 @vitejs/devtools
+```
+
+```sh [bun]
+$ bun add -D vite@^8.3.0 @vitejs/devtools
+```
+
+:::
+
+Versions before v9 do not require `@vitejs/devtools`.
+
 ## Usage
+
+::: code-group
+
+```ts [v9]
+import { defineConfig } from 'vite'
+import vueDevTools from 'vite-plugin-vue-devtools'
+
+export default defineConfig({
+  devtools: {
+    apply: 'serve',
+  },
+  plugins: [vueDevTools()],
+})
+```
+
+```ts [Before v9]
+import { defineConfig } from 'vite'
+import vueDevTools from 'vite-plugin-vue-devtools'
+
+export default defineConfig({
+  plugins: [vueDevTools()],
+})
+```
+
+:::
+
+In v9, set `devtools: { apply: 'serve' }` to enable the Vite DevTools host during development.
+Earlier versions start Vue DevTools through `vueDevTools()` alone and do not require this option.
+
+The v9 plugin logs a warning during development if Vite DevTools is disabled.
+See the [v8 to v9 migration guide](/guide/migration#migrating-from-v8-to-v9) when upgrading.
+
+### Configure Vite DevTools (v9)
+
+Dock visibility, layout, built-in integrations, and branding are configured through Vite's
+`devtools` option:
 
 ```ts [vite.config.ts]
 import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  plugins: [
-    vueDevTools(),
-  ],
+  devtools: {
+    apply: 'serve',
+    builtinDevTools: false,
+    embeddedVisibility: 'passive',
+    dockPreferences: {
+      defaultMode: 'edge',
+      defaultPosition: 'bottom',
+    },
+  },
+  plugins: [vueDevTools()],
 })
 ```
 
+Vue DevTools' runtime integration runs only during development, so `apply: 'serve'` is the
+recommended default. Use `devtools: true` only when you also want the Vite DevTools host during
+builds.
+See the [Vite DevTools guide](https://devtools.vite.dev/guide/) for host options and defaults.
+
 ## Options
+
+The following options apply to v9.
 
 ```ts
 interface VitePluginVueDevToolsOptions {
   /**
-   * append an import to the module id ending with `appendTo` instead of adding a script into body
-   * useful for projects that do not use html file as an entry
-   *
-   * WARNING: only set this if you know exactly what it does.
-   * @default ''
-   */
-  appendTo?: string | RegExp
-
-  /**
-   * Enable vue component inspector
-   *
+   * Whether to install Vue DevTools and register its dock entry.
    * @default true
    */
-  componentInspector?: boolean | VitePluginInspectorOptions
+  enabled?: boolean
 
   /**
-   * Target editor when open in editor (v7.2.0+)
-   *
-   * @default code (Visual Studio Code)
+   * Inject the Vue DevTools client into matching browser entry modules instead
+   * of relying on Vite's HTML transform.
+   * @default undefined
    */
-  launchEditor?: 'appcode' | 'atom' | 'atom-beta' | 'brackets' | 'clion' | 'code' | 'code-insiders' | 'codium' | 'emacs' | 'idea' | 'notepad++' | 'pycharm' | 'phpstorm' | 'rubymine' | 'sublime' | 'vim' | 'visualstudio' | 'webstorm' | 'rider' | string
+  appendTo?: string | RegExp | Array<string | RegExp>
 }
 ```
+
+### `enabled`
+
+Set this to `false` to disable both the Vue runtime integration and its dock entry.
+
+### `appendTo`
+
+By default, the plugin installs the Vue DevTools client through Vite's HTML transform. For projects
+without a Vite-managed HTML entry, set `appendTo` to one or more browser entry module matchers. A
+string matches the end of the resolved module path, while a regular expression tests the complete
+resolved path.
+
+```ts
+VueDevTools({
+  appendTo: ['resources/js/app.ts', /\/entry\.client\.m?js$/],
+})
+```
+
+Only matching client modules are modified. SSR transforms are skipped, and the same module is never
+injected more than once.
+
+:::info Changed in v9
+Component inspection is now integrated into the Vue DevTools dock. Open-in-editor requests are
+handled by `@vitejs/devtools`, including workspace path validation, editor launching, and
+diagnostics. See the [v8 to v9 migration guide](/guide/migration#migrating-from-v8-to-v9).
+:::

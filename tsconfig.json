@@ -1,37 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "jsx": "preserve",
-    "lib": ["esnext", "dom"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "paths": {
-      "@vue/devtools-shared": ["./packages/shared/src/index.ts"],
-      "@vue/devtools-core": ["./packages/core/src/index.ts"],
-      "@vue/devtools-kit": ["./packages/devtools-kit/src/index.ts"],
-      "@vue/devtools-ui": ["./packages/ui/src/index.ts"],
-      "@vue/devtools-ui/theme": ["./packages/ui/theme/index.ts"],
-      "@vue/devtools-applet": ["./packages/applet/src/index.ts"]
-    },
-    "resolveJsonModule": true,
-    "types": [
-      "chrome",
-      "vite/client",
-      "vitest/globals"
-    ],
-    "allowJs": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM"],
     "strict": true,
-    "strictNullChecks": true,
-    "noImplicitAny": false,
-    // We use tsup/vite instead of tsc to build the package, so we don't need to care about this option.
-    // Add outDir option to avoid tsconfig error in monorepo.
-    "outDir": "dist",
-    "esModuleInterop": true
-  },
-  "exclude": [
-    "**/vite/src/overlay/**",
-    "**/dist/**",
-    "**/node_modules/**",
-    "**/**/*.js"
-  ]
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "types": ["node"]
+  }
 }

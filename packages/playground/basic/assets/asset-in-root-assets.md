@@ -1,1 +1,0 @@
-# asset-in-root-assets

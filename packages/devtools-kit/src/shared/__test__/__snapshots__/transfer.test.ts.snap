@@ -1,3 +1,0 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`encode 1`] = `" [{"_":1,"__isVue":23,"a":24,"b":25},{"ctx":2,"vnode":4,"type":14,"appContext":16,"setupState":18,"attrs":19,"provides":20,"injects":21,"refs":22},{"props":3},{},[5],{"_custom":6},{"type":7,"id":8,"displayText":9,"tooltipText":10,"value":11,"fields":12},"component","__vue_devtool_undefined__","Anonymous Component","Component instance","__vue_devtool_undefined__",{"abstract":13},true,{"props":15},[],{"mixins":17},[],{},{},{},{},{},true,1,{"state":26},[27,31],{"type":28,"key":29,"value":30},"provided","$currentInstance","[[CircularRef]] <Anonymous Component>",{"type":32,"key":33,"value":34},"provided","$currentInstance2","[[CircularRef]] <Anonymous Component>"]"`;

@@ -7,16 +7,12 @@ import { groupIconVitePlugin } from 'vitepress-plugin-group-icons'
 export default defineConfig({
   plugins: [
     Components({
-      dirs: [
-        fileURLToPath(new URL('./components', import.meta.url)),
-      ],
+      dirs: [fileURLToPath(new URL('./components', import.meta.url))],
       dts: fileURLToPath(new URL('../components.d.ts', import.meta.url)),
       include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
       extensions: ['vue', 'md'],
     }),
     groupIconVitePlugin(),
-    UnoCSS(
-      fileURLToPath(new URL('./uno.config.ts', import.meta.url)),
-    ),
+    UnoCSS(fileURLToPath(new URL('./uno.config.ts', import.meta.url))),
   ],
 })

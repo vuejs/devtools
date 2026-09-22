@@ -1,7 +1,8 @@
 {
-  "type": "module",
-  "version": "7.3.2",
+  "name": "@vue/devtools-docs",
+  "version": "9.0.0-beta.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "docs:build": "vitepress build",
     "docs:dev": "vitepress dev",
@@ -10,9 +11,10 @@
   "devDependencies": {
     "@unocss/reset": "catalog:",
     "@vueuse/core": "catalog:",
-    "unplugin-vue-components": "^29.1.0",
-    "vitepress": "1.6.4",
-    "vitepress-plugin-group-icons": "^1.7.1",
+    "unocss": "catalog:",
+    "unplugin-vue-components": "^32.1.0",
+    "vitepress": "2.0.0-alpha.20",
+    "vitepress-plugin-group-icons": "^1.7.6",
     "vue": "catalog:"
   }
 }

@@ -1,36 +1,21 @@
-import { relative, resolve } from 'node:path'
-import fse from 'fs-extra'
-import { defineConfig, mergeConfig } from 'vite'
-import baseConfig from './vite.base.config'
+import vue from '@vitejs/plugin-vue'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import UnoCSS from 'unocss/vite'
+import { defineConfig } from 'vite'
 
-export default defineConfig(mergeConfig(baseConfig, {
+const root = dirname(fileURLToPath(import.meta.url))
+
+export default defineConfig({
   base: './',
-  plugins: [
-    {
-      name: 'vite-plugin-copy-devtools-client-bundle',
-      apply: 'build',
-      enforce: 'post',
-      closeBundle() {
-        // copy
-        const clientFile = resolve(__dirname, './dist')
-
-        ;['../vite/client'].forEach((dir) => {
-          fse.copySync(clientFile, resolve(__dirname, dir), { filter: (src) => {
-            const relativePath = relative(clientFile, src)
-            return !relativePath.includes('devtools-client-lib')
-          } })
-        })
-      },
+  plugins: [vue(), UnoCSS()],
+  resolve: {
+    alias: {
+      '@components': resolve(root, 'src/components'),
     },
-  ],
-  optimizeDeps: {
-    exclude: [
-      'vite-hot-client',
-    ],
   },
   build: {
-    target: 'esnext',
-    minify: true, // 'esbuild',
     emptyOutDir: true,
+    target: 'esnext',
   },
-}))
+})

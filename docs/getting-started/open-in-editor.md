@@ -1,76 +1,25 @@
 # Open component in editor
 
-When you select a component, you have the option to open the corresponding source file in your code editor.
+Select a component to open its source file in your code editor.
 
-## Used in devtools vite plugin
+## Vite plugin
 
-Vite plugin supports this feature out-of-the-box.
+The Vite plugin supports this feature out of the box when the connected Vite DevTools host exposes
+its open-in-editor capability.
 
-The feature is based on the [vite-plugin-vue-inspector](https://github.com/webfansplz/vite-plugin-vue-inspector) plugin and requires configuration, which you can do by looking at the [configuration documentation](https://github.com/webfansplz/vite-plugin-vue-inspector?tab=readme-ov-file#--configuration-ide--editor).
+Starting with Vue DevTools v9, Vue DevTools only forwards the component source path to
+`vite:core:open-in-editor`. `@vitejs/devtools` handles workspace path validation, editor launching,
+and diagnostics. The `launchEditor` plugin option has been removed.
 
-Starting from **v7.2.0**, you can specify the editor by `launchEditor` option:
+To open files in a specific editor, set the `LAUNCH_EDITOR` environment variable when you start
+Vite, for example `cursor` or `code`. Vue DevTools v8 read the same variable. When `LAUNCH_EDITOR`
+is unset, Vite DevTools chooses an editor from the ones currently running.
 
-This is a list of [supported editors](https://github.com/yyx990803/launch-editor?tab=readme-ov-file#supported-editors), please ensure that the editor's environment variables are correctly configured beforehand.
+For security, the source file must resolve inside the Vite workspace root. See the
+[Vite DevTools path validation documentation](https://devtools.vite.dev/errors/dtk0028) when an
+open-in-editor request is rejected.
 
-```ts [vite.config.ts]
-import VueDevTools from 'vite-plugin-vue-devtools'
+## Browser extension
 
-export default defineConfig({
-  plugins: [
-    VueDevTools({
-      launchEditor: 'webstorm',
-    }),
-    Unocss(),
-  ],
-})
-```
-
-## Used in devtools browser extension
-
-### Vite & Nuxt & Quasar CLI
-
-Vite & Nuxt & Quasar CLI supports this feature out-of-the-box. Make sure to be in debug mode.
-
-### Webpack
-
-In your Vue project, install the [launch-editor-middleware](https://github.com/yyx990803/launch-editor#middleware) package and modify your webpack configuration:
-
-1. Import the package:
-
-```ts
-const openInEditor = require('launch-editor-middleware')
-```
-
-2. In the `devServer` option, register the `/__open-in-editor` HTTP route:
-
-```js
-devServer: {
-  before: (app) => {
-    app.use('/__open-in-editor', openInEditor())
-  }
-}
-```
-
-3. The editor to launch is guessed. You can also specify the editor app with the editor option. See the [supported editors list.](https://github.com/yyx990803/launch-editor?tab=readme-ov-file#supported-editors)
-
-```js
-openInEditor('code')
-```
-
-4. You can now click on the name of the component in the Component inspector pane (if the devtools knows about its file source, a tooltip will appear).
-
-### Node.js
-
-You can use the [launch-editor](https://github.com/yyx990803/launch-editor) package to setup an HTTP route with the `/__open-in-editor` path. It will receive file as an URL variable.
-
-### Customize request
-
-You can change the request host (default `/`) with the following code in your frontend app, e.g.
-
-```ts
-if (process.env.NODE_ENV !== 'production') {
-  window.VUE_DEVTOOLS_CONFIG = {
-    openInEditorHost: 'http://localhost:3000/'
-  }
-}
-```
+In v9, the browser extension does not support opening source files in an editor, so this action is hidden.
+Use the Vite plugin to open source files from Vue DevTools.

@@ -1,38 +1,52 @@
 {
   "name": "@vue/devtools-api",
-  "type": "module",
-  "version": "8.2.1",
-  "author": "webfansplz",
+  "version": "9.0.0-beta.0",
+  "description": "Public plugin API for Vue DevTools",
   "license": "MIT",
+  "author": "webfansplz",
   "repository": {
-    "directory": "packages/devtools-api",
     "type": "git",
-    "url": "git+https://github.com/vuejs/devtools.git"
+    "url": "git+https://github.com/vuejs/devtools.git",
+    "directory": "packages/devtools-api"
   },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
   "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "node": {
-        "import": "./dist/index-node.js",
-        "require": "./dist/index-node.cjs"
+        "import": {
+          "types": "./dist/index-node.d.mts",
+          "default": "./dist/index-node.mjs"
+        },
+        "require": {
+          "types": "./dist/index-node.d.cts",
+          "default": "./dist/index-node.cjs"
+        }
       },
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "unpkg": "dist/vue-devtools-api.global.js",
-  "jsdelivr": "dist/vue-devtools-api.global.js",
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build": "tsdown --clean",
-    "prepare:type": "tsdown --dts-only",
-    "stub": "tsdown --watch --onSuccess 'tsdown --dts-only'"
+    "build": "vp pack",
+    "dev": "vp pack --watch"
   },
   "dependencies": {
-    "@vue/devtools-kit": "workspace:^"
+    "@vue/devtools-kit": "workspace:*"
   }
 }
