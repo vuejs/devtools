@@ -369,7 +369,7 @@ describe('plugin API stability', () => {
       delete (globalThis as Record<PropertyKey, unknown>)[PLUGIN_REGISTRY_STATE]
     })
 
-    it('replays only the latest setup after the kit is recreated', async () => {
+    it('replays every setup of a plugin id after the kit is recreated', async () => {
       const calls: string[] = []
       setupDevToolsPlugin({ id: 'plugin:hmr' }, (api) => {
         api.on.getInspectorState(() => {
@@ -392,27 +392,36 @@ describe('plugin API stability', () => {
 
       await kit.runtime.callPluginHook('getInspectorState', { inspectorId: 'x', state: {} })
 
-      expect(calls).toEqual(['new'])
+      expect(calls).toEqual(['old', 'new'])
     })
 
-    it('replaces hooks when the same plugin id is set up again', async () => {
+    it('keeps hooks from an earlier setup when the same plugin id is set up again', async () => {
       const calls: string[] = []
+      const app = {}
       kit = createKit()
-      setupDevToolsPlugin({ id: 'plugin:replace' }, (api) => {
-        api.on.editComponentState(() => {
-          calls.push('old')
+      setupDevToolsPlugin({ id: 'plugin:pinia', app }, (api) => {
+        api.on.getInspectorTree((payload) => {
+          calls.push('tree')
+          payload.rootNodes.push({ id: '_root', label: 'Pinia' })
         })
       })
-      setupDevToolsPlugin({ id: 'plugin:replace' }, (api) => {
-        api.on.editComponentState(() => {
-          calls.push('new')
+      setupDevToolsPlugin({ id: 'plugin:pinia', app }, (api) => {
+        api.on.getInspectorState(() => {
+          calls.push('state')
         })
       })
-      await vi.waitFor(() => expect(kit?.plugins.adapters.has('plugin:replace')).toBe(true))
+      await vi.waitFor(() => expect(kit?.plugins.adapters.has('plugin:pinia')).toBe(true))
 
-      await kit.runtime.callPluginHook('editComponentState', { path: [], value: 1 })
+      const rootNodes: Array<{ id: string }> = []
+      await kit.runtime.callPluginHook('getInspectorTree', {
+        app,
+        inspectorId: 'pinia',
+        rootNodes,
+      })
+      await kit.runtime.callPluginHook('getInspectorState', { inspectorId: 'pinia', state: {} })
 
-      expect(calls).toEqual(['new'])
+      expect(rootNodes).toEqual([{ id: '_root', label: 'Pinia' }])
+      expect(calls).toEqual(['tree', 'state'])
     })
   })
 })

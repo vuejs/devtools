@@ -22,10 +22,11 @@ export function setupDevToolsPlugin(
   setupFn: PluginSetupFunction,
 ): void {
   const state = getPluginRegistryState()
+  // Pinia (and other v6 plugins) call this once per app and again per store,
+  // with the same id. Each setup adds hooks; a later call must not drop the
+  // earlier ones. The buffer keeps every call so a late kit replays them all.
   const entry: PluginEntry = [descriptor, setupFn]
-  const existing = state.bufferedPlugins.findIndex(([current]) => current.id === descriptor.id)
-  if (existing === -1) state.bufferedPlugins.push(entry)
-  else state.bufferedPlugins[existing] = entry
+  state.bufferedPlugins.push(entry)
   state.listeners.forEach((listener) => listener(entry))
 }
 
@@ -65,7 +66,6 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
       registeredAdapter.descriptor.settings =
         descriptor.settings ?? registeredAdapter.descriptor.settings
       registeredAdapter.syncSettings()
-      registeredAdapter.clearHooks()
       await runPluginSetup(descriptor.id, setupFn, registeredAdapter.api)
       return registeredAdapter
     }

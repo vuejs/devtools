@@ -8,6 +8,8 @@ test-results
 .playwright
 benchmark-results
 components.d.ts
+auto-imports.d.ts
+.idea/
 docs/.vitepress/cache/
 packages/vite/client/
 .DS_Store
