@@ -65,7 +65,9 @@ import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  devtools: true,
+  devtools: {
+    apply: 'serve',
+  },
   plugins: [vueDevTools()],
 })
 ```
@@ -81,8 +83,8 @@ export default defineConfig({
 
 :::
 
-In v9, set `devtools: true` to enable the Vite DevTools host. Earlier versions start Vue DevTools
-through `vueDevTools()` alone and do not require this option.
+In v9, set `devtools: { apply: 'serve' }` to enable the Vite DevTools host during development.
+Earlier versions start Vue DevTools through `vueDevTools()` alone and do not require this option.
 
 The v9 plugin logs a warning during development if Vite DevTools is disabled.
 See the [v8 to v9 migration guide](/guide/migration#migrating-from-v8-to-v9) when upgrading.
@@ -110,8 +112,9 @@ export default defineConfig({
 })
 ```
 
-`devtools: true` enables the host for both development and builds. Vue DevTools' runtime integration
-runs only during development. Use `apply: 'serve'` to limit the host to development as well.
+Vue DevTools' runtime integration runs only during development, so `apply: 'serve'` is the
+recommended default. Use `devtools: true` only when you also want the Vite DevTools host during
+builds.
 See the [Vite DevTools guide](https://devtools.vite.dev/guide/) for host options and defaults.
 
 ## Options

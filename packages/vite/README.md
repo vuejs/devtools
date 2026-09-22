@@ -17,7 +17,9 @@ import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  devtools: true,
+  devtools: {
+    apply: 'serve',
+  },
   plugins: [vueDevTools()],
 })
 ```

@@ -12,7 +12,7 @@ export function createVueDevToolsDockRegistrationPlugin(): PluginWithDevTools {
       base = config.base
       if (!config.devtools) {
         config.logger.warn(
-          '[vite-plugin-vue-devtools] Vue DevTools requires Vite DevTools. Install @vitejs/devtools and set devtools: true in your Vite config.',
+          "[vite-plugin-vue-devtools] Vue DevTools requires Vite DevTools. Install @vitejs/devtools and set devtools: { apply: 'serve' } in your Vite config.",
         )
       }
     },

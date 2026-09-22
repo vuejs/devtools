@@ -21,7 +21,9 @@ import { defineConfig } from 'vite'
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  devtools: true,
+  devtools: {
+    apply: 'serve',
+  },
   plugins: [
     VueDevTools({
       appendTo: 'resources/js/app.js',
@@ -40,7 +42,9 @@ We still recommend using [Nuxt DevTools](https://github.com/nuxt/devtools) for a
 ```ts [nuxt.config.ts]
 export default defineNuxtConfig({
   vite: {
-    devtools: true,
+    devtools: {
+      apply: 'serve',
+    },
     plugins: [
       VueDevTools({
         appendTo: /\/entry\.m?js$/,
@@ -59,7 +63,9 @@ import RubyPlugin from 'vite-plugin-ruby'
 import VueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  devtools: true,
+  devtools: {
+    apply: 'serve',
+  },
   plugins: [
     VueDevTools({
       appendTo: 'app/frontend/entrypoints/application.js', // your app entrypoint (wherever you call createApp())
@@ -79,7 +85,9 @@ import { defineConfig } from 'wxt'
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
   vite: () => ({
-    devtools: true,
+    devtools: {
+      apply: 'serve',
+    },
     plugins: [
       devtools({
         // your app entrypoint (wherever you call createApp())

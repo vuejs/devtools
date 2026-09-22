@@ -52,7 +52,7 @@ describe('Vue DevTools dock registration', () => {
         },
         'serve',
       )
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining('devtools: true'))
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("devtools: { apply: 'serve' }"))
       expect(
         config.plugins
           .filter((plugin) => !plugin.name.startsWith('vue-devtools:'))

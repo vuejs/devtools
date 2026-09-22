@@ -31,9 +31,9 @@ and its Vite DevTools dock directly:
   it unset and let Vite DevTools pick a running editor. See
   [Open component in editor](/getting-started/open-in-editor).
 - The deprecated `openInEditorHost` and `clientHost` options remain removed.
-- Install `@vitejs/devtools` in your project and set `devtools: true` in your Vite config,
-  alongside `plugins: [vueDevTools()]`. Remove any explicit `DevTools()` plugin registration.
-  Vue DevTools no longer starts or brands the shared DevTools host automatically.
+- Install `@vitejs/devtools` in your project and set `devtools: { apply: 'serve' }` in your Vite
+  config, alongside `plugins: [vueDevTools()]`. Remove any explicit `DevTools()` plugin
+  registration. Vue DevTools no longer starts or brands the shared DevTools host automatically.
 - Move `builtinViteDevTools` to `devtools.builtinDevTools`, and move `embeddedVisibility` and
   `dockPreferences` to the corresponding fields under `devtools`. The plugin no longer exports
   `VueDevToolsDockPreferences`; use Vite's `devtools` configuration types instead.

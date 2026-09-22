@@ -5,7 +5,7 @@
 Vue DevTools v9 ships two hosts over one kit and one client. The Vite plugin is a dock inside Vite DevTools. The Chromium extension is its own DevTools panel and does not go through Vite.
 
 - **`@vue/devtools-kit` + `@vue/devtools-client`** — shared runtime and UI: component tree, state, timeline, Pinia, pages, reactivity graph, and the v6 plugin setup API (`setupDevToolsPlugin`, alias `setupDevtoolsPlugin`).
-- **`vite-plugin-vue-devtools`** — Vite host. Requires Vite 8.3.0+ and a project-level `@vitejs/devtools` (`devtools: true`, or a Vite `devtools` object) next to `plugins: [vueDevTools()]`. This package does not register `DevTools()` and does not brand the shared Vite shell. Sibling repo: `../vite-devtools`. Read its [AGENTS.md](../vite-devtools/AGENTS.md) before changing dock, command, or open-in-editor behavior.
+- **`vite-plugin-vue-devtools`** — Vite host. Requires Vite 8.3.0+ and a project-level `@vitejs/devtools` (`devtools: { apply: 'serve' }` is recommended) next to `plugins: [vueDevTools()]`. This package does not register `DevTools()` and does not brand the shared Vite shell. Sibling repo: `../vite-devtools`. Read its [AGENTS.md](../vite-devtools/AGENTS.md) before changing dock, command, or open-in-editor behavior.
 - **`@vue/devtools-chrome`** — Chromium MV3 host. Content backend calls `createDevtoolsKit({ clientName: 'chrome-extension' })` on the page and bridges the panel on channel `vue-devtools:chrome-extension`. It works on any page that runs Vue, including apps that never load Vite DevTools.
 
 `devframe` / `@devframes/hub` (docs: [devfra.me](https://devfra.me)) matter on the Vite path: docks, commands, terminals, messages. The extension does not use that hub. Features that only exist when several Vite tools share a UI (custom tabs, commands, split screen, the floating inspector button) belong in Vite DevTools. Vue-level `addCustomTab` / `addCustomCommand` stay removed on both hosts. Custom inspectors, component hooks, timeline layers, and plugin settings stay on the Vue plugin API.
@@ -69,12 +69,14 @@ import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  devtools: true,
+  devtools: {
+    apply: 'serve',
+  },
   plugins: [vueDevTools()],
 })
 ```
 
-`devtools: true` turns on the Vite DevTools host for serve and build. Vue's own integration still runs only in development. Limit the host with `apply: 'serve'`. Dock layout and built-ins stay on the host object, not on `vueDevTools()`:
+`devtools: { apply: 'serve' }` turns on the Vite DevTools host during development, matching Vue's development-only integration. Use `devtools: true` only when the host should also run during builds. Dock layout and built-ins stay on the host object, not on `vueDevTools()`:
 
 ```ts
 export default defineConfig({
