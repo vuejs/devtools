@@ -3,48 +3,52 @@ name: CI
 on:
   push:
     branches:
-      - '**'
-
+      - main
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  ci:
+  quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set node
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          node-version: lts/*
+          persist-credentials: false
 
-      - name: Install pnpm
-        # https://github.com/nitrojs/nitro/pull/3060
-        # https://github.com/nodejs/corepack/pull/614
-        run: npm i -g --force corepack && corepack enable pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
 
-      - name: Setup ni
-        run: npm i -g @antfu/ni
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: 24
+          cache: pnpm
+          package-manager-cache: true
 
-      - name: Install
-        run: nci
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: nr build
+      - name: Build packages
+        run: pnpm build
 
-      - name: Lint
-        run: nr lint
+      - name: Check formatting, lint, and types
+        run: pnpm check
 
-      - name: Type check
-        run: nr type-check
+      - name: Run unit and integration tests
+        run: pnpm test
 
-      - name: Test
-        run: nr test
-
-      - name: Build ui stories
-        run: nr -C packages/ui story:build
+      - name: Check Vue SFC types
+        run: pnpm typecheck

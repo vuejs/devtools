@@ -1,0 +1,30 @@
+{
+  "name": "@vue/devtools-playground-reactivity-graph",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 127.0.0.1 --port 3002",
+    "preview": "vite preview --host 127.0.0.1 --port 3002"
+  },
+  "dependencies": {
+    "@antfu/design": "catalog:",
+    "@antfu/utils": "^9.3.0",
+    "@iconify-json/ph": "^1.2.2",
+    "@unocss/reset": "catalog:",
+    "@unocss/transformer-directives": "^66.10.5",
+    "@vue/runtime-dom": "3.6.0-rc.5",
+    "colorjs.io": "^0.7.1",
+    "reka-ui": "^2.10.4",
+    "vue": "3.6.0-rc.5"
+  },
+  "devDependencies": {
+    "@vitejs/devtools": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "typescript": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-vue-devtools": "workspace:*"
+  }
+}

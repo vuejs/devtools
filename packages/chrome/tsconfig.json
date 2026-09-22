@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "paths": {
+      "@components/*": ["../client/src/components/*"]
+    },
+    "types": ["chrome", "vite/client"]
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}

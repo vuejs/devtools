@@ -1,100 +1,153 @@
-import { unoConfig } from '@vue/devtools-ui/theme'
-import { defineConfig, mergeConfigs, presetAttributify, presetWebFonts } from 'unocss'
+import { defineConfig, presetIcons, presetWind3, transformerDirectives } from 'unocss'
 
-export default defineConfig(mergeConfigs([unoConfig, {
-  rules: [
-    /**
-     * Credit to Nanda Syahrasyad (https://github.com/narendrasss)
-     *
-     * - https://github.com/narendrasss/NotANumber
-     * - https://www.nan.fyi/grid.svg
-     * - https://www.nan.fyi/grid-dark.svg
-     */
-    ['panel-grids-light', {
-      'background-image': 'url("data:image/svg+xml,%0A%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\' transform=\'scale(3)\'%3E%3Crect x=\'0\' y=\'0\' width=\'100%25\' height=\'100%25\' fill=\'white\'/%3E%3Cpath d=\'M 10,-2.55e-7 V 20 Z M -1.1677362e-8,10 H 20 Z\' stroke-width=\'0.2\' stroke=\'hsla(0, 0%25, 98%25, 1)\' fill=\'none\'/%3E%3C/svg%3E")',
-      'background-size': '40px 40px',
-    }],
-    ['panel-grids-dark', {
-      'background-image': `url("data:image/svg+xml,%0A%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' transform='scale(3)'%3E%3Crect x='0' y='0' width='100%25' height='100%25' fill='${encodeURIComponent('#121212')}'/%3E%3Cpath d='M 10,-2.55e-7 V 20 Z M -1.1677362e-8,10 H 20 Z' stroke-width='0.2' stroke='${encodeURIComponent('#121212')}' fill='none'/%3E%3C/svg%3E");`,
-      'background-size': '40px 40px',
-    }],
+export default defineConfig({
+  shortcuts: [
+    {
+      'color-base': 'text-neutral-800 dark:text-neutral-200',
+      'color-muted': 'text-neutral-500 dark:text-neutral-400',
+      'color-active': 'text-emerald-700 dark:text-emerald-300',
+      'bg-base': 'bg-white dark:bg-#111',
+      'bg-subtle': 'bg-neutral-50 dark:bg-#171717',
+      'bg-active': 'bg-#8881',
+      'bg-glass': 'bg-white/78 dark:bg-#111/78 backdrop-blur-7',
+      'bg-dots':
+        'bg-[radial-gradient(circle_at_1px_1px,rgb(100_116_139_/_0.22)_1px,transparent_0)] bg-[length:28px_28px]',
+      'border-base': 'border-#8882',
+      'border-active': 'border-emerald-500/30 dark:border-emerald-300/25',
+      'z-graph-link': 'z-10',
+      'z-graph-node': 'z-11',
+      'panel-card': 'rounded-lg border border-base bg-base',
+      'btn-icon':
+        'h-8 w-8 rounded-full flex items-center justify-center border border-transparent hover:bg-active color-muted hover:color-base',
+      'metric-card': 'rounded-lg border border-base bg-subtle p-3',
+      'nav-item':
+        'h-10 w-10 rounded-full flex items-center justify-center color-muted hover:color-base hover:bg-active',
+      'nav-item-active':
+        'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border border-emerald-500/16',
+      'side-nav':
+        'relative z-10 h-full min-h-0 min-w-0 border-r border-base bg-subtle flex flex-col overflow-visible',
+      'side-nav-brand':
+        'relative h-12 box-border shrink-0 border-b border-base bg-subtle p-1 flex items-center justify-center',
+      'side-nav-logo': 'h-7 w-7 shrink-0',
+      'side-nav-item':
+        'relative mt-1 h-10 w-10 box-border shrink-0 rounded-xl border-0 bg-transparent color-muted op65 flex items-center justify-center hover:bg-active hover:op-100',
+      'side-nav-item-active': 'bg-active color-active op-100',
+      'side-nav-item-expanded':
+        'self-stretch max-w-full !w-auto justify-start gap-3 !rounded-none px-3',
+      'tab-icon': 'h-5 w-5 shrink-0 text-5',
+      'settings-button':
+        'min-h-8 inline-flex items-center justify-center gap-1.5 rounded-1 border border-base bg-transparent px-3 py-1 color-inherit font-[inherit] hover:bg-active',
+      'settings-button-primary': 'border-primary-500 text-primary-700 dark:text-primary-300',
+      'settings-button-warning': 'border-amber-500/40 text-amber-700 dark:text-amber-300',
+      'settings-icon-button':
+        'h-5.5 min-w-5.5 inline-flex items-center justify-center rounded-1 border-0 bg-transparent px-1 color-inherit op65 hover:bg-active hover:op100 disabled:cursor-default disabled:op25 disabled:hover:bg-transparent',
+      'settings-select':
+        'min-h-8 min-w-30 rounded-1 border border-base bg-transparent py-1 pl-2.5 pr-7 color-inherit font-[inherit]',
+      'selectable-item':
+        'flex items-center px-2 py-1 rounded cursor-pointer hover:bg-primary-200 dark:hover:bg-gray-800',
+      'selectable-item-active': 'text-white bg-primary-600 hover:text-white hover:bg-primary-600',
+      'font-state-field': 'font-mono',
+      'state-key': 'text-purple-700 dark:text-purple-300',
+      colon: 'text-#444 dark:text-white',
+      'state-value': 'text-#444 dark:text-#bdc6cf',
+      'string-state-type': 'text-#e74c3c dark:text-#FFB980',
+      'literal-state-type': 'text-#03c dark:text-#997fff',
+      'boolean-state-type': 'text-#27ae60 dark:text-#abebc6',
+      'null-state-type': 'text-#999',
+    },
   ],
   theme: {
-    fontFamily: {
-      'data-field': 'Roboto Mono, Menlo, Consolas, monospace',
+    colors: {
+      primary: {
+        50: '#eefcf6',
+        100: '#d7f8ea',
+        200: '#b3efd9',
+        300: '#7ee0bf',
+        400: '#42c99c',
+        DEFAULT: '#00b878',
+        500: '#00a86f',
+        600: '#00895d',
+        700: '#00704f',
+        800: '#035940',
+        900: '#064936',
+        950: '#02291f',
+      },
     },
   },
-  variants: [
-    // @children:[span]:bg-red => .@children\:\[span\]\:bg-red > span { bg-red }
-    (input: string) => {
-      const prefix = '@children:'
-      const reg = /(@children:)\[(.*)\]:(.*)$/
-      if (input.startsWith(prefix)) {
-        return {
-          matcher: input.replace(reg, '$3'),
-          selector: s => `${s} > ${input.replace(reg, '$2')}`,
-        }
-      }
-    },
-    {
-      name: '@active',
-      match(matcher) {
-        if (!matcher.startsWith('@active'))
-          return matcher
-
-        return {
-          matcher: matcher.slice(8),
-          selector: s => `${s}.active`,
-        }
-      },
-    },
+  transformers: [transformerDirectives()],
+  safelist: [
+    'i-carbon-add',
+    'i-carbon-add-alt',
+    'i-carbon-arrow-down',
+    'i-carbon-arrow-left',
+    'i-carbon-arrow-right',
+    'i-carbon-assembly-cluster',
+    'i-carbon-bring-forward',
+    'i-carbon-breaking-change',
+    'i-carbon-caret-down',
+    'i-carbon-caret-up',
+    'i-carbon-checkmark',
+    'i-carbon-chevron-down',
+    'i-carbon-chevron-right',
+    'i-carbon-clean',
+    'i-carbon-close',
+    'i-carbon-color-palette',
+    'i-carbon-code',
+    'i-carbon-copy',
+    'i-carbon-data-enrichment',
+    'i-carbon-data-view',
+    'i-carbon-debug',
+    'i-carbon-direction-right-01',
+    'i-carbon-edit',
+    'i-carbon-filter',
+    'i-carbon-flow-data',
+    'i-carbon-idea',
+    'i-carbon-information',
+    'i-carbon-launch',
+    'i-carbon-language',
+    'i-carbon-moon',
+    'i-carbon-network-4',
+    'i-carbon-overflow-menu-horizontal',
+    'i-carbon-overflow-menu-vertical',
+    'i-carbon-pin',
+    'i-carbon-pin-filled',
+    'i-carbon-plan',
+    'i-carbon-play',
+    'i-carbon-play-filled',
+    'i-carbon-plug',
+    'i-carbon-renew',
+    'i-carbon-roadmap',
+    'i-carbon-save',
+    'i-carbon-search',
+    'i-carbon-select-window',
+    'i-carbon-server-proxy',
+    'i-carbon-settings',
+    'i-carbon-settings-adjust',
+    'i-carbon-side-panel-close',
+    'i-carbon-side-panel-open',
+    'i-carbon-star',
+    'i-carbon-stop-filled',
+    'i-carbon-subtract',
+    'i-carbon-sun',
+    'i-carbon-time',
+    'i-carbon-trash-can',
+    'i-carbon-tree-view-alt',
+    'i-carbon-view',
+    'i-carbon-warning',
+    'i-carbon-zoom-in',
+    'i-carbon-zoom-out',
+    'i-ic-baseline-delete',
+    'i-logos-pinia',
+    'i-logos-vue',
+    'i-ri-route-line',
   ],
-  shortcuts: [{
-    // general
-    'bg-base': 'bg-white dark:bg-#121212',
-    'text-base': 'text-black dark:text-#dfe0e2',
-    'bg-active': 'bg-gray:5',
-    'border-base': 'border-gray/20',
-    'navbar-base': 'border-b border-base h-50px',
-    'transition-base': 'transition-all duration-200',
-
-    'x-divider': 'h-1px w-full bg-gray/15',
-
-    // glass
-    'glass-effect': 'backdrop-blur-6 bg-white/80 dark:bg-#121212/90',
-    'navbar-glass': 'sticky z-10 top-0 glass-effect',
-
-    // code
-    'code-block': 'dark:bg-#121212 bg-white',
-
-    // panel grids
-    'panel-grids': 'panel-grids-light dark:panel-grids-dark',
-    'panel-grids-center': 'panel-grids flex flex-col h-full gap-2 items-center justify-center',
-
-    'selectable-item': 'flex items-center px-2 py-1 rounded cursor-pointer hover:bg-primary-200 dark:(hover:bg-gray-800) @active:(text-white bg-primary-600 hover:(text-white bg-primary-600))',
-    'selectable-item-label': 'text-truncate',
-
-    // component state
-    'state-key': 'text-purple-700 dark:text-purple-300',
-    'colon': 'text-#444 dark:(text-white)',
-    'state-value': 'text-#444 dark:(text-#bdc6cf)',
-    'state-value-label': 'text-gray-500',
-    'state-value-literal': 'text-#03c dark:(text-#997fff)',
-    'state-value-string': 'text-#FFB980',
-  }, [/^theme-card-(\w+)$/, $ => `p2 flex gap2 border border-base bg-base items-center rounded min-w-40 min-h-25 justify-center transition-all saturate-0 op50 shadow hover:(op100 bg-${$[1]}/10 text-${$[1]}6 saturate-100)`]],
   presets: [
-    presetAttributify(),
-    presetWebFonts({
-      fonts: {
-        sans: 'DM Sans',
-        mono: 'DM Mono',
-        stylish: 'Caveat',
-      },
+    presetIcons({
+      scale: 1,
+    }),
+    presetWind3({
+      dark: 'class',
+      variablePrefix: 'vdt-',
     }),
   ],
-  safelist: [
-    'state-value-literal',
-    'state-value-string',
-    'i-carbon-ibm-watson-discovery',
-  ],
-}]))
+})

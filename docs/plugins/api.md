@@ -2,9 +2,11 @@
 
 Plugins API for easier DevTools integrations.
 
-:::tip
+:::tip Compatibility
 
-Since v7.3.0, we are fully compatible with the v6 plugin API. You can check out the [API documentation](https://devtools-v6.vuejs.org/plugin/api-reference.html) here.
+Vue DevTools v9 continues to provide the v6-style plugin setup API for its supported custom
+inspectors, component hooks, timeline layers and plugin settings.
+
 :::
 
 ## Installation
@@ -12,155 +14,82 @@ Since v7.3.0, we are fully compatible with the v6 plugin API. You can check out 
 ::: code-group
 
 ```sh [npm]
-$ npm add -D @vue/devtools-api
+npm add -D @vue/devtools-api
 ```
 
 ```sh [pnpm]
-$ pnpm add -D @vue/devtools-api
+pnpm add -D @vue/devtools-api
 ```
 
 ```sh [yarn]
-$ yarn add -D @vue/devtools-api
+yarn add -D @vue/devtools-api
 ```
 
 ```sh [bun]
-$ bun add -D @vue/devtools-api
+bun add -D @vue/devtools-api
 ```
 
 :::
 
-## `addCustomTab`
+## `setupDevToolsPlugin`
 
-You can choose any icon from [Material Design Icons](https://fonts.google.com/icons) or [Iconify Ic Baseline](https://icones.netlify.app/collection/ic?variant=Baseline), for example `star`.
+Register a Vue DevTools plugin with its descriptor and setup callback:
 
 ```ts
-import { addCustomTab } from '@vue/devtools-api'
+import { setupDevToolsPlugin } from '@vue/devtools-api'
 
-addCustomTab({
-  // unique identifier
-  name: 'vue-use',
-  // title to display in the tab
-  title: 'VueUse',
-  // any icon from material design icons or a URL to an image
-  icon: 'https://vueuse.org/favicon.svg',
-  // iframe view
-  view: {
-    type: 'iframe',
-    src: 'https://vueuse.org/',
+setupDevToolsPlugin(
+  {
+    id: 'example',
+    label: 'Example',
+    app,
   },
-  category: 'advanced',
-})
-
-const SFC = /* vue */ `
-  <script setup lang="ts">
-  import { ref } from 'vue'
-
-  const count = ref(0)
-  </script>
-
-  <template>
-    <div class="h-full w-full flex flex-col items-center justify-center">
-      <div>
-        count is {{ count }}
-      </div>
-      <button class="btn" @click="count++">
-        increment
-      </button>
-    </div>
-  </template>
-
-  <style scoped>
-  .btn {
-    background-color: #4c51bf;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    border: none;
-    cursor: pointer;
-  }
-  </style>
-`
-
-addCustomTab({
-  name: 'plugin-count',
-  title: 'Plugin Count',
-  icon: 'baseline-exposure-plus-1',
-  // SFC view
-  view: {
-    type: 'sfc',
-    sfc: SFC,
+  (api) => {
+    api.addInspector({
+      id: 'example',
+      label: 'Example',
+    })
   },
-  category: 'app',
-})
+)
 ```
 
-## `addCustomCommand`
+The legacy `setupDevtoolsPlugin` spelling remains available as an alias.
 
-You can choose any icon from [Material Design Icons](https://fonts.google.com/icons) or [Iconify Ic Baseline](https://icones.netlify.app/collection/ic?variant=Baseline), for example `star`.
+## Connection lifecycle
+
+Use `onDevToolsConnected` when the runtime is ready, or `onDevToolsClientConnected` when a
+DevTools UI client is also attached:
 
 ```ts
-import { addCustomCommand } from '@vue/devtools-api'
+import { onDevToolsClientConnected, onDevToolsConnected } from '@vue/devtools-api'
 
-// Add a custom command with url
-addCustomCommand({
-  // unique identifier
-  id: 'vueuse',
-  // title to display in the command
-  title: 'VueUse',
-  // any icon from material design icons or a URL to an image
-  icon: 'https://vueuse.org/favicon.svg',
-  action: {
-    type: 'url',
-    src: 'https://vueuse.org/'
-  }
+onDevToolsConnected(() => {
+  console.log('devtools runtime connected')
 })
-
-// Add a custom command with submenu
-addCustomCommand({
-  // unique identifier
-  id: 'vueuse',
-  // title to display in the command
-  title: 'VueUse',
-  // any icon from material design icons or a URL to an image
-  icon: 'https://vueuse.org/favicon.svg',
-  // submenu, which is shown when the menu is clicked
-  children: [
-    {
-      id: 'vueuse:github',
-      title: 'Github',
-      action: {
-        type: 'url',
-        src: 'https://github.com/vueuse/vueuse'
-      }
-    },
-    {
-      id: 'vueuse:website',
-      title: 'Website',
-      icon: 'auto-awesome',
-      action: {
-        type: 'url',
-        src: 'https://vueuse.org/'
-      }
-    },
-  ],
-})
-```
-
-## `removeCustomCommand`
-
-```ts
-import { removeCustomCommand } from '@vue/devtools-api'
-
-// Remove a custom command by id
-removeCustomCommand('vueuse')
-```
-
-## `onDevToolsClientConnected`
-
-```ts
-import { onDevToolsClientConnected } from '@vue/devtools-api'
 
 onDevToolsClientConnected(() => {
   console.log('devtools client connected')
 })
 ```
+
+Importing `@vue/devtools-api` during SSR is safe. Its Node export intentionally performs no browser
+work.
+
+## APIs removed in v9
+
+:::danger Breaking change
+
+The following Vue-level APIs were available in Vue DevTools v8 but are deprecated and no longer
+exported in Vue DevTools v9.
+
+:::
+
+| Removed API           | v9 replacement                                                                                                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `addCustomTab`        | Register an `iframe`, `custom-render`, `json-render`, or another dock entry with `ctx.docks.register()`. See the [Dock System documentation](https://devtools.vite.dev/kit/dock-system). |
+| `addCustomCommand`    | Register a command with `ctx.commands.register()`. See the [Commands & Command Palette documentation](https://devtools.vite.dev/kit/commands).                                           |
+| `removeCustomCommand` | Keep the handle returned by `ctx.commands.register()` and call `handle.unregister()`. See the [Command Handle documentation](https://devtools.vite.dev/kit/commands#command-handle).     |
+
+These replacements live on the Devframe-based Vite DevTools Kit integration surface. For the
+underlying framework-neutral dock and command registries, see the
+[Devframe Hub documentation](https://devfra.me/guide/hub).

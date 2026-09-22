@@ -1,8 +1,11 @@
 import { defineConfig } from 'bumpp'
-import fg from 'fast-glob'
 
 export default defineConfig({
-  files: fg.sync(['./packages/*/package.json'], {
-    ignore: ['./packages/*-extension/package.json'],
-  }),
+  files: [
+    'package.json',
+    'packages/kit/package.json',
+    'packages/devtools-api/package.json',
+    'packages/client/package.json',
+    'packages/vite/package.json',
+  ],
 })

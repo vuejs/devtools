@@ -8,5 +8,5 @@ jobs:
     if: github.repository == 'vuejs/devtools'
     uses: sxzz/workflows/.github/workflows/release-commit.yml@v1
     with:
-      packages: "'./packages/*'"
+      packages: "'./packages/kit' './packages/devtools-api' './packages/vite'"
       compact: true

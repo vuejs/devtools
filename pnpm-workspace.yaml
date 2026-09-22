@@ -1,47 +1,79 @@
 packages:
   - packages/*
+  - playground/*
   - docs
-  - packages/playground/**
 
 catalog:
-  '@iconify/json': ^2.2.395
-  '@types/node': ^24.7.2
-  '@unocss/reset': ^66.5.4
-  '@vitejs/plugin-vue': ^6.0.1
-  '@vueuse/core': ^13.9.0
-  '@vueuse/integrations': ^13.9.0
-  colord: ^2.9.3
+  colorjs.io: ^0.7.1
+  '@antfu/design': ^0.5.3
+  '@iconify-json/carbon': ^1.2.27
+  '@iconify-json/ic': ^1.2.4
+  '@iconify-json/logos': ^1.2.14
+  '@iconify-json/ri': ^1.2.10
+  '@types/chrome': ^0.3.0
+  '@types/node': ^26.6.2
+  '@unocss/reset': ^66.10.5
+  '@vitejs/devtools': ^0.7.5
+  '@vitejs/devtools-kit': ^0.7.5
+  '@vitejs/plugin-vue': ^6.0.9
+  '@vitest/coverage-v8': 4.1.11
+  '@vue/test-utils': ^2.5.1
+  '@vueuse/core': ^15.0.0
+  '@types/d3-selection': ^3.0.12
+  '@types/d3-force': ^3.0.10
+  '@types/d3-zoom': ^3.0.8
+  devframe: ^1.0.0
+  d3-force: ^3.0.0
+  d3-selection: ^3.0.0
+  d3-zoom: ^3.0.0
   floating-vue: 5.2.2
-  pathe: ^2.0.3
-  perfect-debounce: ^2.0.0
-  pinia: ^3.0.3
-  sass-embedded: ^1.93.2
-  serve: ^14.2.5
-  shiki: ^3.13.0
-  splitpanes: ^4.0.4
-  typescript: ^5.9.3
-  unocss: ^66.5.4
-  unplugin-auto-import: ^20.2.0
-  vite: ^7.1.10
-  vite-hot-client: ^2.1.0
-  vite-plugin-dts: ^4.5.4
-  vite-plugin-inspect: ^11.3.3
-  vue: ^3.5.22
-  vue-router: ^4.6.0
-  vue-virtual-scroller: 2.0.0-beta.8
+  fuse.js: ^7.5.0
+  happy-dom: ^20.14.5
+  nano-staged: ^1.0.2
+  pinia: ^4.0.3
+  playwright: ^1.63.0
+  pkg-pr-new: 0.0.88
+  splitpanes: ^4.1.2
+  simple-git-hooks: ^2.14.0
+  taze: ^21.1.0
+  tsdown: ^0.23.0
+  typescript: ^6.0.3
+  unocss: ^66.10.5
+  vite: ^8.3.0
+  vite-plus: 0.3.0
+  vitest: 4.1.11
+  vue: ^3.5.43
+  vue-tsc: ^3.3.11
+  vue-virtual-scroller: ^3.0.5
+  vue-router: ^5.3.1
+  '@clack/prompts': ^0.11.0
+  archiver: ^8.0.0
+  bumpp: ^10.3.2
+  picocolors: ^1.1.1
+  verkit: ^0.1.2
+  nue-glow: 0.2.5
 
-ignoredBuiltDependencies:
-  - '@parcel/watcher'
-  - core-js
-  - simple-git-hooks
-  - yorkie
+overrides:
+  '@devframes/hub': ^1.0.0
+  '@devframes/json-render': ^1.0.0
+  '@devframes/plugin-inspect': ^1.0.0
+  '@devframes/plugin-messages': ^1.0.0
+  '@devframes/plugin-terminals': ^1.0.0
+  '@vitejs/devtools': ^0.7.5
+  '@vitejs/devtools-kit': ^0.7.5
+  crossws: ^0.4.12
+  devframe: ^1.0.0
+  vite: ^8.3.0
 
-onlyBuiltDependencies:
-  - electron
-  - esbuild
-  - vue-demi
+catalogMode: prefer
 
-shamefullyHoist: true
-strictPeerDependencies: false
-sideEffectsCache: false
-shellEmulator: true
+minimumReleaseAge: 0
+
+peerDependencyRules:
+  allowedVersions:
+    '@vitejs/devtools': ^0.7.5
+
+allowBuilds:
+  esbuild: true
+  simple-git-hooks: true
+  vue-demi: true

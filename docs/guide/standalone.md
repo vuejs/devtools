@@ -1,5 +1,9 @@
 # Standalone App
 
+:::warning v9 compatibility
+The standalone app remains on v8 and is not included in Vue DevTools v9.
+:::
+
 > In case you are using an unsupported browser, or if you have other specific needs (for example your application is in Electron), you can use the standalone application.
 
 ![electron](/features/electron.png)
@@ -28,7 +32,7 @@ $ bun add -g @vue/devtools
 
 :::
 
-### Or locally as project dependency:
+### Or locally as a project dependency:
 
 ::: code-group
 
@@ -52,9 +56,9 @@ $ bun add -D @vue/devtools
 
 ## Usage
 
-### Using global package
+### Using the global package
 
-Once you installed the package globally, run:
+After installing the package globally, run:
 
 ```sh
 vue-devtools
@@ -83,9 +87,9 @@ Or if you want to debug your device remotely:
 **Don't forget to remove it before deploying to production!**
 :::
 
-### Using dependency package
+### Using a local dependency
 
-Once you installed the package as project dependency, run:
+After installing the package as a project dependency, run:
 
 ```sh
 ./node_modules/.bin/vue-devtools
@@ -101,7 +105,7 @@ Then import it directly in your app:
 import { devtools } from '@vue/devtools'
 ```
 
-And connect to host:
+Then connect to the host:
 
 ```ts
 if (process.env.NODE_ENV === 'development')
@@ -109,7 +113,7 @@ if (process.env.NODE_ENV === 'development')
 ```
 
 :::tip Important
-Make sure to invoke devtools connect function before creating Vue App, otherwise it might not work as expected.
+Call `devtools.connect()` before creating the Vue app; otherwise, it may not work as expected.
 :::
 
 **host** - is an optional argument that tells your application where devtools middleware server is running, if you debug your app on your computer you don't have to set this (the default is `http://localhost`), but if you want to debug your app on mobile devices, you might want to pass your local IP (e.g. `http://192.168.1.12`).
@@ -118,9 +122,9 @@ Make sure to invoke devtools connect function before creating Vue App, otherwise
 
 ## FAQ
 
-### 1. How to change port devtools server is running on?
+### 1. How do I change the DevTools server port?
 
-You can change it by setting environment variable before running it:
+Set the `PORT` environment variable when starting the server:
 
 ```sh
 PORT=8000 vue-devtools
@@ -132,17 +136,17 @@ Then in your app you'll have to set either:
 window.__VUE_DEVTOOLS_PORT__ = 8000
 ```
 
-Or update connect method with new port:
+Or pass the new port to `connect()`:
 
 ```ts
 devtools.connect(/ host /, 8000)
 ```
 
-### 2. How to remotely inspect page on the server?
+### 2. How do I inspect a page on a remote server?
 
 For that you can use `ngrok` proxy. You can download it [here](https://ngrok.com/).
 
-Once you start vue-devtools run:
+After starting `vue-devtools`, run:
 
 ```sh
 ngrok http 8098
@@ -156,11 +160,11 @@ devtools.connect('https://example.ngrok.io', null)
 
 Make sure to set port to `null` or `false`, because `ngrok` host already proxies to proper port that we defined in the first command.
 
-### 3. How to inspect page served through `HTTPS`?
+### 3. How do I inspect a page served over HTTPS?
 
 For that you can also use ngrok, as it automatically proxies https requests to http. Take a look at question number 2 for instructions.
 
-### 4. How to inspect cordova applications?
+### 4. How do I inspect Cordova applications?
 
 Make sure that the page under `http://your-ip:8098` is returning a javascript code on your device/simulator. If it doesn't - make sure to check your anti-virus or router/firewall settings. If it works - please follow the instructions, and connect to devtools using your IP. For example:
 
@@ -175,9 +179,7 @@ function onDeviceReady() {
 
 if (window.location.protocol === 'file:')
   document.addEventListener('deviceready', onDeviceReady, false)
-
-else
-  onDeviceReady()
+else onDeviceReady()
 ```
 
-This will only work on `development` build of your app.
+This only works with a development build of your app.

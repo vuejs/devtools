@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "Vue DevTools"
-  text: "Unleash Vue Developer Experience"
+  name: 'Vue DevTools'
+  text: 'Unleash Vue Developer Experience'
   tagline: Enhance your Vue development journey with an amazing experience!
   actions:
     - theme: brand
@@ -25,11 +25,11 @@ features:
     title: Developer experience
     details: Enhance your Vue development journey with an amazing experience!
   - icon: 🎛
-    title: Extensive App
-    details: Vite Plugin, Browser Extension, Standalone App, There always one for you.
+    title: Multiple ways to use DevTools
+    details: Choose the Vite plugin or browser extension to fit your workflow.
   - icon: 🔌
-    title: Extendable
-    details: Provide plugin API for integrations, a friendly bridge between your libraries and the devtools.
+    title: Extensible
+    details: Integrate your libraries with Vue DevTools through the plugin API.
 
   - icon: 🍃
     title: Component Wizard

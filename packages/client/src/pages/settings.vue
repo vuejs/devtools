@@ -1,223 +1,237 @@
 <script setup lang="ts">
-import { VueButton, VueCard, VueCheckbox, VueConfirm, VueDarkToggle, VueSelect, VueSwitch } from '@vue/devtools-ui'
+import type { Ref } from 'vue'
+import { computed, ref, toRefs } from 'vue'
+import Checkbox from '../components/common/Checkbox.vue'
+import ConfirmationDialog from '../components/common/ConfirmationDialog.vue'
+import Switch from '../components/common/Switch.vue'
+import TabIcon from '../components/nav/TabIcon.vue'
+import { useDevtoolsColorMode } from '../composables/color-mode'
+import { useDevtoolsSettings } from '../composables/settings'
+import { useDevtoolsTabCatalog } from '../composables/tabs'
 
-const { categorizedTabs: categories } = useAllTabs()
+const { categorizedTabs: categories } = useDevtoolsTabCatalog()
+const { dark, setDarkMode } = useDevtoolsColorMode()
+const { settings, resetDevtoolsSettings } = useDevtoolsSettings()
 
-const hostEnv = useHostEnv()
+const { scale, expandSidebar, scrollableSidebar, highlightUpdates } = toRefs(settings)
+const { hiddenTabCategories, hiddenTabs, pinnedTabs } = toRefs(settings.tabSettings)
 
-/**
- * Enable feature settings in separate window because someone is using it, related #458
- */
-const enableFeatureSettings = hostEnv === 'iframe' || hostEnv === 'separate-window'
-
-const { scale, interactionCloseOnOutsideClick, showPanel, minimizePanelInteractive, expandSidebar, scrollableSidebar, reduceMotion } = toRefs(toReactive(devtoolsClientState))
-
-// #region settings
 const scaleOptions = [
   ['Tiny', 12 / 15],
   ['Small', 14 / 15],
   ['Normal', 1],
   ['Large', 16 / 15],
   ['Huge', 18 / 15],
-]
-const MinimizeInactiveOptions = [
-  ['Always', 0],
-  ['1s', 1000],
-  ['2s', 2000],
-  ['5s', 5000],
-  ['10s', 10000],
-  ['Never', -1],
-]
-// #endregion
+] as const
 
-// #region tabs
-const { hiddenTabCategories, hiddenTabs, pinnedTabs } = toRefs(devtoolsClientState.value.tabSettings)
-function toggleTab(name: string, v: boolean) {
-  if (v)
-    hiddenTabs.value = hiddenTabs.value.filter(i => i !== name)
-  else
-    hiddenTabs.value.push(name)
+const clearOptionsConfirmState = ref(false)
+
+function onToggleDarkMode() {
+  setDarkMode(!dark.value)
 }
 
-function toggleTabCategory(name: string, v: boolean) {
-  if (v)
-    hiddenTabCategories.value = hiddenTabCategories.value.filter(i => i !== name)
-  else
-    hiddenTabCategories.value.push(name)
+function toggleTab(name: string, visible: boolean) {
+  setListValue(hiddenTabs, name, !visible)
+}
+
+function toggleTabCategory(name: string, visible: boolean) {
+  setListValue(hiddenTabCategories, name, !visible)
 }
 
 function togglePinTab(name: string) {
-  if (pinnedTabs.value.includes(name))
-    pinnedTabs.value = pinnedTabs.value.filter(i => i !== name)
-  else
-    pinnedTabs.value.push(name)
+  setListValue(pinnedTabs, name, !pinnedTabs.value.includes(name))
 }
 
 function pinMove(name: string, delta: number) {
   const index = pinnedTabs.value.indexOf(name)
-  if (index === -1)
-    return
+  if (index === -1) return
 
   const newIndex = index + delta
-  if (newIndex < 0 || newIndex >= pinnedTabs.value.length)
-    return
+  if (newIndex < 0 || newIndex >= pinnedTabs.value.length) return
 
-  const newPinnedTabs = [...pinnedTabs.value]
-  newPinnedTabs.splice(index, 1)
-  newPinnedTabs.splice(newIndex, 0, name)
-  pinnedTabs.value = newPinnedTabs
+  const next = [...pinnedTabs.value]
+  next.splice(index, 1)
+  next.splice(newIndex, 0, name)
+  pinnedTabs.value = next
 }
-// #endregion
 
-const clearOptionsConfirmState = ref(false)
-async function clearOptions() {
-  resetDevtoolsClientState()
+function clearOptions() {
+  resetDevtoolsSettings()
   window.location.reload()
 }
 
-const minimizePanelInteractiveOptions = MinimizeInactiveOptions.map(([label, value]) => ({ label, value }))
-const minimizePanelInteractiveLabel = computed(() => {
-  const option = minimizePanelInteractiveOptions.find(i => i.value === minimizePanelInteractive.value)
-  return `${option?.label ?? 'Select...'}`
-})
+function setListValue(list: Ref<string[]>, name: string, enabled: boolean) {
+  const exists = list.value.includes(name)
+  if (enabled && !exists) {
+    list.value = [...list.value, name]
+    return
+  }
+
+  if (!enabled && exists) list.value = list.value.filter((item) => item !== name)
+}
 </script>
 
 <template>
-  <div h-full w-full of-auto px8 py6>
-    <IconTitle
-      class="mb-5 text-xl op75"
-      icon="i-carbon-settings-adjust"
-      text="DevTools Settings"
-    />
-    <div grid="~ md:cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-x-10 gap-y-3" max-w-300>
-      <div flex="~ col gap-2">
-        <h3 text-lg>
-          Tabs
-        </h3>
-        <template v-for="[{ name, hidden }, tabs] of categories" :key="name">
-          <VueCard
-            v-if="tabs.length" p3 flex="~ col gap-1"
-            :class="hidden ? 'op50 grayscale' : ''"
-          >
-            <VueSwitch
-              :model-value="!hiddenTabCategories.includes(name)"
-              class="row-reverse flex py1 pl2 pr1 hover:bg-active"
-              @update:model-value="(v: boolean) => toggleTabCategory(name, v)"
-            >
-              <div flex="~ gap-2" flex-auto items-center justify-start>
-                <span capitalize op75>{{ name }}</span>
-              </div>
-            </VueSwitch>
-
-            <div mx--1 my1 h-1px border="b base" op75 />
-
-            <template v-for="tab of tabs" :key="tab.name">
-              <VueSwitch
-                class="row-reverse n-primary flex py1 pl2 pr1 hover:bg-active"
-                :model-value="!hiddenTabs.includes(tab.name)"
-                :class="tab.hidden ? 'op35' : ''"
-                @update:model-value="(v: boolean) => toggleTab(tab.name, v)"
-              >
-                <div flex="~ gap-2" flex-auto items-center justify-start pr-4 text-sm>
-                  <TabIcon text-xl :icon="tab.icon" :fallback="tab.fallbackIcon" :title="tab.title" />
-                  <span>{{ tab.title }}</span>
-                  <div flex-auto />
-                  <template v-if="pinnedTabs.includes(tab.name)">
-                    <button
-                      class="flex items-center px1 py1 text-sm op65 disabled:(cursor-not-allowed op30) not-disabled:hover:(bg-active op100)"
-                      :disabled="pinnedTabs[0] === tab.name"
-                      @click.stop="pinMove(tab.name, -1)"
-                    >
-                      <div class="i-carbon-caret-up" />
-                    </button>
-                    <button
-                      class="flex items-center px1 py1 text-sm op65 disabled:(cursor-not-allowed op30) not-disabled:hover:(bg-active op100)"
-                      :disabled="pinnedTabs[pinnedTabs.length - 1] === tab.name"
-                      @click.stop="pinMove(tab.name, 1)"
-                    >
-                      <div class="i-carbon-caret-down" />
-                    </button>
-                  </template>
-                  <button class="flex items-center px1 py1 text-sm op65 hover:(bg-active op100)" @click.stop="togglePinTab(tab.name)">
-                    <div :class="pinnedTabs.includes(tab.name) ? ' i-carbon-pin-filled rotate--45' : ' i-carbon-pin op45'" />
-                  </button>
-                </div>
-              </VueSwitch>
-            </template>
-          </VueCard>
-        </template>
+  <div class="h-full w-full overflow-y-auto">
+    <div class="min-h-full px-8 py-6">
+      <div class="mb-5 flex items-center gap-2 text-xl op75">
+        <div class="i-carbon-settings-adjust" />
+        <span>DevTools Settings</span>
       </div>
-      <div flex="~ col gap-2">
-        <h3 text-lg>
-          Appearance
-        </h3>
-        <VueCard p4 flex="~ col gap-2">
-          <div flex="~ gap2">
-            <VueDarkToggle v-slot="{ isDark, toggle }" :animation="!reduceMotion">
-              <VueButton outlined type="primary" @click="toggle">
-                <div i-carbon-sun dark:i-carbon-moon translate-y--1px /> {{ isDark ? 'Dark' : 'Light' }}
-              </VueButton>
-            </VueDarkToggle>
-          </div>
-          <div mx--2 my1 h-1px border="b base" op75 />
-          <p>UI Scale</p>
-          <div>
-            <VueSelect
-              v-model="scale" :options="scaleOptions.map(([label, value]) => ({ label, value }))" :button-props="{ outlined: true }"
-            />
-          </div>
-          <div mx--2 my1 h-1px border="b base" op75 />
-          <div class="flex items-center gap2 text-sm">
-            <VueCheckbox v-model="expandSidebar" />
-            <span op75>Expand Sidebar</span>
-          </div>
-          <div class="flex items-center gap2 text-sm">
-            <VueCheckbox v-model="scrollableSidebar" />
-            <span op75>Scrollable Sidebar</span>
-          </div>
-        </VueCard>
 
-        <template v-if="enableFeatureSettings">
-          <h3 mt2 text-lg>
-            Features
-          </h3>
-          <VueCard p4 flex="~ col gap-2">
-            <div class="flex items-center gap2 text-sm">
-              <VueCheckbox v-model="interactionCloseOnOutsideClick" />
-              <span op75>Close DevTools when clicking outside</span>
+      <div
+        class="grid max-w-300 grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]"
+      >
+        <div class="flex flex-col gap-2">
+          <h3 class="text-lg">Tabs</h3>
+
+          <template v-for="[{ name, hidden }, tabs] of categories" :key="name">
+            <div
+              v-if="tabs.length"
+              class="panel-card flex flex-col gap-1 p-3"
+              :class="hidden ? 'op50 grayscale' : ''"
+            >
+              <Switch
+                :model-value="!hiddenTabCategories.includes(name)"
+                class="flex-row-reverse py-1 pl-2 pr-1 hover:bg-active"
+                :aria-label="`Toggle ${name} tabs`"
+                @update:model-value="(value: boolean) => toggleTabCategory(name, value)"
+              >
+                <span class="flex flex-auto items-center justify-start gap-2 capitalize op75">
+                  {{ name }}
+                </span>
+              </Switch>
+
+              <div class="-mx-1 my-1 h-1px border-b border-base op75" />
+
+              <template v-for="tab of tabs" :key="tab.id">
+                <Switch
+                  :model-value="!hiddenTabs.includes(tab.id)"
+                  class="flex-row-reverse py-1 pl-2 pr-1 hover:bg-active"
+                  :class="tab.hidden ? 'op35' : ''"
+                  :aria-label="`Toggle ${tab.title}`"
+                  @update:model-value="(value: boolean) => toggleTab(tab.id, value)"
+                >
+                  <span
+                    class="min-w-0 flex flex-auto items-center justify-start gap-2 pr-4 text-sm"
+                  >
+                    <TabIcon class="text-xl" :icon="tab.icon" />
+                    <span class="truncate">{{ tab.title }}</span>
+                    <span class="flex-auto" />
+
+                    <template v-if="pinnedTabs.includes(tab.id)">
+                      <button
+                        v-tooltip.bottom="'Move up'"
+                        class="settings-icon-button"
+                        type="button"
+                        aria-label="Move pinned tab up"
+                        :disabled="pinnedTabs.indexOf(tab.id) === 0"
+                        title="Move up"
+                        @click.stop.prevent="pinMove(tab.id, -1)"
+                      >
+                        <div class="i-carbon-caret-up" aria-hidden="true" />
+                      </button>
+                      <button
+                        v-tooltip.bottom="'Move down'"
+                        class="settings-icon-button"
+                        type="button"
+                        aria-label="Move pinned tab down"
+                        :disabled="pinnedTabs.indexOf(tab.id) === pinnedTabs.length - 1"
+                        title="Move down"
+                        @click.stop.prevent="pinMove(tab.id, 1)"
+                      >
+                        <div class="i-carbon-caret-down" aria-hidden="true" />
+                      </button>
+                    </template>
+
+                    <button
+                      v-tooltip.bottom="pinnedTabs.includes(tab.id) ? 'Unpin tab' : 'Pin tab'"
+                      class="settings-icon-button"
+                      type="button"
+                      :aria-label="pinnedTabs.includes(tab.id) ? 'Unpin tab' : 'Pin tab'"
+                      :title="pinnedTabs.includes(tab.id) ? 'Unpin tab' : 'Pin tab'"
+                      @click.stop.prevent="togglePinTab(tab.id)"
+                    >
+                      <div
+                        :class="
+                          pinnedTabs.includes(tab.id)
+                            ? 'i-carbon-pin-filled -rotate-45'
+                            : 'i-carbon-pin op45'
+                        "
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </span>
+                </Switch>
+              </template>
             </div>
-            <div class="flex items-center gap2 text-sm">
-              <VueCheckbox v-model="showPanel" />
-              <span op75>Always show the floating panel</span>
+          </template>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <h3 class="text-lg">Appearance</h3>
+
+          <div class="panel-card flex flex-col gap-2 p-4">
+            <div class="flex gap-2">
+              <button
+                class="settings-button text-primary-700 dark:text-primary-300"
+                type="button"
+                @click="onToggleDarkMode"
+              >
+                <div :class="dark ? 'i-carbon-moon' : 'i-carbon-sun'" />
+                {{ dark ? 'Dark' : 'Light' }}
+              </button>
             </div>
 
-            <div mx--2 my1 h-1px border="b base" op75 />
+            <div class="-mx-2 my-1 h-1px border-b border-base op75" />
 
-            <p>Minimize floating panel on inactive</p>
+            <p>UI Scale</p>
             <div>
-              <VueSelect v-model="minimizePanelInteractive" :button-props="{ outlined: true }" :options="minimizePanelInteractiveOptions" :placeholder="minimizePanelInteractiveLabel" />
+              <select
+                v-model.number="scale"
+                class="settings-select"
+                :aria-label="`UI Scale: ${scale}`"
+              >
+                <option v-for="[label, value] of scaleOptions" :key="label" :value="value">
+                  {{ label }}
+                </option>
+              </select>
             </div>
-          </VueCard>
-        </template>
 
-        <h3 mt2 text-lg>
-          Debug
-        </h3>
-        <div flex="~ gap-2">
-          <VueButton outlined type="warning" @click="clearOptionsConfirmState = true">
-            <div i-carbon-breaking-change />
-            Reset Local Settings & State
-          </VueButton>
-          <VueConfirm
-            v-model="clearOptionsConfirmState"
-            title="Clear Local Settings & State"
-            width="40%"
-            height="200px"
-            content="Are you sure you to reset all local settings & state? Devtools will reload."
-            @confirm="clearOptions"
-          />
+            <div class="-mx-2 my-1 h-1px border-b border-base op75" />
+
+            <Checkbox v-model="expandSidebar" class="text-sm">
+              <span class="op75">Expand Sidebar</span>
+            </Checkbox>
+            <Checkbox v-model="scrollableSidebar" class="text-sm">
+              <span class="op75">Scrollable Sidebar</span>
+            </Checkbox>
+            <Checkbox v-model="highlightUpdates" class="text-sm">
+              <span class="op75">Highlight component updates</span>
+            </Checkbox>
+          </div>
+
+          <h3 class="mt-2 text-lg">Debug</h3>
+
+          <div class="flex gap-2">
+            <button
+              class="settings-button text-primary-700 dark:text-primary-300"
+              type="button"
+              @click="clearOptionsConfirmState = true"
+            >
+              <div class="i-carbon-breaking-change" />
+              Reset Local Settings & State
+            </button>
+          </div>
         </div>
       </div>
+
+      <ConfirmationDialog
+        v-model:open="clearOptionsConfirmState"
+        description="Are you sure you want to reset all local settings and state? DevTools will reload."
+        title="Clear Local Settings & State"
+        @confirm="clearOptions"
+      />
     </div>
   </div>
 </template>

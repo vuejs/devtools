@@ -1,15 +1,26 @@
-import type { CustomTab } from '@vue/devtools-kit'
-import type { MaybeRefOrGetter } from 'vue'
+export type BuiltinDevtoolsTabId =
+  | 'overview'
+  | 'components'
+  | 'pages'
+  | 'timeline'
+  | 'plugins'
+  | 'graph'
+  | 'settings'
 
-export interface ModuleBuiltinTab extends Pick<CustomTab, 'name' | 'icon' | 'title' | 'category'> {
-  fallbackIcon?: string
-  order?: number
-  path: string
-  show?: () => MaybeRefOrGetter<any>
-  badge?: () => MaybeRefOrGetter<number | string | undefined>
-  onClick?: () => void
+export type KnownInspectorDevtoolsTabId = 'router' | 'pinia'
+
+export type DevtoolsTabId =
+  | BuiltinDevtoolsTabId
+  | KnownInspectorDevtoolsTabId
+  | `inspector:${string}`
+
+export interface DevtoolsTabDefinition {
+  id: DevtoolsTabId
+  title: string
+  icon: string
+  order: number
+  description: string
+  path?: string
 }
 
-export interface CustomInspectorTab extends ModuleBuiltinTab {
-  pluginId: string
-}
+export type DevtoolsTab = DevtoolsTabDefinition

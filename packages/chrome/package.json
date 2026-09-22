@@ -1,0 +1,40 @@
+{
+  "name": "@vue/devtools-chrome",
+  "version": "9.0.0-beta.0",
+  "private": true,
+  "description": "Chrome extension for Vue DevTools",
+  "license": "MIT",
+  "author": "webfansplz",
+  "files": [
+    "app",
+    "dist",
+    "icons",
+    "manifest.json"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run build:scripts && pnpm run build:panel",
+    "build:panel": "vite build",
+    "build:scripts": "tsdown",
+    "dev:panel": "vite build --watch",
+    "dev:scripts": "tsdown --watch",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "@vue/devtools-client": "workspace:*",
+    "@vue/devtools-kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@iconify-json/carbon": "catalog:",
+    "@iconify-json/ic": "catalog:",
+    "@iconify-json/logos": "catalog:",
+    "@iconify-json/ri": "catalog:",
+    "@types/chrome": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vue": "catalog:"
+  }
+}

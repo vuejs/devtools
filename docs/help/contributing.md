@@ -4,9 +4,9 @@
 
 ## Development Setup
 
-You will need [Node.js](https://nodejs.org) **version 18.19+**, and [PNPM](https://pnpm.io) **version 10+**.
+You will need [Node.js](https://nodejs.org) **version 22.12+** and [pnpm](https://pnpm.io) **version 12.5.1**.
 
-We also recommend installing [@antfu/ni](https://github.com/antfu/ni) to help switching between repos using different package managers. `ni` also provides the handy `nr` command which running npm scripts easier.
+We also recommend [@antfu/ni](https://github.com/antfu/ni) for switching between repositories that use different package managers. Its `nr` command makes it easier to run package scripts.
 
 After cloning the repo, run:
 
@@ -14,40 +14,21 @@ After cloning the repo, run:
 pnpm i # install the dependencies of the project
 ```
 
-:::tip ⚠️
-
-Since `electron` is used in the project, if your network environment is unstable, you may be unable to install dependencies.
-You can use the following command to set up the mirror, and run `pnpm i` again to install the dependencies.
-
-```bash
-pnpm config set ELECTRON_MIRROR https://npmmirror.com/mirrors/electron/
-```
-
-:::
-
-## Git Hooks
-
-The project uses [simple-git-hooks](https://github.com/toplenboren/simple-git-hooks) to enforce the following on each commit:
-
-- Automatically format changed files using ESLint
-
 ## Development
 
-Build the project with watch mode:
+Build the project in watch mode:
 
 ```sh
 pnpm dev
 ```
 
-OR
-
-Build the project with:
+Or build it once:
 
 ```sh
 pnpm build
 ```
 
-And then run the playground:
+Then run the playground:
 
 ```sh
 pnpm play
