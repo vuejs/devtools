@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { OverlayProps } from './Overlay.vue'
 import { onKeyStroke, useScrollLock, useVModel } from '@vueuse/core'
-import { onMounted, ref, watchEffect } from 'vue'
+import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
+import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch, watchEffect } from 'vue'
 import Button from './Button.vue'
 import Overlay from './Overlay.vue'
 
@@ -32,6 +33,25 @@ const emit = defineEmits<{
 }>()
 
 const show = useVModel(props, 'modelValue', emit, { passive: true })
+const modal = ref<HTMLElement>()
+const titleId = useId()
+const { activate: activateFocusTrap, deactivate: deactivateFocusTrap } = useFocusTrap(modal, {
+  escapeDeactivates: false,
+  fallbackFocus: () => modal.value!,
+  returnFocusOnDeactivate: true,
+})
+
+watch(show, async (visible) => {
+  if (visible) {
+    await nextTick()
+    activateFocusTrap()
+  }
+  else {
+    deactivateFocusTrap()
+  }
+}, { flush: 'post' })
+
+onBeforeUnmount(() => deactivateFocusTrap())
 
 const isScrollLocked = useScrollLock(() => window.document.documentElement)
 watchEffect(() => {
@@ -52,7 +72,13 @@ onKeyStroke('Escape', () => {
 
 const isMount = ref(false)
 
-onMounted(() => isMount.value = true)
+onMounted(async () => {
+  isMount.value = true
+  if (show.value) {
+    await nextTick()
+    activateFocusTrap()
+  }
+})
 </script>
 
 <template>
@@ -65,6 +91,11 @@ onMounted(() => isMount.value = true)
     >
       <Overlay v-if="show" :dim :blur :position>
         <div
+          ref="modal"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="titleId"
+          tabindex="-1"
           class="modal relative grid grid-rows-[1.875rem_1fr_2.5rem] $ui-base max-h-[calc(100vh-6.25rem)] max-w-[calc(100vw-6.25rem)] min-h-6.25rem min-w-12.5rem gap-2.5 rounded-md bg-white px6 py4.5 color-gray-800 shadow-2xl transition-transform transition-duration-300 dark:bg-gray-900 dark:color-gray-200"
           :style="{
             width: props.width,
@@ -72,14 +103,14 @@ onMounted(() => isMount.value = true)
           }"
         >
           <div class="h7.5 w-full $ui-fbc">
-            <div class="text-4.5">
+            <div :id="titleId" class="text-4.5">
               <slot name="title">
                 {{ props.title }}
               </slot>
             </div>
-            <div v-if="closable" class="h6 w6 $ui-fcc cursor-pointer rounded-full transition-colors hover:bg-primary-100 dark:hover:bg-gray-700" @click="close">
+            <button v-if="closable" type="button" aria-label="Close dialog" class="h6 w6 $ui-fcc cursor-pointer rounded-full transition-colors hover:bg-primary-100 dark:hover:bg-gray-700" @click="close">
               <div class="i-carbon-close" />
-            </div>
+            </button>
           </div>
           <div class="content transition-all transition-duration-300">
             <slot />
