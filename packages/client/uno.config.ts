@@ -36,13 +36,14 @@ export default defineConfig({
         'self-stretch max-w-full !w-auto justify-start gap-3 !rounded-none px-3',
       'tab-icon': 'h-5 w-5 shrink-0 text-5',
       'settings-button':
-        'min-h-8 inline-flex items-center justify-center gap-1.5 rounded-1 border border-base bg-transparent px-3 py-1 color-inherit font-[inherit] hover:bg-active',
+        'min-h-8 inline-flex items-center justify-center gap-1.5 rounded-1 border border-solid border-[#d4d4d4] bg-transparent px-3 py-1 color-inherit font-[inherit] appearance-none dark:border-[#737373] hover:bg-active',
       'settings-button-primary': 'border-primary-500 text-primary-700 dark:text-primary-300',
-      'settings-button-warning': 'border-amber-500/40 text-amber-700 dark:text-amber-300',
+      'settings-button-warning':
+        'border-amber-600 text-amber-700 dark:border-amber-400 dark:text-amber-300',
       'settings-icon-button':
         'h-5.5 min-w-5.5 inline-flex items-center justify-center rounded-1 border-0 bg-transparent px-1 color-inherit op65 hover:bg-active hover:op100 disabled:cursor-default disabled:op25 disabled:hover:bg-transparent',
       'settings-select':
-        'min-h-8 min-w-30 rounded-1 border border-base bg-transparent py-1 pl-2.5 pr-7 color-inherit font-[inherit]',
+        'min-h-8 min-w-30 rounded-1 border border-solid border-[#d4d4d4] bg-transparent py-1 pl-2.5 pr-7 color-inherit font-[inherit] appearance-none dark:border-[#737373]',
       'selectable-item':
         'flex items-center px-2 py-1 rounded cursor-pointer hover:bg-primary-200 dark:hover:bg-gray-800',
       'selectable-item-active': 'text-white bg-primary-600 hover:text-white hover:bg-primary-600',
