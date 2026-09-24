@@ -82,6 +82,7 @@ select {
 
 button {
   cursor: pointer;
+  appearance: none;
 }
 
 .font-state-field {
@@ -112,7 +113,7 @@ pre {
   padding: 4px 8px;
   font-size: 12px;
   line-height: 16px;
-  box-shadow: 0 6px 30px #0000001a;
+  box-shadow: none;
 }
 
 .dark .v-popper--theme-tooltip .v-popper__inner {
@@ -143,7 +144,7 @@ pre {
   border-radius: 8px;
   background: #ffffff;
   color: #111111;
-  box-shadow: 0 6px 30px #0000001a;
+  box-shadow: none;
   overflow: hidden;
 }
 
