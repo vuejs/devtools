@@ -16,7 +16,7 @@
     "@unocss/transformer-directives": "^66.10.5",
     "@vue/runtime-dom": "3.6.0-rc.5",
     "colorjs.io": "^0.7.1",
-    "reka-ui": "^2.10.4",
+    "reka-ui": "^2.10.5",
     "vue": "3.6.0-rc.5"
   },
   "devDependencies": {
