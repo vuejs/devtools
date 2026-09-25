@@ -24,7 +24,7 @@ const model = defineModel<boolean>({ required: true })
   >
     <input
       v-model="model"
-      class="sr-only"
+      class="peer sr-only"
       type="checkbox"
       :aria-label="ariaLabel"
       :disabled="disabled"
@@ -32,7 +32,7 @@ const model = defineModel<boolean>({ required: true })
       :name="name"
     />
     <span
-      class="relative h-4 w-7 shrink-0 border border-base rounded-full bg-#8882 transition-colors"
+      class="relative h-4 w-7 shrink-0 border border-base rounded-full bg-#8882 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500/35"
       :class="model ? 'border-primary-500/40 bg-primary-500/20' : ''"
       aria-hidden="true"
     >
