@@ -12,7 +12,7 @@ Vue DevTools v9 ships two hosts over one kit and one client. The Vite plugin is 
 
 ## Stack & Structure
 
-Monorepo (`pnpm` workspaces). ESM TypeScript. Library packages bundle with Vite Plus (`vp pack`). Node **22.12+**, pnpm **12.5.1** (`packageManager`). Versions live in `pnpm-workspace.yaml` `catalog:` (and matching `overrides`); package entries use `"catalog:"`.
+Monorepo (`pnpm` workspaces). ESM TypeScript. Library packages bundle with tsdown. Node **22.12+**, pnpm **12.5.1** (`packageManager`). Versions live in `pnpm-workspace.yaml` `catalog:` (and matching `overrides`); package entries use `"catalog:"`.
 
 ### Packages
 
@@ -49,8 +49,6 @@ flowchart TD
 On the Vite host, docks, commands, terminals, and open-in-editor stay in `@vitejs/devtools`. Open-in-editor is forwarded as `vite:core:open-in-editor`, gated by `capabilities.openInEditor`. The extension panel does not offer open-in-editor; that action exists only in the Vite dock.
 
 `vueDevTools()` options are `enabled` and `appendTo`. Dock layout, built-in integrations, and open-in-editor stay on Vite's `devtools` config. Runtime `budget` is a kit option.
-
-Keep `vite-plus` pinned to exact `0.3.0` in the catalog. `0.3.3` breaks `vp pack` against Vite 8.3, and a caret range still resolves `0.3.3`.
 
 ## Architecture
 

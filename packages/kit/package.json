@@ -43,10 +43,13 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "vp pack",
-    "dev": "vp pack --watch"
+    "build": "tsdown",
+    "dev": "tsdown --watch"
   },
   "dependencies": {
     "devframe": "catalog:"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
   }
 }

@@ -11,16 +11,16 @@ describe('CommandPalette', () => {
   let wrapper: VueWrapper
 
   beforeEach(() => {
-    vi.spyOn(HTMLDialogElement.prototype, 'showModal').mockImplementation(
-      function (this: HTMLDialogElement) {
-        this.open = true
-      },
-    )
-    vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(
-      function (this: HTMLDialogElement) {
-        this.open = false
-      },
-    )
+    vi.spyOn(HTMLDialogElement.prototype, 'showModal').mockImplementation(function (
+      this: HTMLDialogElement,
+    ) {
+      this.open = true
+    })
+    vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(function (
+      this: HTMLDialogElement,
+    ) {
+      this.open = false
+    })
     if (!HTMLElement.prototype.scrollIntoView) HTMLElement.prototype.scrollIntoView = vi.fn()
   })
 

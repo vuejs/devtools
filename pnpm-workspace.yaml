@@ -40,7 +40,7 @@ catalog:
   typescript: ^6.0.3
   unocss: ^66.10.5
   vite: ^8.3.1
-  vite-plus: 0.3.0
+  vite-plus: ^1.0.0
   vitest: 4.1.11
   vue: ^3.5.43
   vue-tsc: ^3.3.11
