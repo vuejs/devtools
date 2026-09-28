@@ -6,15 +6,15 @@ packages:
 catalog:
   colorjs.io: ^0.7.1
   '@antfu/design': ^0.5.3
-  '@iconify-json/carbon': ^1.2.27
+  '@iconify-json/carbon': ^1.2.28
   '@iconify-json/ic': ^1.2.4
   '@iconify-json/logos': ^1.2.14
   '@iconify-json/ri': ^1.2.10
   '@types/chrome': ^0.3.0
-  '@types/node': ^26.6.2
+  '@types/node': ^26.6.3
   '@unocss/reset': ^66.10.5
-  '@vitejs/devtools': ^0.7.5
-  '@vitejs/devtools-kit': ^0.7.5
+  '@vitejs/devtools': ^0.7.6
+  '@vitejs/devtools-kit': ^0.7.6
   '@vitejs/plugin-vue': ^6.0.9
   '@vitest/coverage-v8': 4.1.11
   '@vue/test-utils': ^2.5.1
@@ -22,7 +22,7 @@ catalog:
   '@types/d3-selection': ^3.0.12
   '@types/d3-force': ^3.0.10
   '@types/d3-zoom': ^3.0.8
-  devframe: ^1.0.0
+  devframe: ^1.1.0
   d3-force: ^3.0.0
   d3-selection: ^3.0.0
   d3-zoom: ^3.0.0
@@ -35,11 +35,11 @@ catalog:
   pkg-pr-new: 0.0.88
   splitpanes: ^4.1.2
   simple-git-hooks: ^2.14.0
-  taze: ^21.1.0
+  taze: ^21.2.0
   tsdown: ^0.23.0
   typescript: ^6.0.3
   unocss: ^66.10.5
-  vite: ^8.3.0
+  vite: ^8.3.1
   vite-plus: 0.3.0
   vitest: 4.1.11
   vue: ^3.5.43
@@ -54,16 +54,16 @@ catalog:
   nue-glow: 0.2.5
 
 overrides:
-  '@devframes/hub': ^1.0.0
-  '@devframes/json-render': ^1.0.0
-  '@devframes/plugin-inspect': ^1.0.0
-  '@devframes/plugin-messages': ^1.0.0
-  '@devframes/plugin-terminals': ^1.0.0
-  '@vitejs/devtools': ^0.7.5
-  '@vitejs/devtools-kit': ^0.7.5
+  '@devframes/hub': ^1.1.0
+  '@devframes/json-render': ^1.1.0
+  '@devframes/plugin-inspect': ^1.1.0
+  '@devframes/plugin-messages': ^1.1.0
+  '@devframes/plugin-terminals': ^1.1.0
+  '@vitejs/devtools': ^0.7.6
+  '@vitejs/devtools-kit': ^0.7.6
   crossws: ^0.4.12
-  devframe: ^1.0.0
-  vite: ^8.3.0
+  devframe: ^1.1.0
+  vite: ^8.3.1
 
 catalogMode: prefer
 
