@@ -20,7 +20,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "vp run --filter './packages/*' --filter '!vite-plugin-vue-devtools' build && vp run --filter vite-plugin-vue-devtools build",
+    "build": "pnpm --filter './packages/*' --filter '!vite-plugin-vue-devtools' -r build && pnpm --filter vite-plugin-vue-devtools build",
     "check": "vp check",
     "dep:up": "taze -I major -r",
     "docs": "pnpm -C docs docs:dev",

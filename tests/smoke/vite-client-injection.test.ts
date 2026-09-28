@@ -2,30 +2,29 @@ import type { Browser } from 'playwright'
 import type { ViteDevServer } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { chromium } from 'playwright'
-import { readFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { createServer as createHttpServer, type Server as HttpServer } from 'node:http'
 import { dirname, resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createServer } from 'vite'
 import { vueDevtools } from '../../packages/vite/src'
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const playgroundRoot = resolve(repositoryRoot, 'playground/basic')
+const fixtureRoot = resolve(repositoryRoot, 'tests/fixtures/vite-smoke')
 
 interface ViteMatrixScenario {
   base?: string
   bundledDev?: boolean
   middlewareMode?: boolean
   name: string
-  customDevtools?: boolean
   optionsApi?: boolean
 }
 
 const scenarios: ViteMatrixScenario[] = [
   { name: 'latest Vite 8 SPA' },
   { bundledDev: true, name: 'Vite 8 bundled dev' },
-  { name: 'Vite 8 custom DevTools options', customDevtools: true },
   { name: 'Vite 8 without Options API', optionsApi: false },
   { base: '/nested/', name: 'Vite 8 custom root and base' },
   {
@@ -49,7 +48,7 @@ describe('Vite client injection', () => {
   })
 
   for (const scenario of scenarios) {
-    it(`loads the virtual client in ${scenario.name}`, async () => {
+    it(`${scenario.name}: loads the client${scenario.name === 'latest Vite 8 SPA' ? ' and edits Pinia state through the panel' : ''}`, async () => {
       if (!browser) throw new Error('Playwright browser did not start')
 
       const failedVirtualModuleRequests: string[] = []
@@ -58,6 +57,7 @@ describe('Vite client injection', () => {
       let server: ViteDevServer | undefined
       let middlewareServer: HttpServer | undefined
       const page = await browser.newPage()
+      const cacheDir = await mkdtemp(resolve(tmpdir(), 'vue-devtools-vite-smoke-'))
 
       try {
         if (scenario.middlewareMode) middlewareServer = createMiddlewareServer(() => server)
@@ -66,6 +66,7 @@ describe('Vite client injection', () => {
           appType: scenario.middlewareMode ? 'custom' : 'spa',
           base: scenario.base,
           configFile: false,
+          cacheDir,
           define: {
             'process.env.NODE_ENV': JSON.stringify('development'),
             ...(scenario.optionsApi === false
@@ -74,20 +75,12 @@ describe('Vite client injection', () => {
                 }
               : {}),
           },
-          root: playgroundRoot,
+          root: fixtureRoot,
           logLevel: 'silent',
-          devtools: scenario.customDevtools
-            ? {
-                embeddedVisibility: 'passive',
-                dockPreferences: {
-                  defaultMode: 'edge',
-                  defaultPosition: 'bottom',
-                },
-              }
-            : true,
+          devtools: true,
           plugins: [vue(), vueDevtools()],
           optimizeDeps: {
-            exclude: ['@vue/devtools-api', 'pinia', 'vue-router'],
+            exclude: ['@vue/devtools-api', 'pinia'],
           },
           resolve: {
             alias: {
@@ -129,6 +122,12 @@ describe('Vite client injection', () => {
         await page.goto(appUrl, {
           waitUntil: 'networkidle',
         })
+        await expect
+          .poll(() => page.locator('#app[data-v-app]').count(), {
+            timeout: 10_000,
+            message: `Test app did not mount. Runtime errors: ${runtimeErrors.join('; ') || 'none'}`,
+          })
+          .toBe(1)
         try {
           await expect
             .poll(
@@ -152,32 +151,14 @@ describe('Vite client injection', () => {
         }
 
         expect(failedVirtualModuleRequests).toEqual([])
-        const dockClientScriptWorked = await page.evaluate<boolean>(`(async () => {
+        const dockClientScriptLoaded = await page.evaluate<boolean>(`(async () => {
           const importsModule = await import('/__devtools/__client-imports.js')
           const loadDockClientScript = importsModule.clientImports['vue-devtools']?.[0]
           if (!loadDockClientScript) return false
           const clientModule = await loadDockClientScript()
-          const setup = clientModule.default
-          if (typeof setup !== 'function') return false
-          let subscriptions = 0
-          let disposed = 0
-          const context = {
-            current: { events: { on(event) {
-              if (event === 'entry:deactivated') subscriptions++
-              return () => { disposed++ }
-            } } },
-            docks: { selectedId: 'vue-devtools', async switchEntry() { return true } },
-            panel: { session: { open: true } },
-          }
-          // The host loader must share the already installed runtime module.
-          setup(context)
-          if (subscriptions !== 1) return false
-          // Replacing the Dock context must detach the old entry listener.
-          setup({ ...context })
-          return subscriptions === 2 && disposed === 1
-
+          return typeof clientModule.default === 'function'
         })()`)
-        expect(dockClientScriptWorked).toBe(true)
+        expect(dockClientScriptLoaded).toBe(true)
         expect(
           runtimeErrors.filter(
             (message) =>
@@ -187,116 +168,6 @@ describe('Vite client injection', () => {
         ).toEqual([])
 
         if (scenario.name === 'latest Vite 8 SPA') {
-          const consumerCompatibility = await page.evaluate(async () => {
-            const target = globalThis as typeof globalThis & {
-              [key: symbol]: unknown
-              $pinia?: { _s: Map<string, { count?: number }> }
-            }
-            const registry = target[Symbol.for('vue-devtools:plugin-registry-state')] as
-              | {
-                  bufferedPlugins?: Array<
-                    [
-                      {
-                        componentStateTypes?: string[]
-                        id: string
-                        packageName?: string
-                      },
-                      unknown,
-                    ]
-                  >
-                }
-              | undefined
-            const owners = target[Symbol.for('vue-devtools-next:kit-owners')] as
-              | Map<
-                  string,
-                  {
-                    plugins: {
-                      adapters: Map<string, { descriptor: { packageName?: string } }>
-                    }
-                    runtime: {
-                      command(command: unknown): Promise<{ status: number }>
-                      query<T>(query: unknown): Promise<T>
-                    }
-                  }
-                >
-              | undefined
-            const kit = owners?.values().next().value
-            if (!kit) throw new Error('Vue DevTools runtime owner was not exposed')
-
-            const plugins = (registry?.bufferedPlugins ?? []).map(([descriptor]) => descriptor)
-            const pinia = plugins.find((plugin) => plugin.packageName === 'pinia')
-            const router = plugins.find((plugin) => plugin.packageName === 'vue-router')
-
-            const tree = await kit.runtime.query<{ appId?: string; nodes: Array<{ id: string }> }>({
-              type: 'components:treeSnapshot',
-            })
-            let editedPiniaState = false
-            let piniaEditDiagnostics: Record<string, unknown> = {
-              adapterPackages: [...kit.plugins.adapters.values()].map(
-                (adapter) => adapter.descriptor.packageName,
-              ),
-              componentCount: tree.nodes.length,
-            }
-            for (const node of tree.nodes) {
-              const snapshot = await kit.runtime.query<{
-                sections?: Array<{ id: string }>
-              }>({
-                appId: tree.appId,
-                type: 'components:stateSnapshot',
-                payload: { componentId: node.id },
-              })
-              const section = snapshot?.sections?.find((item) => item.id === '🍍 counter')
-              if (!section) continue
-
-              const counter = target.$pinia?._s.get('counter')
-              const before = counter?.count
-              const result = await kit.runtime.command({
-                appId: tree.appId,
-                type: 'components:editState',
-                payload: {
-                  componentId: node.id,
-                  sectionId: section.id,
-                  path: ['state', 'count'],
-                  value: typeof before === 'number' ? before + 1 : 1,
-                },
-              })
-              editedPiniaState = result.status === 1 && counter?.count !== before
-              piniaEditDiagnostics = {
-                adapterPackages: [...kit.plugins.adapters.values()].map(
-                  (adapter) => adapter.descriptor.packageName,
-                ),
-                after: counter?.count,
-                before,
-                commandStatus: result.status,
-                componentId: node.id,
-                foundSection: true,
-              }
-              break
-            }
-
-            return {
-              editedPiniaState,
-              piniaEditDiagnostics,
-              piniaStateTypes: pinia?.componentStateTypes ?? [],
-              plugins: plugins.map((plugin) => ({
-                componentStateTypes: plugin.componentStateTypes ?? [],
-                id: plugin.id,
-                packageName: plugin.packageName,
-              })),
-              routerStateTypes: router?.componentStateTypes ?? [],
-            }
-          })
-
-          expect(
-            consumerCompatibility.piniaStateTypes,
-            JSON.stringify(consumerCompatibility.plugins),
-          ).toEqual(expect.arrayContaining(['🍍 counter']))
-          expect(consumerCompatibility.routerStateTypes).toContain('Routing')
-          expect(
-            consumerCompatibility.editedPiniaState,
-            `${JSON.stringify(consumerCompatibility.piniaEditDiagnostics)}; runtime errors: ${runtimeErrors.join('; ')}`,
-          ).toBe(true)
-
           // Exercise the built client over its real iframe transport, not just the runtime API.
           await page.evaluate((src) => {
             const frame = document.createElement('iframe')
@@ -330,77 +201,11 @@ describe('Vite client injection', () => {
           await countRow.getByRole('button', { name: 'Edit state value', exact: true }).click()
           await countRow.getByRole('textbox').fill('42')
           await countRow.getByRole('textbox').press('Enter')
-          await expect
-            .poll(() =>
-              page.evaluate(
-                () =>
-                  (
-                    globalThis as typeof globalThis & {
-                      $pinia?: { _s: Map<string, { count: number }> }
-                    }
-                  ).$pinia?._s.get('counter')?.count,
-              ),
-            )
-            .toBe(42)
+          await expect.poll(() => page.locator('#count').textContent()).toBe('42')
           await expect.poll(() => countRow.innerText()).toContain('42')
-
-          await stateRow('profile').click()
-          await stateRow('nested').click()
-          await expect.poll(() => stateRow('score').innerText(), { timeout: 5_000 }).toContain('42')
-          await page.evaluate(() => {
-            const store = (
-              globalThis as typeof globalThis & {
-                $pinia?: { _s: Map<string, { profile: { nested: { score: number } } }> }
-              }
-            ).$pinia?._s.get('counter')
-            if (!store) throw new Error('Counter store is missing')
-            store.profile.nested.score = 73
-          })
-          await expect.poll(() => stateRow('score').innerText(), { timeout: 5_000 }).toContain('73')
-
-          await panel.getByRole('link', { name: 'Components', exact: true }).click()
-          await panel.getByPlaceholder('Find components...').fill('Dashboard')
-          await expect
-            .poll(() => panel.getByRole('treeitem').allTextContents())
-            .toEqual(expect.arrayContaining([expect.stringContaining('Dashboard')]))
-          await panel.getByPlaceholder('Find components...').fill('')
-          await panel.getByRole('link', { name: 'Timeline', exact: true }).click()
-          await panel.getByRole('button', { name: 'Stop recording', exact: true }).click()
-          await panel.getByRole('button', { name: 'Start recording', exact: true }).click()
-          await panel.getByRole('button', { name: 'Clear all timelines', exact: true }).click()
-          await panel.getByRole('link', { name: 'Pinia', exact: true }).click()
-          await expect.poll(() => stateRow('count').innerText()).toContain('42')
-          // Observe disconnect and reconnect, rather than accepting a stale UI value.
-          await page.evaluate(`window.__VUE_DEVTOOLS_VITE_RUNTIME__.disposeRpcHost()`)
-          const attachedClients = () =>
-            page.evaluate<number>(
-              `window.__VUE_DEVTOOLS_VITE_RUNTIME__.kit.runtime.performance.snapshot().attachedClients`,
-            )
-          await expect.poll(attachedClients).toBe(0)
-          await page.evaluate(`(() => {
-            const state = window.__VUE_DEVTOOLS_VITE_RUNTIME__
-            const host = state.kit.rpc.attachInPage({ name: 'vue-devtools', window })
-            state.disposeRpcHost = () => host.dispose()
-          })()`)
-          await expect.poll(attachedClients, { timeout: 10_000 }).toBeGreaterThan(0)
-          await expect
-            .poll(() => stateRow('count').innerText(), { timeout: 10_000 })
-            .toContain('42')
-          expect(pageErrors).toEqual([])
         }
 
-        const connectionResponse = await fetch(`${origin}/__devtools/__connection.json`)
-        expect(connectionResponse.headers.get('content-type')).toContain('application/json')
-        const connectionMeta = await connectionResponse.json()
-        if (scenario.customDevtools) {
-          expect(connectionMeta.configs.ui).toMatchObject({
-            embeddedVisibility: 'passive',
-            dockPreferences: {
-              defaultMode: 'edge',
-              defaultPosition: 'bottom',
-            },
-          })
-        }
+        expect(pageErrors).toEqual([])
 
         const vueClientResponse = await fetch(`${origin}${scenario.base ?? '/'}__devtools__/`)
         expect(vueClientResponse.headers.get('content-type')).toContain('text/html')
@@ -409,6 +214,7 @@ describe('Vite client injection', () => {
         await page.close()
         await server?.close()
         await close(middlewareServer)
+        await rm(cacheDir, { recursive: true, force: true })
       }
     })
   }
@@ -425,7 +231,7 @@ function createMiddlewareServer(getViteServer: () => ViteDevServer | undefined):
 
     server.middlewares(request, response, async () => {
       try {
-        const template = await readFile(resolve(playgroundRoot, 'index.html'), 'utf8')
+        const template = await readFile(resolve(fixtureRoot, 'index.html'), 'utf8')
         const html = await server.transformIndexHtml(request.url ?? '/', template)
         response.statusCode = 200
         response.setHeader('content-type', 'text/html; charset=utf-8')

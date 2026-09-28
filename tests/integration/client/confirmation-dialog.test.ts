@@ -15,17 +15,17 @@ describe('ConfirmationDialog', () => {
     document.body.append(returnFocus)
     returnFocus.focus()
 
-    showModal = vi
-      .spyOn(HTMLDialogElement.prototype, 'showModal')
-      .mockImplementation(function (this: HTMLDialogElement) {
-        this.open = true
-      })
-    vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(
-      function (this: HTMLDialogElement) {
-        this.open = false
-        this.dispatchEvent(new Event('close'))
-      },
-    )
+    showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal').mockImplementation(function (
+      this: HTMLDialogElement,
+    ) {
+      this.open = true
+    })
+    vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(function (
+      this: HTMLDialogElement,
+    ) {
+      this.open = false
+      this.dispatchEvent(new Event('close'))
+    })
   })
 
   afterEach(() => {

@@ -25,7 +25,4 @@ export default defineConfig({
     sortPackageJson: true,
     trailingComma: 'all',
   },
-  run: {
-    cache: true,
-  },
 })
