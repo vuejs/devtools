@@ -1,0 +1,73 @@
+{
+  "name": "@vue/devtools-agentic",
+  "version": "9.0.0-beta.0",
+  "description": "Agent tools and host adapters for Vue DevTools",
+  "license": "MIT",
+  "author": "webfansplz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/devtools.git",
+    "directory": "packages/agentic"
+  },
+  "bin": {
+    "vue-devtools-agentic": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json",
+    "./devframe": {
+      "import": {
+        "types": "./dist/devframe.d.mts",
+        "default": "./dist/devframe.mjs"
+      },
+      "require": {
+        "types": "./dist/devframe.d.cts",
+        "default": "./dist/devframe.cjs"
+      }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/node.d.mts",
+        "default": "./dist/node.mjs"
+      },
+      "require": {
+        "types": "./dist/node.d.cts",
+        "default": "./dist/node.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch"
+  },
+  "dependencies": {
+    "@devframes/agentic": "catalog:",
+    "@vue/devtools-kit": "workspace:*",
+    "cac": "catalog:",
+    "devframe": "catalog:",
+    "safe-stable-stringify": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  }
+}

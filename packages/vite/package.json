@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "@vitejs/devtools-kit": "catalog:",
+    "@vue/devtools-agentic": "workspace:*",
     "@vue/devtools-kit": "workspace:*"
   },
   "devDependencies": {
@@ -67,7 +68,7 @@
     "vite": "catalog:"
   },
   "peerDependencies": {
-    "@vitejs/devtools": "^0.7.5",
+    "@vitejs/devtools": "^0.7.6",
     "vite": "^8.3.0"
   }
 }
