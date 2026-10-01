@@ -38,6 +38,7 @@ export default defineConfig({
       reporter: ['text', 'json-summary', 'html'],
     },
     environment: 'node',
+    execArgv: ['--no-experimental-webstorage'],
     exclude: ['tests/smoke/**', '**/dist/**', '**/node_modules/**'],
     include: [
       'tests/unit/**/*.test.ts',
