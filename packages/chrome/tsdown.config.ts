@@ -27,6 +27,7 @@ function createIifeConfig(name: string, entry: string) {
       entryFileNames: '[name].js',
     },
     platform: 'browser' as const,
+    sourcemap: false,
     target: 'esnext',
   }
 }

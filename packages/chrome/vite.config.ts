@@ -9,6 +9,7 @@ const workspaceDir = fileURLToPath(new URL('../..', import.meta.url))
 export default defineConfig({
   base: './',
   build: {
+    sourcemap: false,
     emptyOutDir: false,
     outDir: fileURLToPath(new URL('./dist', import.meta.url)),
     rolldownOptions: {
