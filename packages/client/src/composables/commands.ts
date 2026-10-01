@@ -1,6 +1,6 @@
 import type { ComputedRef } from 'vue'
 import type { DevtoolsTab } from '../types/tab'
-import Fuse from 'fuse.js'
+import Fuse from 'fuse.js/basic'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { createVueDocumentationCommands } from '../constants/documentation'
