@@ -1,6 +1,6 @@
 {
   "name": "@vue/devtools-api",
-  "version": "9.0.0-beta.0",
+  "version": "9.0.0-beta.1",
   "description": "Public plugin API for Vue DevTools",
   "license": "MIT",
   "author": "webfansplz",

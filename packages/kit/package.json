@@ -1,6 +1,6 @@
 {
   "name": "@vue/devtools-kit",
-  "version": "9.0.0-beta.0",
+  "version": "9.0.0-beta.1",
   "description": "Runtime and plugin integration kit for Vue DevTools",
   "license": "MIT",
   "author": "webfansplz",

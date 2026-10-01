@@ -1,6 +1,6 @@
 {
   "name": "@vue/devtools-client",
-  "version": "9.0.0-beta.0",
+  "version": "9.0.0-beta.1",
   "private": true,
   "description": "Client interface for Vue DevTools",
   "license": "MIT",
