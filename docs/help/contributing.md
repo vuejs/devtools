@@ -4,7 +4,7 @@
 
 ## Development Setup
 
-You will need [Node.js](https://nodejs.org) **version 22.12+** and [pnpm](https://pnpm.io) **version 12.5.1**.
+Building Vue DevTools requires [Node.js](https://nodejs.org) **22.18+ on 22.x, 24.11+ on 24.x, or 26+**, and [pnpm](https://pnpm.io) **12.6.0**.
 
 We also recommend [@antfu/ni](https://github.com/antfu/ni) for switching between repositories that use different package managers. Its `nr` command makes it easier to run package scripts.
 

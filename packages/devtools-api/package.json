@@ -16,29 +16,17 @@
   ],
   "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "node": {
-        "import": {
-          "types": "./dist/index-node.d.mts",
-          "default": "./dist/index-node.mjs"
-        },
-        "require": {
-          "types": "./dist/index-node.d.cts",
-          "default": "./dist/index-node.cjs"
-        }
+        "types": "./dist/index-node.d.mts",
+        "default": "./dist/index-node.mjs"
       },
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -51,5 +39,8 @@
   },
   "devDependencies": {
     "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

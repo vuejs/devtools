@@ -12,7 +12,7 @@ Vue DevTools v9 ships two hosts over one kit and one client. The Vite plugin is 
 
 ## Stack & Structure
 
-Monorepo (`pnpm` workspaces). ESM TypeScript. Library packages bundle with tsdown. Node **22.12+**, pnpm **12.5.1** (`packageManager`). Versions live in `pnpm-workspace.yaml` `catalog:` (and matching `overrides`); package entries use `"catalog:"`.
+Monorepo (`pnpm` workspaces). ESM TypeScript. Library packages bundle with tsdown and publish ESM only. Published packages require Node **22.12+**. Building this repository requires Node **22.18+ on 22.x, 24.11+ on 24.x, or 26+**, and pnpm **12.6.0** (`packageManager`). Versions live in `pnpm-workspace.yaml` `catalog:` (and matching `overrides`); package entries use `"catalog:"`.
 
 ### Packages
 
