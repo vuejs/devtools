@@ -1,3 +1,5 @@
+import { StatePages } from './pagination'
+import { safeOwnEnumerableStringKeys } from '../../codec/encode'
 import { ValueHandleRegistry, encodeValue } from '../../codec'
 import type { ComponentId, InstanceRef } from '../types'
 import { RuntimeRegistry } from '../registry'
@@ -6,6 +8,8 @@ import type {
   ComponentStateSnapshotMessage,
   ExpandedValueMessage,
   StateEntry,
+  StateValueMessage,
+  StatePageOptions,
   ComponentStateSection,
   ReactivityGraphSnapshot,
 } from '../../protocol'
@@ -17,7 +21,6 @@ import {
   resolveEntryEditable,
 } from './sections'
 import {
-  readPath,
   resolvePath,
   getEditableSectionTarget,
   setStateValue,
@@ -43,6 +46,7 @@ export interface LegacyComponentStateEntry {
 const MAX_HANDLE_SCOPES = 8
 
 export class ComponentStateCollector {
+  private pages: StatePages
   private handles: ValueHandleRegistry
   private handleScopes: string[] = []
   private versions = new Map<ComponentId, number>()
@@ -54,6 +58,7 @@ export class ComponentStateCollector {
     private readonly budget: RuntimeBudget,
   ) {
     this.handles = new ValueHandleRegistry({ maxHandles: budget.state.maxHandles })
+    this.pages = new StatePages(budget.transport.maxMessageBytes)
   }
 
   get handleCount(): number {
@@ -91,6 +96,7 @@ export class ComponentStateCollector {
   snapshot(
     componentId: ComponentId,
     maxEntries = this.budget.state.maxEntries,
+    maxPreviewEntries = maxEntries,
   ): ComponentStateSnapshotMessage | undefined {
     const record = this.registry.getComponent(componentId)
     if (!record) return
@@ -102,9 +108,10 @@ export class ComponentStateCollector {
       ? this.collectReactivityGraph(instance)
       : undefined
     const entries = normalizeMaxEntries(maxEntries, this.budget.state.maxEntries)
+    const previewEntries = normalizeMaxEntries(maxPreviewEntries, entries)
     const scope = this.beginStateScope(stateScopeKey(componentId))
     const sections = createSectionSources(instance)
-      .map((section) => this.collectSection(section, entries, scope))
+      .map((section) => this.collectSection(section, entries, scope, previewEntries))
       .filter((section) => section.entries.length > 0)
 
     return {
@@ -115,15 +122,177 @@ export class ComponentStateCollector {
     }
   }
 
+  statePage(
+    target: string,
+    options: StatePageOptions,
+    componentId: string,
+    legacy: LegacyComponentStateEntry[] = [],
+    initial?: ComponentStateSnapshotMessage,
+  ): ComponentStateSnapshotMessage {
+    return this.pages.read(target, options, () => {
+      const scope = initial
+        ? stateScopeKey(componentId)
+        : this.beginStateScope(stateScopeKey(componentId))
+      const record = this.registry.getComponent(componentId)
+      const fields: { id: string; label: string; read: () => StateEntry }[] = []
+      if (record) {
+        for (const source of createSectionSources(record.instance)) {
+          const cached = new Map(
+            initial?.sections
+              .find((section) => section.id === source.id)
+              ?.entries.map((entry) => [entry.key, entry]),
+          )
+          for (const key of source.source ? safeOwnKeys(source.source) : []) {
+            if (!stringifyStateKey(key)) continue
+            fields.push({
+              id: source.id,
+              label: source.label,
+              read: () => {
+                const entry = cached.get(stringifyStateKey(key))
+                if (entry) {
+                  cached.delete(entry.key)
+                  return entry
+                }
+                return this.collectSection(source, 1, scope, 30, [key]).entries[0]!
+              },
+            })
+          }
+        }
+      }
+      for (const entry of legacy) {
+        const id = entry.type || 'data'
+        const key = stringifyStateKey(entry.key ?? '')
+        if (!key) continue
+        fields.push({
+          id,
+          label: toSectionLabel(id),
+          read: () => this.encodePluginStateEntry(entry, id, key, scope, 30),
+        })
+      }
+      const totals = new Map<string, number>()
+      for (const field of fields) totals.set(field.id, (totals.get(field.id) ?? 0) + 1)
+      // Keep each section contiguous so byte trimming preserves the same field order.
+      const order = new Map([...totals.keys()].map((id, index) => [id, index]))
+      fields.sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+      const version = this.versions.get(componentId) ?? 0
+      const graph = initial
+        ? initial.reactivityGraph
+        : record && supportsReactivityGraphVueVersion(this.registry.getApp(record.appId)?.version)
+          ? this.collectReactivityGraph(record.instance)
+          : undefined
+      return {
+        total: fields.length,
+        read: (offset, limit) => {
+          const sections: ComponentStateSection[] = []
+          for (const field of fields.slice(offset, offset + limit)) {
+            let section = sections.find((section) => section.id === field.id)
+            if (!section) {
+              section = { id: field.id, label: field.label, entries: [] }
+              sections.push(section)
+            }
+            section.entries.push(field.read())
+          }
+          for (const section of sections)
+            section.partial = section.entries.length < totals.get(section.id)!
+          return {
+            componentId,
+            version,
+            sections,
+            ...(offset === 0 && graph ? { reactivityGraph: graph } : {}),
+          }
+        },
+      }
+    }) as ComponentStateSnapshotMessage
+  }
+
+  expandPage(
+    target: string,
+    options: StatePageOptions,
+    handle: string,
+    path: string[] = [],
+  ): ExpandedValueMessage | { found: false } | undefined {
+    const root = this.handles.get(handle)
+    if (!root) return
+    const resolved = path.length ? resolvePath(root, path) : { found: true, value: root }
+    if (!resolved.found) return { found: false }
+    return this.valuePage(
+      target,
+      options,
+      resolved.value,
+      this.handles.getScope(handle),
+      handle,
+      path,
+    )
+  }
+
+  private valuePage(
+    target: string,
+    options: StatePageOptions,
+    value: unknown,
+    scope?: string,
+    handle = '',
+    path: string[] = [],
+  ): ExpandedValueMessage {
+    const maxPageSize = typeof value === 'string' ? 5000 : 500
+    const pageOptions = {
+      ...options,
+      pageSize: options.pageSize ?? (typeof value === 'string' ? 5000 : 50),
+    }
+    return this.pages.read(
+      target,
+      pageOptions,
+      () => {
+        // Fix collection membership for this batch without eagerly evaluating object getters.
+        const collection =
+          value instanceof Map ? new Map(value) : value instanceof Set ? new Set(value) : value
+        const keys = Array.isArray(value)
+          ? Array.from({ length: value.length }, (_, index) => String(index))
+          : value && typeof value === 'object' && !(value instanceof Map) && !(value instanceof Set)
+            ? safeOwnEnumerableStringKeys(value)
+            : undefined
+        const encode = (offset: number, limit: number) =>
+          typeof collection === 'string'
+            ? { kind: 'string' as const, value: collection.slice(offset, offset + limit) }
+            : encodeValue(collection, {
+                entryKeys: keys,
+                handles: this.handles,
+                handleScope: scope,
+                maxDepth: 1,
+                maxEntries: limit,
+                entryOffset: offset,
+                maxStringLength: this.budget.state.maxStringLength,
+              })
+        const summary = encode(0, 0)
+        const total =
+          typeof collection === 'string'
+            ? collection.length
+            : summary.kind === 'array'
+              ? summary.length
+              : summary.kind === 'object'
+                ? summary.entries
+                : summary.kind === 'map' || summary.kind === 'set'
+                  ? summary.size
+                  : 1
+        return { total, read: (offset, limit) => ({ handle, path, value: encode(offset, limit) }) }
+      },
+      maxPageSize,
+    ) as ExpandedValueMessage
+  }
+
   expand(
     handle: string,
     path: string[] = [],
     maxEntries = this.budget.state.maxEntries,
-  ): ExpandedValueMessage | undefined {
+  ): ExpandedValueMessage | { found: false } | undefined {
     const root = this.handles.get(handle)
     if (!root) return
 
-    const value = path.length ? readPath(root, path) : root
+    let value: unknown = root
+    if (path.length) {
+      const resolved = resolvePath(root, path)
+      if (!resolved.found) return { found: false }
+      value = resolved.value
+    }
     const entries = normalizeMaxEntries(maxEntries, this.budget.state.maxEntries)
     return {
       handle,
@@ -156,6 +325,71 @@ export class ComponentStateCollector {
     if (!source) return { found: false }
 
     return resolvePath(source, path)
+  }
+
+  readStateValue(
+    componentId: ComponentId,
+    sectionId: string,
+    path: string[],
+    options?: StatePageOptions,
+  ): StateValueMessage {
+    const record = this.registry.getComponent(componentId)
+    if (!record || !path.length) return { found: false }
+    const section = createSectionSources(record.instance).find(
+      (section) => section.id === sectionId,
+    )
+    if (!section?.source) return { found: false }
+    const key = path[0]!
+    return this.readStatePath(
+      section.source,
+      path,
+      stateScopeKey(componentId),
+      resolveEntryEditable(section.editable, section.meta?.(key), key),
+      options,
+      JSON.stringify([componentId, sectionId, path]),
+    )
+  }
+
+  readStatePath(
+    source: object,
+    path: string[],
+    scope: string,
+    editable: boolean,
+    options?: StatePageOptions,
+    target = JSON.stringify([scope, path]),
+  ): StateValueMessage {
+    let value: unknown = source
+    // Resolve each segment once: getters can have side effects. Preserve readonly
+    // boundaries even when a nested value belongs to an editable section.
+    // The section root itself can be shallowReadonly (Vue props) while nested
+    // values stay writable, so the flag applies only after the first segment.
+    for (let depth = 0; depth <= path.length; depth++) {
+      if (
+        depth > 0 &&
+        value &&
+        typeof value === 'object' &&
+        readUnknownProperty(value, '__v_isReadonly') === true
+      )
+        editable = false
+      if (depth === path.length) break
+      if (value == null || (typeof value !== 'object' && typeof value !== 'function'))
+        return { found: false }
+      const resolved = resolvePath(value, [path[depth]!])
+      if (!resolved.found) return { found: false }
+      value = resolved.value
+    }
+    if (!options?.snapshotId) this.beginStateScope(scope)
+    if (options) {
+      const result = this.valuePage(target, options, value, scope)
+      return {
+        found: true,
+        editable,
+        value: result.value,
+        pagination: result.pagination,
+        snapshotId: result.snapshotId,
+      }
+    }
+    return { found: true, editable, value: this.encodeStateValue(value, scope, 30) }
   }
 
   /** `triggerRef` the live computed for this state path. */
@@ -209,8 +443,15 @@ export class ComponentStateCollector {
   appendLegacyEntries(
     snapshot: ComponentStateSnapshotMessage,
     entries: LegacyComponentStateEntry[],
+    limits?: { maxEntries?: number; maxPreviewEntries?: number },
   ): void {
     const scope = stateScopeKey(snapshot.componentId)
+    const maxEntries = limits
+      ? normalizeMaxEntries(
+          limits.maxEntries ?? this.budget.state.maxEntries,
+          this.budget.state.maxEntries,
+        )
+      : Infinity
     for (const entry of entries) {
       const sectionId = entry.type || 'data'
       const key = stringifyStateKey(entry.key ?? '')
@@ -226,17 +467,13 @@ export class ComponentStateCollector {
         snapshot.sections.push(section)
       }
 
-      section.entries.push({
-        key,
-        path: [sectionId, key],
-        value: this.encodeStateValue(entry.value, scope),
-        editable: entry.editable === true,
-        meta: {
-          ...entry.meta,
-          ...(entry.objectType ? { stateTypeName: entry.objectType } : {}),
-          ...(entry.raw ? { raw: entry.raw } : {}),
-        },
-      })
+      if (section.entries.length >= maxEntries) {
+        section.partial = true
+        continue
+      }
+      section.entries.push(
+        this.encodePluginStateEntry(entry, sectionId, key, scope, limits?.maxPreviewEntries),
+      )
     }
   }
 
@@ -260,6 +497,7 @@ export class ComponentStateCollector {
   }
 
   clear(): void {
+    this.pages.clear()
     this.handles.clear()
     this.handleScopes = []
     this.versions.clear()
@@ -267,12 +505,36 @@ export class ComponentStateCollector {
     this.reactivityGraphIdSeed = 0
   }
 
-  private encodeStateValue(value: unknown, scope?: string): StateEntry['value'] {
+  private encodePluginStateEntry(
+    entry: LegacyComponentStateEntry,
+    sectionId: string,
+    key: string,
+    scope: string,
+    maxPreviewEntries?: number,
+  ): StateEntry {
+    return {
+      key,
+      path: [sectionId, key],
+      value: this.encodeStateValue(entry.value, scope, maxPreviewEntries),
+      editable: entry.editable === true,
+      meta: {
+        ...entry.meta,
+        ...(entry.objectType ? { stateTypeName: entry.objectType } : {}),
+        ...(entry.raw ? { raw: entry.raw } : {}),
+      },
+    }
+  }
+
+  private encodeStateValue(
+    value: unknown,
+    scope?: string,
+    maxPreviewEntries = this.budget.state.maxEntries,
+  ): StateEntry['value'] {
     return encodeValue(value, {
       handles: this.handles,
       handleScope: scope,
       maxDepth: this.budget.state.lazyChildren ? 1 : this.budget.state.maxDepth,
-      maxEntries: this.budget.state.maxEntries,
+      maxEntries: normalizeMaxEntries(maxPreviewEntries, this.budget.state.maxEntries),
       maxStringLength: this.budget.state.maxStringLength,
     })
   }
@@ -281,8 +543,11 @@ export class ComponentStateCollector {
     source: SectionSource,
     maxEntries: number,
     scope: string,
+    maxPreviewEntries: number,
+    selectedKeys?: PropertyKey[],
   ): ComponentStateSection {
-    const keys = source.source ? safeOwnKeys(source.source).slice(0, maxEntries) : []
+    const keys =
+      selectedKeys ?? (source.source ? safeOwnKeys(source.source).slice(0, maxEntries) : [])
     const entries: StateEntry[] = []
 
     for (const key of keys) {
@@ -299,7 +564,7 @@ export class ComponentStateCollector {
           handles: this.handles,
           handleScope: scope,
           maxDepth: this.budget.state.lazyChildren ? 1 : this.budget.state.maxDepth,
-          maxEntries,
+          maxEntries: maxPreviewEntries,
           maxStringLength: this.budget.state.maxStringLength,
         })
       } catch (error) {
@@ -324,7 +589,7 @@ export class ComponentStateCollector {
       id: source.id,
       label: source.label,
       entries,
-      partial: !!source.source && safeOwnKeys(source.source).length > keys.length,
+      partial: !selectedKeys && !!source.source && safeOwnKeys(source.source).length > keys.length,
     }
   }
 

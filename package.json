@@ -41,7 +41,7 @@
     "test:integration": "vitest run tests/integration",
     "test:performance": "vitest run --config vitest.performance.config.ts",
     "test:smoke:chrome": "pnpm --filter @vue/devtools-kit build && pnpm --filter @vue/devtools-client build && pnpm --filter @vue/devtools-chrome build && vitest run --config vitest.smoke.config.ts",
-    "test:smoke:vite": "pnpm --filter @vue/devtools-kit build && pnpm --filter @vue/devtools-client build && pnpm --filter vite-plugin-vue-devtools build && vitest run --config vitest.smoke.config.ts tests/smoke/vite-client-injection.test.ts",
+    "test:smoke:vite": "pnpm --filter @vue/devtools-kit build && pnpm --filter @vue/devtools-client build && pnpm --filter @vue/devtools-agentic build && pnpm --filter vite-plugin-vue-devtools build && vitest run --config vitest.smoke.config.ts tests/smoke/vite-client-injection.test.ts tests/smoke/agentic.test.ts",
     "test:unit": "vitest run tests/unit",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit -p packages/client/tsconfig.json",
@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@clack/prompts": "catalog:",
+    "@modelcontextprotocol/client": "catalog:",
     "@types/chrome": "catalog:",
     "@types/node": "catalog:",
     "@vitejs/devtools": "catalog:",

@@ -12,6 +12,7 @@ const GETTING_STARTED = [
 
 const GUIDES = [
   { text: 'Vite Plugin', link: '/guide/vite-plugin' },
+  { text: 'Agents', link: '/guide/agents' },
   { text: 'Browser Extension', link: '/guide/browser-extension' },
 ] satisfies DefaultTheme.NavItemWithLink[]
 

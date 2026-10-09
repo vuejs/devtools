@@ -75,7 +75,7 @@ describe('component state isolation (P0.4)', () => {
       payload: { handle },
       type: 'values:expand',
     })
-    expect(expanded?.value.kind).toBe('object')
+    expect(expanded && 'value' in expanded && expanded.value.kind).toBe('object')
   })
 
   it('stores the real value as a stable $tempN global via its handle', async () => {

@@ -19,6 +19,10 @@ export default defineConfig({
         replacement: fromRoot('./packages/kit/src/index.ts'),
       },
       {
+        find: /^@vue\/devtools-agentic\/devframe$/,
+        replacement: fromRoot('./packages/agentic/src/devframe.ts'),
+      },
+      {
         find: '@components',
         replacement: fromRoot('./packages/client/src/components'),
       },

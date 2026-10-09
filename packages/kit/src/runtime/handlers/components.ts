@@ -17,7 +17,13 @@ import type { DevtoolsRuntime } from '../runtime'
 import type { LegacyComponentStateEntry } from '../state'
 import { createLegacyStateSetter } from '../state/legacy-edit'
 import type { createComponentUpdateHighlight } from '../update-highlight'
-import { readBoolean, readString, readStringArray } from './shared'
+import {
+  readBoolean,
+  readNumber,
+  readString,
+  readStringArray,
+  readStatePageOptions,
+} from './shared'
 
 export function registerComponentHandlers(
   runtime: DevtoolsRuntime,
@@ -82,9 +88,50 @@ export function registerComponentHandlers(
     if (!componentId) return
     const record = runtime.registry.getComponent(componentId, query.appId)
     if (record) exposeComponentInstance(record)
-    const snapshot = runtime.componentState.snapshot(componentId, maxEntries)
-    if (record && snapshot) await applyInspectComponentHooks(runtime, record, snapshot)
+    const options = readStatePageOptions(query.payload)
+    if (options) {
+      if (!record) return
+      const initial = options.snapshotId
+        ? undefined
+        : runtime.componentState.snapshot(componentId, 50, 30)!
+      const legacy = initial ? await readInspectComponentEntries(runtime, record, initial) : []
+      return runtime.componentState.statePage(
+        JSON.stringify(['component', query.appId, componentId]),
+        options,
+        componentId,
+        legacy,
+        initial,
+      )
+    }
+    const maxPreviewEntries = readNumber(query.payload, 'maxPreviewEntries')
+    const snapshot = runtime.componentState.snapshot(componentId, maxEntries, maxPreviewEntries)
+    if (record && snapshot)
+      await applyInspectComponentHooks(
+        runtime,
+        record,
+        snapshot,
+        maxPreviewEntries === undefined ? undefined : { maxEntries, maxPreviewEntries },
+      )
     return snapshot
+  })
+
+  runtime.registerQuery('components:stateValue', (query) => {
+    const componentId = readString(query.payload, 'componentId')
+    const sectionId = readString(query.payload, 'sectionId')
+    const path = readStringArray(query.payload, 'path')
+    if (
+      !componentId ||
+      !sectionId ||
+      !query.appId ||
+      !runtime.registry.getComponent(componentId, query.appId)
+    )
+      return { found: false }
+    return runtime.componentState.readStateValue(
+      componentId,
+      sectionId,
+      path,
+      readStatePageOptions(query.payload),
+    )
   })
 
   runtime.registerQuery('components:inspect', async () => {
@@ -111,6 +158,16 @@ export function registerComponentHandlers(
     if (query.payload == null || typeof query.payload !== 'object') return
     const payload = query.payload as { handle?: unknown; path?: unknown; maxEntries?: unknown }
     if (typeof payload.handle !== 'string') return
+    const options = readStatePageOptions(query.payload)
+    if (options) {
+      const path = readStringArray(query.payload, 'path')
+      return runtime.componentState.expandPage(
+        JSON.stringify(['value', query.appId, payload.handle, path]),
+        options,
+        payload.handle,
+        path,
+      )
+    }
     return runtime.componentState.expand(
       payload.handle,
       Array.isArray(payload.path)
@@ -423,26 +480,29 @@ async function applyInspectComponentHooks(
   runtime: DevtoolsRuntime,
   record: ComponentRecord,
   snapshot: ComponentStateSnapshotMessage,
+  limits?: { maxEntries?: number; maxPreviewEntries?: number },
 ): Promise<void> {
+  runtime.componentState.appendLegacyEntries(
+    snapshot,
+    await readInspectComponentEntries(runtime, record, snapshot),
+    limits,
+  )
+}
+
+async function readInspectComponentEntries(
+  runtime: DevtoolsRuntime,
+  record: ComponentRecord,
+  snapshot: ComponentStateSnapshotMessage,
+): Promise<LegacyComponentStateEntry[]> {
   const legacyState = toLegacyStateEntries(snapshot)
   const originalLength = legacyState.length
-  const instanceData = {
-    id: record.id,
-    name: record.name,
-    file: record.file,
-    state: legacyState,
-  }
-
+  const instanceData = { id: record.id, name: record.name, file: record.file, state: legacyState }
   await runtime.callPluginHook('inspectComponent', {
     app: runtime.registry.getApp(record.appId)?.app,
     componentInstance: record.instance,
     instanceData,
   })
-
-  runtime.componentState.appendLegacyEntries(
-    snapshot,
-    legacyState.slice(originalLength).filter(isLegacyStateEntry),
-  )
+  return legacyState.slice(originalLength).filter(isLegacyStateEntry)
 }
 
 function toLegacyStateEntries(

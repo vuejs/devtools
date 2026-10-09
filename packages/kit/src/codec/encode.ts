@@ -47,6 +47,9 @@ export type EncodedValue =
   | { kind: 'circular'; handle: ValueHandle }
 
 export interface ValueCodecOptions {
+  /** Offset within the root collection; nested previews always start at zero. */
+  entryOffset?: number
+  entryKeys?: string[]
   maxDepth?: number
   maxEntries?: number
   maxStringLength?: number
@@ -56,6 +59,8 @@ export interface ValueCodecOptions {
 }
 
 interface EncodeState {
+  entryKeys?: string[]
+  entryOffset: number
   depth: number
   seen: WeakMap<object, ValueHandle>
   handles: ValueHandleRegistry
@@ -69,6 +74,8 @@ export function encodeValue(value: unknown, options: ValueCodecOptions = {}): En
   const handles = options.handles ?? new ValueHandleRegistry()
   return encode(value, {
     depth: 0,
+    entryOffset: options.entryOffset ?? 0,
+    entryKeys: options.entryKeys,
     seen: new WeakMap(),
     handles,
     handleScope: options.handleScope,
@@ -147,16 +154,22 @@ function encodeUnsafe(value: unknown, state: EncodeState): EncodedValue {
     return { kind: 'error', name: value.name, message: value.message, stack: value.stack }
 
   if (Array.isArray(value)) {
+    const keys = state.entryKeys
+    const offset = state.entryOffset
     return {
       kind: 'array',
-      length: value.length,
+      length: keys?.length ?? value.length,
       preview:
         state.depth >= state.maxDepth
           ? []
-          : value.slice(0, state.maxEntries).map((item, index) => ({
-              key: String(index),
-              value: encode(item, nextState(state)),
-            })),
+          : keys
+            ? keys
+                .slice(offset, offset + state.maxEntries)
+                .map((key) => ({ key, value: encodeOwnProperty(value, key, nextState(state)) }))
+            : value.slice(offset, offset + state.maxEntries).map((item, index) => ({
+                key: String(index + offset),
+                value: encode(item, nextState(state)),
+              })),
       handle,
     }
   }
@@ -169,8 +182,8 @@ function encodeUnsafe(value: unknown, state: EncodeState): EncodedValue {
 }
 
 function encodeObject(value: object, handle: ValueHandle, state: EncodeState): EncodedValue {
-  const keys = safeOwnEnumerableStringKeys(value)
-  const previewKeys = keys.slice(0, state.maxEntries)
+  const keys = state.entryKeys ?? safeOwnEnumerableStringKeys(value)
+  const previewKeys = keys.slice(state.entryOffset, state.entryOffset + state.maxEntries)
   return {
     kind: 'object',
     name: getObjectName(value),
@@ -198,12 +211,12 @@ function encodeMap(
     if (state.depth < state.maxDepth) {
       let index = 0
       for (const [key, item] of value) {
-        if (index >= state.maxEntries) break
+        if (index >= state.entryOffset + state.maxEntries) break
+        if (index++ < state.entryOffset) continue
         preview.push({
           key: formatPreviewKey(key),
           value: encode(item, nextState(state)),
         })
-        index++
       }
     }
   } catch {
@@ -220,12 +233,12 @@ function encodeSet(value: Set<unknown>, handle: ValueHandle, state: EncodeState)
     if (state.depth < state.maxDepth) {
       let index = 0
       for (const item of value) {
-        if (index >= state.maxEntries) break
+        if (index >= state.entryOffset + state.maxEntries) break
+        if (index++ < state.entryOffset) continue
         preview.push({
-          key: String(index),
+          key: String(index - 1),
           value: encode(item, nextState(state)),
         })
-        index++
       }
     }
   } catch {
@@ -255,7 +268,7 @@ function encodeOwnProperty(target: object, key: string, state: EncodeState): Enc
   }
 }
 
-function safeOwnEnumerableStringKeys(value: object): string[] {
+export function safeOwnEnumerableStringKeys(value: object): string[] {
   try {
     const keys: string[] = []
     for (const key of Reflect.ownKeys(value)) {
@@ -370,6 +383,8 @@ function nextState(state: EncodeState): EncodeState {
   return {
     ...state,
     depth: state.depth + 1,
+    entryOffset: 0,
+    entryKeys: undefined,
   }
 }
 

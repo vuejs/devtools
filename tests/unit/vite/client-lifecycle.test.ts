@@ -1,6 +1,13 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
+
+const agent = vi.hoisted(() => {
+  const register = vi.fn((_connection: unknown, _page: { url: string; title: string }) => vi.fn())
+  const sessionDispose = vi.fn()
+  const createSession = vi.fn(() => ({ query: vi.fn(), dispose: sessionDispose }))
+  return { register, sessionDispose, createSession }
+})
 
 const mocks = vi.hoisted(() => {
   const state = {
@@ -44,6 +51,11 @@ vi.mock('@vitejs/devtools-kit/client', () => ({
   getDevToolsClientContext: () => undefined,
 }))
 
+vi.mock('@vue/devtools-agentic/devframe', () => ({
+  createVueDevtoolsAgentSession: agent.createSession,
+  registerVueDevtoolsAgentPage: agent.register,
+}))
+
 import {
   disposeVueDevTools,
   installVueDevTools,
@@ -56,6 +68,10 @@ describe('Vite client inspector lifecycle', () => {
     disposeVueDevTools()
     delete (window as unknown as Record<string, unknown>)[CLIENT_RUNTIME_KEY]
     mocks.command.mockClear()
+    agent.register.mockReset()
+    agent.register.mockImplementation(() => vi.fn())
+    agent.sessionDispose.mockClear()
+    agent.createSession.mockClear()
   })
 
   it.each(['runtime-first', 'dock-first'])(
@@ -114,6 +130,55 @@ describe('Vite client inspector lifecycle', () => {
     expect(mocks.command).toHaveBeenCalledWith({ type: 'components:cancelInspect' })
   })
 
+  it('registers agent tools once while MCP is advertised and follows the document location', async () => {
+    const initialUrl = location.href
+    const initialTitle = document.title
+    onTestFinished(() => {
+      history.replaceState({}, '', initialUrl)
+      document.title = initialTitle
+    })
+    installVueDevTools({ enabled: true })
+    const dock = createDockContext({ mcp: true })
+    setupVueDevToolsDockController(dock.context)
+    await vi.waitFor(() => expect(agent.register).toHaveBeenCalledOnce())
+    setupVueDevToolsDockController(dock.context)
+    expect(agent.createSession).toHaveBeenCalledOnce()
+    expect(agent.createSession).toHaveBeenCalledWith(expect.any(Function))
+    expect(Object.hasOwn(history, 'pushState')).toBe(false)
+    expect(Object.hasOwn(history, 'replaceState')).toBe(false)
+    const page = agent.register.mock.calls[0][1]
+    expect(page.url).toBe(location.href)
+    history.pushState({}, '', '/settings?tab=1#main')
+    expect(page.url).toBe(new URL('/settings?tab=1#main', location.origin).href)
+    document.title = 'Next'
+    expect(JSON.parse(JSON.stringify(page))).toEqual({
+      id: expect.any(String),
+      url: new URL('/settings?tab=1#main', location.origin).href,
+      title: 'Next',
+    })
+
+    const closed = createDockContext()
+    setupVueDevToolsDockController(closed.context)
+    expect(agent.register.mock.results[0].value).toHaveBeenCalledOnce()
+    expect(agent.sessionDispose).toHaveBeenCalledOnce()
+  })
+
+  it('drops a failed agent registration and tries again on the next setup', async () => {
+    installVueDevTools({ enabled: true })
+    agent.register.mockImplementationOnce(() => {
+      throw new Error('register failed')
+    })
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    setupVueDevToolsDockController(createDockContext({ mcp: true }).context)
+    await vi.waitFor(() => expect(error).toHaveBeenCalled())
+    expect(agent.sessionDispose).toHaveBeenCalledOnce()
+    error.mockRestore()
+
+    setupVueDevToolsDockController(createDockContext({ mcp: true }).context)
+    await vi.waitFor(() => expect(agent.register).toHaveBeenCalledTimes(2))
+    expect(agent.createSession).toHaveBeenCalledTimes(2)
+  })
+
   it('replaces and disposes dock deactivation listeners', () => {
     installVueDevTools({ enabled: true })
     const first = createDockContext()
@@ -130,7 +195,7 @@ describe('Vite client inspector lifecycle', () => {
   })
 })
 
-function createDockContext() {
+function createDockContext(options?: { mcp?: boolean }) {
   let onDeactivate = () => {}
   const unsubscribe = vi.fn()
   const switchEntry = vi.fn(async (id: string | null) => {
@@ -153,6 +218,7 @@ function createDockContext() {
     panel: {
       session: { open: true },
     },
+    ...(options?.mcp ? { rpc: { connectionMeta: { mcp: { path: '__mcp' } } } } : {}),
   } as unknown as Parameters<typeof setupVueDevToolsDockController>[0]
 
   return {
