@@ -54,6 +54,13 @@ export function registerComponentHandlers(
     return snapshot
   })
 
+  runtime.registerQuery<ComponentTreeSnapshotMessage>('components:search', async (query) => {
+    const filter = readString(query.payload, 'filter') ?? ''
+    const snapshot = runtime.components.search(query.appId, filter)
+    await applyVisitComponentTreeHooks(runtime, snapshot.nodes, filter)
+    return snapshot
+  })
+
   runtime.registerCommand('components:expandTreeNode', (command) => {
     const appId = command.appId
     const componentId = readString(command.payload, 'componentId')

@@ -14,6 +14,8 @@ interface Session extends PageSource {
   target: string
   pageSize: number
   offset: number
+  // Items the byte budget last allowed per page; avoids encoding a full pageSize that gets trimmed.
+  fit?: number
   last?: { page: number; result: Result }
 }
 
@@ -62,7 +64,8 @@ export class StatePages {
       throw new Error(
         'Read pages in order using pagination.next. Restart at page 1 without snapshotId to reread earlier pages.',
       )
-    const result = session.read(offset, pageSize)
+    const requested = Math.min(pageSize, session.fit ?? pageSize)
+    const result = session.read(offset, requested)
     const items =
       'sections' in result
         ? result.sections.flatMap((section) => section.entries)
@@ -119,6 +122,7 @@ export class StatePages {
     if (count === 0 && offset < session.total)
       throw new Error('State changed during pagination. Restart at page 1 without snapshotId.')
     session.offset = offset + count
+    session.fit = count < requested ? Math.max(1, count) : Math.min(pageSize, requested * 2)
     session.last = { page, result }
     if (session.offset >= session.total) this.sessions.set(id, finished(session))
     return result

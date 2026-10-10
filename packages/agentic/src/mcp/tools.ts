@@ -23,8 +23,7 @@ export function createVueDevtoolsAgentTools(
     pageSize: z.number().int().min(1).max(500).default(50),
     snapshotId: z.string().min(1).optional(),
   }
-  const pagingGuide =
-    ' To read all entries, start at page 1, then pass the returned snapshotId and pagination.next as page, keeping pageSize and the target unchanged, until next is null. Pages can contain fewer than pageSize entries to fit the response budget. The batch retains field order, not an atomic snapshot of live values. Restart without snapshotId if it expires.'
+  const pagingGuide = ' Paginated: see vue-devtools:agent:help for the paging protocol.'
 
   function tool<S extends z.ZodType>(
     description: string,
@@ -110,16 +109,12 @@ export function createVueDevtoolsAgentTools(
     'list-plugins': { ...listPlugins, args: [], handler: () => listPlugins.handler({}) },
     'runtime-health': { ...runtimeHealth, args: [], handler: () => runtimeHealth.handler({}) },
     'component-tree': tool(
-      'List the initially expanded Vue component tree and source files. filter matches component name or source file on the returned nodes and is also forwarded to plugin tree hooks. The tree can be partial; use component-children for childCount and cursors. If a cursor expires, restart component-children for that component.',
+      'List the initially expanded Vue component tree and source files. With filter, search every component in the app by name or source file (up to 100 matches, each with its parentId) instead. The tree can be partial; use component-children for childCount and cursors. If a cursor expires, restart component-children for that component.',
       target.extend({ filter: z.string().max(200).optional() }),
-      async ({ appId, filter }) => {
-        const snapshot = await connection.query({
-          type: 'components:treeSnapshot',
-          appId,
-          payload: filter ? { filter } : {},
-        })
-        return filterTree(snapshot, filter)
-      },
+      ({ appId, filter }) =>
+        filter
+          ? connection.query({ type: 'components:search', appId, payload: { filter } })
+          : connection.query({ type: 'components:treeSnapshot', appId, payload: {} }),
       resultSchemas.tree,
     ),
     'component-children': tool(
@@ -143,7 +138,7 @@ export function createVueDevtoolsAgentTools(
       resultSchemas.command,
     ),
     'component-state': tool(
-      'Read a page of component state, grouped by section. pagination.total counts top-level fields across all sections. Objects and arrays preview 30 entries; use expand-value to page through their contents, or component-value for a known field path. A null result means the component was not found.' +
+      'Read a page of component state, grouped by section. pagination.total counts top-level fields across all sections. Objects and arrays preview 30 entries; use expand-value or component-value to read their contents. A null result means the component was not found.' +
         pagingGuide,
       component.extend(pagination),
       ({ appId, ...payload }) =>
@@ -192,7 +187,7 @@ export function createVueDevtoolsAgentTools(
       resultSchemas.matches,
     ),
     'component-value': tool(
-      'Read a known field in a built-in component state section without a snapshot or handle, including fields outside the current page. Get sectionId from component-state (for example props, data, setup); path uses property names or array indexes as strings. found:false means the target or path is missing; a present null/undefined value has a codec tag. Objects preview 30 entries. Use edit-component-state only when an intentional change is needed. Supply page:1 to paginate this value; for strings pageSize defaults to 5000 (maximum 5000; collections maximum 500), and total and pageSize count UTF-16 code units and value contains a text segment.' +
+      'Read a known field in a component state section without a snapshot or handle, including fields outside the current page. Get sectionId from component-state (for example props, data, setup); path uses property names or array indexes as strings. found:false means the target or path is missing; a present null/undefined value has a codec tag. Objects preview 30 entries. Paginate with page:1 (strings default to 5000 UTF-16 units, collections to 50 entries).' +
         pagingGuide,
       componentField.extend({
         page: z.number().int().min(1).optional(),
@@ -204,7 +199,7 @@ export function createVueDevtoolsAgentTools(
       resultSchemas.stateValue,
     ),
     'inspector-value': tool(
-      'Read one field through an existing plugin Inspector, including Pinia. Use inspector/node/section IDs from list-inspectors, inspector-tree and inspector-state. path starts with the state entry key, followed by nested keys. found:false means no matching target or path. Reads still run the plugin getInspectorState hook, but only encode the requested value. Supply page:1 to paginate the value, including long strings (UTF-16 code units; default and maximum pageSize 5000, collections maximum 500).' +
+      'Read one field through an existing plugin Inspector, including Pinia. Use inspector/node/section IDs from list-inspectors, inspector-tree and inspector-state. path starts with the state entry key, followed by nested keys. found:false means no matching target or path. The plugin getInspectorState hook still runs, but only the requested value is encoded. Paginate with page:1 (strings default to 5000 UTF-16 units, collections to 50 entries).' +
         pagingGuide,
       inspectorField.extend({
         page: z.number().int().min(1).optional(),
@@ -242,7 +237,7 @@ export function createVueDevtoolsAgentTools(
         }
       : {}),
     'expand-value': tool(
-      'Expand an encoded value handle from a previous state or inspector query in this app and document. Read only the necessary path. Handles can expire when the same component or inspector node is read again, including by the DevTools panel, or when retained snapshots are released. If a handle is unavailable, rerun the original component-state or inspector-state query and retry with its new handle. After reload, rediscover the page tools first.' +
+      'Expand an encoded value handle from a previous state or inspector query in this app and document. Read only the necessary path. Handles expire when the same component or inspector node is read again, or when retained snapshots are released; then rerun the original query for a new handle. After reload, rediscover the page tools first.' +
         pagingGuide,
       target.extend({
         handle: z.string().min(1),
@@ -266,24 +261,6 @@ export function createVueDevtoolsAgentTools(
       },
       resultSchemas.expanded,
     ),
-  }
-}
-
-function filterTree(snapshot: unknown, filter: string | undefined): unknown {
-  if (!filter || !snapshot || typeof snapshot !== 'object' || !('nodes' in snapshot))
-    return snapshot
-  const nodes = (snapshot as { nodes?: unknown }).nodes
-  if (!Array.isArray(nodes)) return snapshot
-  const needle = filter.toLowerCase()
-  return {
-    ...snapshot,
-    nodes: nodes.filter((node) => {
-      if (!node || typeof node !== 'object') return false
-      const record = node as { name?: unknown; file?: unknown }
-      return [record.name, record.file].some(
-        (value) => typeof value === 'string' && value.toLowerCase().includes(needle),
-      )
-    }),
   }
 }
 

@@ -47,6 +47,10 @@ export interface RuntimeQueryMap {
     payload: { filter?: string } | undefined
     result: ComponentTreeSnapshotMessage
   }
+  'components:search': {
+    payload: { filter: string }
+    result: ComponentTreeSnapshotMessage
+  }
   'components:treeChildren': {
     payload: { componentId: string; cursor?: string }
     result: ComponentTreePageMessage

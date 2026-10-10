@@ -84,21 +84,14 @@ describe('Vue agent tools', () => {
     expect((await tools['list-apps'].handler()).page.id).toBe(page.id)
   })
 
-  it('matches a component tree filter by name or file and still forwards it', async () => {
-    const tree = {
-      nodes: [
-        { name: 'App', file: 'src/App.vue' },
-        { name: 'UserList', file: 'src/users/List.vue' },
-      ],
-    }
-    const { query, tools } = setup(tree)
+  it('routes a component tree filter to the app-wide search and passes matches through', async () => {
+    const matches = { nodes: [{ name: 'UserList', file: 'src/users/List.vue' }] }
+    const { query, tools } = setup(matches)
     expect(
       (await tools['component-tree'].handler({ appId: 'app', filter: 'LIST.vue' })).result,
-    ).toEqual({
-      nodes: [tree.nodes[1]],
-    })
+    ).toEqual(matches)
     expect(query).toHaveBeenCalledWith({
-      type: 'components:treeSnapshot',
+      type: 'components:search',
       appId: 'app',
       payload: { filter: 'LIST.vue' },
     })

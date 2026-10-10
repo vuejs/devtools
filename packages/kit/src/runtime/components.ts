@@ -109,6 +109,23 @@ export class ComponentTreeStore {
     }
   }
 
+  search(appId: AppId | undefined, needle: string, limit = 100): ComponentTreeSnapshot {
+    const app = appId ? this.registry.getApp(appId) : this.registry.listApps()[0]
+    if (!app) return { appId, version: 0, nodes: [] }
+    const query = needle.toLowerCase()
+    const nodes: ComponentSnapshot[] = []
+    for (const record of this.registry.refreshComponentTree(app.id)) {
+      if (record.hidden) continue
+      const matches = [record.name, record.file].some(
+        (value) => typeof value === 'string' && value.toLowerCase().includes(query),
+      )
+      if (!matches) continue
+      nodes.push(this.toSnapshot(record))
+      if (nodes.length >= limit) break
+    }
+    return { appId: app.id, version: this.appVersions.get(app.id) ?? 0, nodes }
+  }
+
   snapshot(appId?: AppId): ComponentTreeSnapshot {
     const app = appId ? this.registry.getApp(appId) : this.registry.listApps()[0]
     if (!app) return { appId, version: 0, nodes: [] }

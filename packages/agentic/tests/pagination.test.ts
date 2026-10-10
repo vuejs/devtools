@@ -12,8 +12,11 @@ afterEach(async () => {
   await kit?.dispose()
   vi.restoreAllMocks()
 })
-async function setup(props: Record<string, unknown>) {
-  kit = createDevtoolsKit({ target: { name: 'pagination' }, hook: { install: false } })
+async function setup(
+  props: Record<string, unknown>,
+  budget?: Parameters<typeof createDevtoolsKit>[0]['budget'],
+) {
+  kit = createDevtoolsKit({ target: { name: 'pagination' }, hook: { install: false }, budget })
   kit.install()
   const fixture = createComponentTreeFixture(1)
   Object.assign(fixture.instances[0]!, { props })
@@ -224,4 +227,55 @@ it('retains the original object keys when the live collection changes between pa
   expect(second.value).toMatchObject({ preview: [{ key: 'b', value: { value: 2 } }] })
   expect(third.value).toMatchObject({ preview: [{ key: 'c', value: { value: 3 } }] })
   expect(third.pagination).toEqual({ total: 3, current: 3, pageSize: 1, next: null })
+})
+
+it('reconstructs a long string exactly when the byte budget forces mid-string cuts', async () => {
+  const text = 'Vue € 🌍 '.repeat(4000)
+  const { tools, componentId } = await setup({ text }, { transport: { maxMessageBytes: 4 * 1024 } })
+  const target = { appId: 'app:0', componentId, sectionId: 'props', path: ['text'] }
+  let result = (await tools['component-value'].handler({ ...target, page: 1, pageSize: 5000 }))
+    .result as Extract<import('../../kit/src/protocol').StateValueMessage, { found: true }>
+  let actual = ''
+  let pages = 0
+  for (;;) {
+    pages++
+    if (result.value.kind !== 'string') throw new Error('Expected string segment')
+    expect(measureRuntimeMessageBytes(result)).toBeLessThanOrEqual(4 * 1024)
+    actual += result.value.value
+    if (!result.pagination!.next) break
+    result = (
+      await tools['component-value'].handler({
+        ...target,
+        page: result.pagination!.next,
+        pageSize: 5000,
+        snapshotId: result.snapshotId,
+      })
+    ).result as typeof result
+  }
+  expect(pages).toBeGreaterThan(1)
+  expect(actual).toBe(text)
+})
+
+it('expires a finished batch once its last page has been handed out', async () => {
+  const { tools, componentId } = await setup({ values: Array.from({ length: 4 }, (_, i) => i) })
+  const target = { appId: 'app:0', componentId, sectionId: 'props', path: ['values'] }
+  const first = (await tools['component-value'].handler({ ...target, page: 1, pageSize: 2 }))
+    .result as { snapshotId: string; pagination: { next: number | null } }
+  const second = (
+    await tools['component-value'].handler({
+      ...target,
+      page: first.pagination.next!,
+      pageSize: 2,
+      snapshotId: first.snapshotId,
+    })
+  ).result as { pagination: { next: number | null } }
+  expect(second.pagination.next).toBeNull()
+  await expect(
+    tools['component-value'].handler({
+      ...target,
+      page: 3,
+      pageSize: 2,
+      snapshotId: first.snapshotId,
+    }),
+  ).rejects.toThrow(/complete|Read pages in order|expired/)
 })
