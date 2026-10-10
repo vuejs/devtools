@@ -154,22 +154,17 @@ function encodeUnsafe(value: unknown, state: EncodeState): EncodedValue {
     return { kind: 'error', name: value.name, message: value.message, stack: value.stack }
 
   if (Array.isArray(value)) {
-    const keys = state.entryKeys
     const offset = state.entryOffset
     return {
       kind: 'array',
-      length: keys?.length ?? value.length,
+      length: value.length,
       preview:
         state.depth >= state.maxDepth
           ? []
-          : keys
-            ? keys
-                .slice(offset, offset + state.maxEntries)
-                .map((key) => ({ key, value: encodeOwnProperty(value, key, nextState(state)) }))
-            : value.slice(offset, offset + state.maxEntries).map((item, index) => ({
-                key: String(index + offset),
-                value: encode(item, nextState(state)),
-              })),
+          : value.slice(offset, offset + state.maxEntries).map((item, index) => ({
+              key: String(index + offset),
+              value: encode(item, nextState(state)),
+            })),
       handle,
     }
   }
@@ -209,10 +204,8 @@ function encodeMap(
   try {
     size = value.size
     if (state.depth < state.maxDepth) {
-      let index = 0
       for (const [key, item] of value) {
-        if (index >= state.entryOffset + state.maxEntries) break
-        if (index++ < state.entryOffset) continue
+        if (preview.length >= state.maxEntries) break
         preview.push({
           key: formatPreviewKey(key),
           value: encode(item, nextState(state)),
@@ -233,10 +226,9 @@ function encodeSet(value: Set<unknown>, handle: ValueHandle, state: EncodeState)
     if (state.depth < state.maxDepth) {
       let index = 0
       for (const item of value) {
-        if (index >= state.entryOffset + state.maxEntries) break
-        if (index++ < state.entryOffset) continue
+        if (index >= state.maxEntries) break
         preview.push({
-          key: String(index - 1),
+          key: String(index++),
           value: encode(item, nextState(state)),
         })
       }

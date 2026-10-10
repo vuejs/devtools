@@ -242,37 +242,53 @@ export class ComponentStateCollector {
       target,
       pageOptions,
       () => {
-        // Fix collection membership for this batch without eagerly evaluating object getters.
-        const collection =
-          value instanceof Map ? new Map(value) : value instanceof Set ? new Set(value) : value
-        const keys = Array.isArray(value)
-          ? Array.from({ length: value.length }, (_, index) => String(index))
-          : value && typeof value === 'object' && !(value instanceof Map) && !(value instanceof Set)
+        // Snapshot Map/Set membership once so each page slices rather than re-walking the collection.
+        const mapEntries = value instanceof Map ? Array.from(value) : undefined
+        const setItems = value instanceof Set ? Array.from(value) : undefined
+        const objectKeys =
+          value && typeof value === 'object' && !Array.isArray(value) && !mapEntries && !setItems
             ? safeOwnEnumerableStringKeys(value)
             : undefined
-        const encode = (offset: number, limit: number) =>
-          typeof collection === 'string'
-            ? { kind: 'string' as const, value: collection.slice(offset, offset + limit) }
-            : encodeValue(collection, {
-                entryKeys: keys,
-                handles: this.handles,
-                handleScope: scope,
-                maxDepth: 1,
-                maxEntries: limit,
-                entryOffset: offset,
-                maxStringLength: this.budget.state.maxStringLength,
-              })
-        const summary = encode(0, 0)
-        const total =
-          typeof collection === 'string'
-            ? collection.length
-            : summary.kind === 'array'
-              ? summary.length
-              : summary.kind === 'object'
-                ? summary.entries
-                : summary.kind === 'map' || summary.kind === 'set'
-                  ? summary.size
-                  : 1
+        const encodeOptions = {
+          handles: this.handles,
+          handleScope: scope,
+          maxDepth: 1,
+          maxStringLength: this.budget.state.maxStringLength,
+        }
+        const encode = (offset: number, limit: number) => {
+          if (typeof value === 'string')
+            return { kind: 'string' as const, value: value.slice(offset, offset + limit) }
+          if (mapEntries)
+            return encodeValue(new Map(mapEntries.slice(offset, offset + limit)), {
+              ...encodeOptions,
+              maxEntries: limit,
+            })
+          if (setItems) {
+            const encoded = encodeValue(new Set(setItems.slice(offset, offset + limit)), {
+              ...encodeOptions,
+              maxEntries: limit,
+            })
+            if (encoded.kind === 'set')
+              encoded.preview = encoded.preview.map((entry, index) => ({
+                key: String(offset + index),
+                value: entry.value,
+              }))
+            return encoded
+          }
+          return encodeValue(value, {
+            entryKeys: objectKeys,
+            ...encodeOptions,
+            maxEntries: limit,
+            entryOffset: offset,
+          })
+        }
+        const total = (() => {
+          if (typeof value === 'string') return value.length
+          if (Array.isArray(value)) return value.length
+          if (mapEntries || setItems) return (mapEntries ?? setItems)!.length
+          const summary = encode(0, 0)
+          return summary.kind === 'object' ? summary.entries : 1
+        })()
         return { total, read: (offset, limit) => ({ handle, path, value: encode(offset, limit) }) }
       },
       maxPageSize,

@@ -82,23 +82,37 @@ export class StatePages {
     }
     update()
     // Leave room for the RPC envelope and host metadata; never advance past omitted entries.
+    const limit = this.maxBytes * 0.9
     let bytes = measureRuntimeMessageBytes(result)
-    while (bytes > this.maxBytes * 0.9 && count > 1) {
+    if ('value' in result && result.value.kind === 'string' && bytes > limit) {
+      const text = result.value.value
+      let low = 1
+      let high = text.length
+      while (low < high) {
+        const mid = (low + high + 1) >> 1
+        result.value.value = text.slice(0, mid)
+        if (measureRuntimeMessageBytes(result) <= limit) low = mid
+        else high = mid - 1
+      }
+      if (low > 1 && isHighSurrogate(text.charCodeAt(low - 1))) low--
+      result.value.value = text.slice(0, low)
+      count = low
+      update()
+      bytes = measureRuntimeMessageBytes(result)
+    }
+    while (bytes > limit && count > 1) {
       if ('sections' in result) {
         const section = [...result.sections]
           .reverse()
           .find((section) => section.entries.length > 0)!
         bytes -= measureRuntimeMessageBytes(section.entries.pop())
         section.partial = true
-      } else if (result.value.kind === 'string') {
-        result.value.value = result.value.value.slice(0, -1)
-        bytes = measureRuntimeMessageBytes(result)
       } else if ('preview' in result.value)
         bytes -= measureRuntimeMessageBytes(result.value.preview.pop())
       count--
       update()
     }
-    if (measureRuntimeMessageBytes(result) > this.maxBytes * 0.9)
+    if (measureRuntimeMessageBytes(result) > limit)
       throw new Error(
         'A single state entry exceeds the response budget. Read a narrower field path or expand its value separately.',
       )
@@ -106,10 +120,29 @@ export class StatePages {
       throw new Error('State changed during pagination. Restart at page 1 without snapshotId.')
     session.offset = offset + count
     session.last = { page, result }
+    if (session.offset >= session.total) this.sessions.set(id, finished(session))
     return result
   }
 
   clear() {
     this.sessions.clear()
   }
+}
+
+/** Drops the live collection and field readers once every page has been handed out. */
+function finished(session: Session): Session {
+  return {
+    target: session.target,
+    pageSize: session.pageSize,
+    total: session.total,
+    offset: session.offset,
+    last: session.last,
+    read: () => {
+      throw new Error('State pagination is complete. Restart at page 1 without snapshotId.')
+    },
+  }
+}
+
+function isHighSurrogate(code: number): boolean {
+  return code >= 0xd800 && code <= 0xdbff
 }
