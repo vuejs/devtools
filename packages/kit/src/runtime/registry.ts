@@ -462,7 +462,7 @@ function readAppName(app: object): string | undefined {
   return component ? readStringProperty(component, 'name') : undefined
 }
 
-function readComponentName(instance: object): string {
+export function readComponentName(instance: object): string {
   const type = readObjectProperty(instance, 'type')
   if (type) {
     const name =

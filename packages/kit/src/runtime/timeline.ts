@@ -2,6 +2,7 @@ import type { EncodedValue, ValueHandleRegistry } from '../codec'
 import type { AppId, InstanceRef } from './types'
 import type { DevtoolsRuntime } from './runtime'
 import { encodeValue } from '../codec'
+import { readComponentName } from './registry'
 
 interface PerformanceStartEvent {
   type: 'perf:start'
@@ -148,7 +149,7 @@ export function createRuntimeTimeline(
       const componentRecord = component
         ? runtime.registry.getComponent(component, event.appId)
         : undefined
-      const componentName = componentRecord?.name ?? 'Unknown Component'
+      const componentName = componentRecord?.name ?? readComponentName(event.instance)
 
       dispatchTimelineEvent(runtime, handles, state, {
         appId: event.appId,
@@ -236,7 +237,7 @@ function addPerformanceStart(
   const componentRecord = componentId
     ? runtime.registry.getComponent(componentId, event.appId)
     : undefined
-  const componentName = componentRecord?.name ?? 'Unknown Component'
+  const componentName = componentRecord?.name ?? readComponentName(event.instance)
   const groupId = state.groupSeed++
   // The registry ID can change from undefined to an ID between start and end.
   const groupKey = `${event.appId}:${event.phase}`
@@ -286,7 +287,7 @@ function addPerformanceEnd(
   const componentRecord = componentId
     ? runtime.registry.getComponent(componentId, event.appId)
     : undefined
-  const componentName = componentRecord?.name ?? 'Unknown Component'
+  const componentName = componentRecord?.name ?? readComponentName(event.instance)
   const duration = Math.max(0, event.timestamp - group.startTime)
   groups!.delete(groupKey)
 
