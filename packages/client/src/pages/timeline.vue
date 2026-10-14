@@ -111,7 +111,7 @@ const eventRows = computed<TimelineEventRow[]>(() => {
     return {
       ...event,
       color: event.type === 'timeline:eventsLimited' ? LIMITED_COLOR : color,
-      delta: prev ? event.time - prev.time : undefined,
+      delta: prev && event.time >= prev.time ? event.time - prev.time : undefined,
       grouped: inGroup(prev),
       groupStart: !inGroup(prev) && inGroup(next),
       repeatsTitle: inGroup(prev) && (prev!.title ?? prev!.label) === (event.title ?? event.label),
@@ -203,7 +203,7 @@ function createEventInfoRows(event: TimelineEventRow): InfoRow[] {
     { key: 'timestamp', value: formatClock(event.time) },
   ]
 
-  if (event.delta != null) rows.push({ key: 'duration', value: formatDelta(event.delta) })
+  if (event.delta != null) rows.push({ key: 'delta', value: formatDelta(event.delta) })
 
   if (event.subtitle) rows.push({ key: 'subtitle', value: event.subtitle })
   if (event.layerId) rows.push({ key: 'layer', value: event.layerId })
@@ -410,9 +410,15 @@ onUnmounted(() => {
                           aria-hidden="true"
                         >
                           <span
-                            v-if="event.grouped"
-                            class="absolute left-1/2 top-0 w-0 border-l border-l-solid border-gray-300 dark:border-gray-600"
-                            :class="event.groupEnd ? 'h-1/2' : 'h-full'"
+                            v-if="event.grouped || event.groupStart"
+                            class="absolute left-1/2 w-0 border-l border-l-solid border-gray-300 dark:border-gray-600"
+                            :class="
+                              event.groupStart
+                                ? 'top-1/2 h-1/2'
+                                : event.groupEnd
+                                  ? 'top-0 h-1/2'
+                                  : 'top-0 h-full'
+                            "
                           />
                           <span
                             v-if="event.grouped"
