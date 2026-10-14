@@ -232,8 +232,10 @@ function includesFilter(value: string | undefined, filter: string): boolean {
 
       <div v-else-if="!emptyState">
         <section v-for="section in filteredStateSections" :key="section.id">
-          <div
-            class="flex cursor-pointer items-center hover:bg-active"
+          <button
+            class="w-full flex cursor-pointer items-center border-0 bg-transparent p-0 text-left color-inherit hover:bg-active"
+            type="button"
+            :aria-expanded="isStateSectionExpanded(section.id)"
             @click="toggleStateSection(section.id)"
           >
             <span
@@ -245,7 +247,7 @@ function includesFilter(value: string | undefined, filter: string): boolean {
               {{ section.label }}
             </span>
             <span v-if="section.partial" class="ml-2 color-muted text-11px">partial</span>
-          </div>
+          </button>
 
           <div v-if="isStateSectionExpanded(section.id)">
             <StateEntryRow
