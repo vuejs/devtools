@@ -1,3 +1,4 @@
+import type { StatePageOptions, StateValueMessage } from '../../protocol'
 import type { DevtoolsRuntime } from '../runtime'
 import type { AppRef } from '../types'
 
@@ -52,4 +53,19 @@ export function resolveAppRef(
   appId: string | undefined,
 ): AppRef | undefined {
   return appId ? runtime.registry.getApp(appId)?.app : runtime.registry.listApps()[0]?.app
+}
+
+/** Explain why a stateValue read does not allow an edit, or return undefined when it does. */
+export function editableError(value: StateValueMessage): string | undefined {
+  if (!value.found) return 'State path was not found'
+  if (!value.editable) return 'State field is read-only'
+}
+
+export function readStatePageOptions(payload: unknown): StatePageOptions | undefined {
+  const page = readNumber(payload, 'page')
+  const pageSize = readNumber(payload, 'pageSize')
+  const snapshotId = readString(payload, 'snapshotId')
+  return page === undefined && pageSize === undefined && snapshotId === undefined
+    ? undefined
+    : { page, pageSize, snapshotId }
 }

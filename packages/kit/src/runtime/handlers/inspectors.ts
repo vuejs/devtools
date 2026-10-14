@@ -1,17 +1,24 @@
 import type { CustomInspectorOptions } from '../../plugin'
-import type { ComponentStateSnapshotMessage, InspectorsListMessage } from '../../protocol'
+import type {
+  ComponentStateSnapshotMessage,
+  InspectorsListMessage,
+  StatePageOptions,
+  StateValueMessage,
+} from '../../protocol'
 import type { DevtoolsRuntime } from '../runtime'
 import type { LegacyComponentStateEntry } from '../state'
 import { createLegacyStateSetter } from '../state/legacy-edit'
 import type { AppRef } from '../types'
 import {
   isRecord,
+  editableError,
   readBoolean,
   readNumber,
   readObject,
   readRecord,
   readString,
   readStringArray,
+  readStatePageOptions,
   readUnknownProperty,
   resolveAppRef,
   retiredAppError,
@@ -62,6 +69,15 @@ export function registerInspectorHandlers(runtime: DevtoolsRuntime) {
     const inspector = runtime.inspectors.get(inspectorId, app)
     if (!inspector) return
 
+    const paging = readStatePageOptions(query.payload)
+    const pageTarget = JSON.stringify(['inspector', query.appId, inspectorId, nodeId])
+    if (paging?.snapshotId)
+      return runtime.componentState.statePage(
+        pageTarget,
+        paging,
+        `inspector:${inspectorId}:${nodeId}`,
+      )
+
     inspector.selectedNodeId = nodeId
 
     const payload = {
@@ -72,7 +88,39 @@ export function registerInspectorHandlers(runtime: DevtoolsRuntime) {
     }
     await runtime.callPluginHook('getInspectorState', payload)
 
+    if (paging)
+      return runtime.componentState.statePage(
+        pageTarget,
+        paging,
+        `inspector:${inspectorId}:${nodeId}`,
+        toInspectorLegacyStateEntries(inspectorId, nodeId, payload.state),
+      )
     return createInspectorStateSnapshot(runtime, inspectorId, nodeId, payload.state)
+  })
+
+  runtime.registerQuery('inspectors:stateValue', async (query) => {
+    const inspectorId = readString(query.payload, 'inspectorId')
+    const nodeId = readString(query.payload, 'nodeId')
+    const sectionId = readString(query.payload, 'sectionId')
+    const path = readStringArray(query.payload, 'path')
+    if (
+      !query.appId ||
+      !runtime.registry.getApp(query.appId) ||
+      !inspectorId ||
+      !nodeId ||
+      !sectionId ||
+      !path.length
+    )
+      return { found: false }
+    return readInspectorStateValue(
+      runtime,
+      query.appId,
+      inspectorId,
+      nodeId,
+      sectionId,
+      path,
+      readStatePageOptions(query.payload),
+    )
   })
 
   runtime.registerCommand('inspectors:add', (command) => {
@@ -174,6 +222,22 @@ export function registerInspectorHandlers(runtime: DevtoolsRuntime) {
     const app = resolveAppRef(runtime, command.appId)
     const inspector = runtime.inspectors.get(inspectorId, app)
     if (!inspector) return { status: 0, error: `Unknown inspector: ${inspectorId}` }
+
+    if (readBoolean(payload, 'requireEditable') === true) {
+      const error = editableError(
+        command.appId
+          ? await readInspectorStateValue(
+              runtime,
+              command.appId,
+              inspectorId,
+              nodeId,
+              sectionId,
+              path,
+            )
+          : { found: false as const },
+      )
+      if (error) return { status: 0, error }
+    }
 
     const state = {
       value: readUnknownProperty(payload, 'value'),
@@ -325,4 +389,31 @@ function stringifyInspectorStateKey(key: unknown): string {
   } catch {
     return Object.prototype.toString.call(key)
   }
+}
+
+async function readInspectorStateValue(
+  runtime: DevtoolsRuntime,
+  appId: string,
+  inspectorId: string,
+  nodeId: string,
+  sectionId: string,
+  path: string[],
+  options?: StatePageOptions,
+): Promise<StateValueMessage> {
+  const app = resolveAppRef(runtime, appId)
+  if (!runtime.inspectors.get(inspectorId, app)) return { found: false }
+  const payload = { app, inspectorId, nodeId, state: {} }
+  await runtime.callPluginHook('getInspectorState', payload)
+  const entry = toInspectorLegacyStateEntries(inspectorId, nodeId, payload.state).find(
+    (entry) => entry.type === sectionId && entry.key === path[0],
+  )
+  if (!entry) return { found: false }
+  return runtime.componentState.readStatePath(
+    { value: entry.value },
+    ['value', ...path.slice(1)],
+    `state:inspector:${appId}:${inspectorId}:${nodeId}`,
+    entry.editable === true,
+    options,
+    JSON.stringify([appId, inspectorId, nodeId, sectionId, path]),
+  )
 }

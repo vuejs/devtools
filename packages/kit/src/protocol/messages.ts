@@ -55,7 +55,22 @@ export interface ComponentTreeSnapshotMessage {
   nodes: ComponentTreeNodeSnapshot[]
 }
 
+export interface StatePageOptions {
+  page?: number
+  pageSize?: number
+  snapshotId?: string
+}
+
+export interface StatePagination {
+  total: number
+  pageSize: number
+  current: number
+  next: number | null
+}
+
 export interface ComponentStateSnapshotMessage {
+  snapshotId?: string
+  pagination?: StatePagination
   componentId: ComponentId
   version: number
   sections: ComponentStateSection[]
@@ -111,6 +126,8 @@ export interface ReactivityGraphSnapshot {
 }
 
 export interface ExpandedValueMessage {
+  snapshotId?: string
+  pagination?: StatePagination
   handle: string
   path: string[]
   value: EncodedValue
@@ -181,3 +198,14 @@ export interface RouterSnapshotMessage {
   currentRoute?: RouterRouteSnapshot
   routes: RouterRouteRecordSnapshot[]
 }
+
+/** A missing path is distinct from a present null or undefined value. */
+export type StateValueMessage =
+  | { found: false }
+  | {
+      found: true
+      value: EncodedValue
+      editable: boolean
+      snapshotId?: string
+      pagination?: StatePagination
+    }
