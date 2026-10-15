@@ -42,7 +42,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsdown && node --input-type=commonjs -e \"const fs=require('node:fs');fs.rmSync('client',{recursive:true,force:true});fs.cpSync('../client/dist','client',{recursive:true})\"",
+    "build": "tsdown && node --input-type=module -e \"import fs from 'node:fs';fs.rmSync('client',{recursive:true,force:true});fs.cpSync('../client/dist','client',{recursive:true})\"",
     "dev": "tsdown --watch"
   },
   "dependencies": {

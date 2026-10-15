@@ -7,7 +7,6 @@ export interface VueDevtoolsDetectionPayload {
   devtoolsEnabled: boolean
   installed: boolean
   nuxtDetected: boolean
-  vitePluginClientUrl?: string
   vitePluginDetected: boolean
   vitePressDetected: boolean
   vueDetected: boolean
@@ -82,7 +81,6 @@ function isVueDevtoolsDetectionPayload(value: unknown): value is VueDevtoolsDete
     typeof payload.nuxtDetected === 'boolean' &&
     typeof payload.vitePluginDetected === 'boolean' &&
     typeof payload.vitePressDetected === 'boolean' &&
-    typeof payload.vueDetected === 'boolean' &&
-    (payload.vitePluginClientUrl == null || typeof payload.vitePluginClientUrl === 'string')
+    typeof payload.vueDetected === 'boolean'
   )
 }
