@@ -22,7 +22,7 @@ function frameLabel(frame: DevtoolsExtensionFrameDescriptor): string {
     <ul v-if="frames.length > 1" class="m-0 list-none border-b border-base p-2">
       <li v-for="frame in frames" :key="frame.frameId">
         <button
-          class="selectable-item w-full border-0 bg-transparent color-inherit text-left font-[inherit]"
+          class="selectable-item w-full border-0 bg-transparent color-inherit text-left"
           :class="{ active: activeFrameId === frame.frameId }"
           type="button"
           :title="frame.url"
@@ -38,7 +38,7 @@ function frameLabel(frame: DevtoolsExtensionFrameDescriptor): string {
     <ul class="m-0 list-none p-2">
       <li v-for="app in apps" :key="app.id">
         <button
-          class="selectable-item w-full border-0 bg-transparent color-inherit text-left font-[inherit]"
+          class="selectable-item w-full border-0 bg-transparent color-inherit text-left"
           :class="{ active: selectedAppId === app.id }"
           type="button"
           :aria-pressed="selectedAppId === app.id"
