@@ -98,6 +98,69 @@ describe('Chrome MV3 extension smoke test', () => {
       )
       .toBe(false)
   })
+
+  // Chrome stops an idle service worker and its in-memory detection state with it.
+  it('recovers subframe-only detection after the service worker restarts', async () => {
+    if (!context || !fixture || !serviceWorker) throw new Error('Smoke fixture did not start')
+
+    const page = await context.newPage()
+    await page.goto(fixture.subframeOnlyUrl)
+    const tabId = await serviceWorker.evaluate(async (pageUrl) => {
+      const tabs = await (
+        globalThis as typeof globalThis & {
+          chrome: {
+            tabs: { query(options: object): Promise<Array<{ id?: number; url?: string }>> }
+          }
+        }
+      ).chrome.tabs.query({})
+      return tabs.find((tab) => tab.url === pageUrl)?.id
+    }, page.url())
+    if (tabId == null) throw new Error('Unable to find subframe-only fixture tab')
+
+    // Ask the way the devtools page does, from an extension page.
+    const extensionPage = await context.newPage()
+    await extensionPage.goto(
+      `chrome-extension://${new URL(serviceWorker.url()).host}/app/popups/not-found.html`,
+    )
+    const queryVueDetected = () =>
+      extensionPage.evaluate(
+        (id) =>
+          new Promise<boolean>((resolve) => {
+            const chromeApi = (
+              globalThis as typeof globalThis & {
+                chrome: {
+                  runtime: {
+                    lastError?: unknown
+                    sendMessage(
+                      message: object,
+                      callback: (payload?: { vueDetected?: boolean }) => void,
+                    ): void
+                  }
+                }
+              }
+            ).chrome
+            chromeApi.runtime.sendMessage(
+              { source: 'vue-devtools:chrome', tabId: id, type: 'vue-devtools:detection-query' },
+              (payload) => {
+                void chromeApi.runtime.lastError
+                resolve(!!payload?.vueDetected)
+              },
+            )
+          }),
+        tabId,
+      )
+
+    await expect.poll(queryVueDetected, { timeout: 10_000 }).toBe(true)
+
+    const cdp = await context.newCDPSession(extensionPage)
+    await cdp.send('ServiceWorker.enable')
+    await cdp.send('ServiceWorker.stopAllWorkers')
+
+    await expect.poll(queryVueDetected, { interval: 1_000, timeout: 5_000 }).toBe(true)
+
+    await extensionPage.close()
+    await page.close()
+  })
 })
 
 async function waitForVueDetection(page: import('playwright').Page): Promise<void> {
