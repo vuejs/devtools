@@ -5,6 +5,53 @@ import * as codec from '../../../packages/kit/src/codec'
 
 afterEach(() => vi.useRealTimers())
 
+it('names component events before component registration', async () => {
+  const runtime = createDevtoolsRuntime()
+  try {
+    const fixture = createComponentTreeFixture(2)
+    runtime.dispatch({
+      type: 'app:init',
+      app: fixture.app,
+      version: '3.5.0',
+      vueTypes: {},
+      time: 1,
+    })
+    const instance = fixture.instances[1]!
+    expect(runtime.registry.getComponentId(instance)).toBeUndefined()
+    const events = vi.fn()
+    runtime.subscribe('timeline:eventAdded', events)
+    runtime.dispatch({
+      type: 'component:emit',
+      appId: 'app:0',
+      instance,
+      event: 'update',
+      args: [],
+      time: 2,
+    })
+    await runtime.scheduler.flush()
+    expect(events).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        layerId: 'component-event',
+        title: 'update',
+        subtitle: 'by FixtureComponent1',
+        data: expect.objectContaining({
+          preview: expect.arrayContaining([
+            expect.objectContaining({
+              key: 'component',
+              value: expect.objectContaining({
+                kind: 'custom',
+                display: 'FixtureComponent1',
+              }),
+            }),
+          ]),
+        }),
+      }),
+    )
+  } finally {
+    runtime.dispose()
+  }
+})
+
 it('pairs performance events across component registration', async () => {
   const runtime = createDevtoolsRuntime()
   try {
@@ -17,6 +64,7 @@ it('pairs performance events across component registration', async () => {
       time: 1,
     })
     const instance = fixture.instances[1]!
+    expect(runtime.registry.getComponentId(instance)).toBeUndefined()
     const events = vi.fn()
     runtime.subscribe('timeline:eventAdded', events)
     runtime.dispatch({
@@ -39,6 +87,14 @@ it('pairs performance events across component registration', async () => {
     await runtime.scheduler.flush()
     expect(events).toHaveBeenCalledTimes(2)
     expect(events.mock.calls[1]![0].groupId).toBe(events.mock.calls[0]![0].groupId)
+    for (const [event] of events.mock.calls) {
+      expect(event.title).toBe('FixtureComponent1')
+      expect(event.data).toMatchObject({
+        preview: expect.arrayContaining([
+          { key: 'component', value: { kind: 'string', value: 'FixtureComponent1' } },
+        ]),
+      })
+    }
   } finally {
     runtime.dispose()
   }
