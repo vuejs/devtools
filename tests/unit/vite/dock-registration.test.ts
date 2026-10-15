@@ -15,9 +15,10 @@ describe('Vue DevTools dock registration', () => {
 
     await callHook(plugin.configResolved, {
       base,
-      devtools: { enabled: true, apply: 'all' },
+      devtools: { enabled: true, apply: 'all', config: {} },
     } as ResolvedConfig)
     await plugin.devtools?.setup({
+      agent: { registerTool: vi.fn(() => ({ unregister: vi.fn() })) },
       docks: { register },
       views: { hostStatic },
     } as never)
@@ -29,13 +30,55 @@ describe('Vue DevTools dock registration', () => {
     )
     expect(register).toHaveBeenCalledWith({
       category: 'framework',
-      clientScript: { importFrom: clientScriptUrl },
+      clientScript: { importFrom: clientScriptUrl, eager: true },
       icon: 'logos:vue',
       id: 'vue-devtools',
       frameId: 'vue-devtools',
       title: 'Vue DevTools',
       type: 'iframe',
       url: clientUrl,
+    })
+  })
+
+  it('registers the default agent surface and cleans it up with the Vite plugin', async () => {
+    const plugin = createVueDevToolsDockRegistrationPlugin() as Plugin
+    const unregister = vi.fn()
+    const registerTool = vi.fn(() => ({ unregister }))
+    const register = vi.fn()
+    await plugin.devtools?.setup({
+      agent: { registerTool },
+      docks: { register },
+      views: { hostStatic: vi.fn() },
+    } as never)
+    expect(registerTool).toHaveBeenCalledWith(expect.objectContaining({ safety: 'read' }))
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        clientScript: { importFrom: '/__devtools__/dock-client.js', eager: true },
+      }),
+    )
+    const close = plugin.closeBundle
+    if (typeof close !== 'function') throw new TypeError('Expected closeBundle hook')
+    await close.call({} as never)
+    expect(unregister).toHaveBeenCalledOnce()
+    expect(vueDevtools({ enabled: false })).toEqual([])
+  })
+
+  it('does not register an agent surface or eagerly load the script when the host disables MCP', async () => {
+    const plugin = createVueDevToolsDockRegistrationPlugin() as Plugin
+    await callHook(plugin.configResolved, {
+      base: '/',
+      devtools: { config: { mcp: false } },
+    } as ResolvedConfig)
+    const registerTool = vi.fn()
+    const register = vi.fn()
+    await plugin.devtools?.setup({
+      agent: { registerTool },
+      docks: { register },
+      views: { hostStatic: vi.fn() },
+    } as never)
+    expect(registerTool).not.toHaveBeenCalled()
+    expect(register.mock.calls[0][0].clientScript).toEqual({
+      importFrom: '/__devtools__/dock-client.js',
     })
   })
 

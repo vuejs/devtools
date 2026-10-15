@@ -251,7 +251,7 @@ export function createDevtoolsState(options: DevtoolsStateOptions) {
       appId: selectedAppId.value,
       payload: { handle, maxEntries },
     })
-    if (!expanded) return
+    if (!expanded || !('value' in expanded)) return
 
     // Clearing a snapshot or selection also invalidates its in-flight expansions.
     if (version !== expandedValuesVersion || getEntryKey(entry) !== entryKey) return

@@ -1,0 +1,60 @@
+{
+  "name": "@vue/devtools-agent",
+  "version": "9.0.0-beta.1",
+  "description": "Agent tools and host adapters for Vue DevTools",
+  "license": "MIT",
+  "author": "webfansplz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/devtools.git",
+    "directory": "packages/agent"
+  },
+  "bin": {
+    "vue-devtools-agent": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./dist/cli.mjs"
+  ],
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json",
+    "./devframe": {
+      "types": "./dist/devframe.d.mts",
+      "default": "./dist/devframe.mjs"
+    },
+    "./node": {
+      "types": "./dist/node.d.mts",
+      "default": "./dist/node.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch"
+  },
+  "dependencies": {
+    "@devframes/agentic": "catalog:",
+    "@vue/devtools-kit": "workspace:*",
+    "cac": "catalog:",
+    "devframe": "catalog:",
+    "safe-stable-stringify": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

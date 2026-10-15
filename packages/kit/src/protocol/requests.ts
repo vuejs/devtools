@@ -1,3 +1,4 @@
+import type { StatePageOptions } from './messages'
 import type {
   CustomInspectorOptions,
   TimelineEventOptions,
@@ -8,6 +9,7 @@ import type { RuntimeInspectorInfo } from '../runtime/inspectors'
 import type { RuntimePerformanceSnapshot } from '../runtime/performance'
 import type { AppId, RuntimeCommand, RuntimeCommandResult, RuntimeQuery } from '../runtime/types'
 import type {
+  StateValueMessage,
   AppsSnapshotMessage,
   ComponentInspectionResultMessage,
   ComponentStateSnapshotMessage,
@@ -30,6 +32,8 @@ interface StateEdit {
   value?: unknown
   remove?: boolean
   newKey?: string
+  /** Reject the edit unless the path exists and is editable, as reported by the stateValue query. */
+  requireEditable?: boolean
 }
 
 /** Built-in request contracts. Extend these interfaces to type additional registered methods. */
@@ -45,13 +49,34 @@ export interface RuntimeQueryMap {
     payload: { filter?: string } | undefined
     result: ComponentTreeSnapshotMessage
   }
+  'components:search': {
+    payload: { filter: string }
+    result: ComponentTreeSnapshotMessage
+  }
   'components:treeChildren': {
     payload: { componentId: string; cursor?: string }
     result: ComponentTreePageMessage
   }
   'components:stateSnapshot': {
-    payload: { componentId: string; maxEntries?: number }
+    payload: {
+      componentId: string
+      maxEntries?: number
+      maxPreviewEntries?: number
+    } & StatePageOptions
     result: ComponentStateSnapshotMessage | undefined
+  }
+  'components:stateValue': {
+    payload: { componentId: string; sectionId: string; path: string[] } & StatePageOptions
+    result: StateValueMessage
+  }
+  'inspectors:stateValue': {
+    payload: {
+      inspectorId: string
+      nodeId: string
+      sectionId: string
+      path: string[]
+    } & StatePageOptions
+    result: StateValueMessage
   }
   'components:inspect': { payload: undefined; result: ComponentInspectionResultMessage | undefined }
   'components:getBounds': { payload: ComponentTarget; result: ComponentBounds | undefined }
@@ -64,7 +89,7 @@ export interface RuntimeQueryMap {
     result: InspectorTreeSnapshotMessage
   }
   'inspectors:stateSnapshot': {
-    payload: { inspectorId: string; nodeId: string }
+    payload: { inspectorId: string; nodeId: string } & StatePageOptions
     result: ComponentStateSnapshotMessage | undefined
   }
   'router:snapshot': { payload: undefined; result: RouterSnapshotMessage }
@@ -73,8 +98,8 @@ export interface RuntimeQueryMap {
     result: { appId?: string; path: string; routes: RouterRouteRecordSnapshot[] }
   }
   'values:expand': {
-    payload: { handle: string; path?: string[]; maxEntries?: number }
-    result: ExpandedValueMessage | undefined
+    payload: { handle: string; path?: string[]; maxEntries?: number } & StatePageOptions
+    result: ExpandedValueMessage | { found: false } | undefined
   }
   'values:storeAsGlobal': {
     payload: { handle: string } | { componentId: string; sectionId: string; path: string[] }

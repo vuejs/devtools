@@ -80,13 +80,15 @@ export function isUserSetupKey(key: string): boolean {
  */
 export function collectSetupBindings(
   record: Record<string, unknown>,
+  selectedKey?: string,
 ): Record<string, unknown> | undefined {
   const bindings: Record<string, unknown> = {}
   const props = readObject(record, 'props')
 
   for (const source of setupBindingSources(record)) {
     if (!source) continue
-    for (const key of Object.keys(source)) {
+    for (const key of selectedKey === undefined ? Object.keys(source) : [selectedKey]) {
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue
       if (key in bindings || !isUserSetupKey(key) || (props && hasOwn(props, key))) continue
       bindings[key] = readObjectValue(source, key)
     }
