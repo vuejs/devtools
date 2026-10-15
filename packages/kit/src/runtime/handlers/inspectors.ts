@@ -401,7 +401,7 @@ async function readInspectorStateValue(
   options?: StatePageOptions,
 ): Promise<StateValueMessage> {
   const app = resolveAppRef(runtime, appId)
-  if (!runtime.inspectors.get(inspectorId, app)) return { found: false }
+  if (!app || !runtime.inspectors.get(inspectorId, app)) return { found: false }
   const payload = { app, inspectorId, nodeId, state: {} }
   await runtime.callPluginHook('getInspectorState', payload)
   const entry = toInspectorLegacyStateEntries(inspectorId, nodeId, payload.state).find(

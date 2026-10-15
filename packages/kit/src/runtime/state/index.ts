@@ -1,6 +1,12 @@
 import { StatePages } from './pagination'
 import { safeOwnEnumerableStringKeys } from '../../codec/encode'
-import { ValueHandleRegistry, encodeValue } from '../../codec'
+import {
+  ValueHandleRegistry,
+  encodeValue,
+  isComputedRef,
+  isUnaccessedComputed,
+  readCachedComputedValue,
+} from '../../codec'
 import type { ComponentId, InstanceRef } from '../types'
 import { RuntimeRegistry } from '../registry'
 import type { RuntimeBudget } from '../budget'
@@ -233,6 +239,7 @@ export class ComponentStateCollector {
     handle = '',
     path: string[] = [],
   ): ExpandedValueMessage {
+    if (isComputedRef(value) && !isUnaccessedComputed(value)) value = readCachedComputedValue(value)
     const maxPageSize = typeof value === 'string' ? 5000 : 500
     const pageOptions = {
       ...options,
@@ -258,21 +265,21 @@ export class ComponentStateCollector {
         const encode = (offset: number, limit: number) => {
           if (typeof value === 'string')
             return { kind: 'string' as const, value: value.slice(offset, offset + limit) }
-          if (mapEntries)
-            return encodeValue(new Map(mapEntries.slice(offset, offset + limit)), {
-              ...encodeOptions,
-              maxEntries: limit,
-            })
-          if (setItems) {
-            const encoded = encodeValue(new Set(setItems.slice(offset, offset + limit)), {
-              ...encodeOptions,
-              maxEntries: limit,
-            })
-            if (encoded.kind === 'set')
-              encoded.preview = encoded.preview.map((entry, index) => ({
-                key: String(offset + index),
-                value: entry.value,
-              }))
+          if (mapEntries || setItems) {
+            const slice = mapEntries
+              ? new Map(mapEntries.slice(offset, offset + limit))
+              : new Set(setItems!.slice(offset, offset + limit))
+            const encoded = encodeValue(slice, { ...encodeOptions, maxEntries: limit })
+            if (encoded.kind === 'map' || encoded.kind === 'set') {
+              if (encoded.handle) this.handles.delete(encoded.handle)
+              encoded.handle = this.handles.getOrCreate(value as object, scope)
+              encoded.size = (mapEntries ?? setItems)!.length
+              if (encoded.kind === 'set')
+                encoded.preview = encoded.preview.map((entry, index) => ({
+                  key: String(offset + index),
+                  value: entry.value,
+                }))
+            }
             return encoded
           }
           return encodeValue(value, {
@@ -351,7 +358,7 @@ export class ComponentStateCollector {
   ): StateValueMessage {
     const record = this.registry.getComponent(componentId)
     if (!record || !path.length) return { found: false }
-    const section = createSectionSources(record.instance).find(
+    const section = createSectionSources(record.instance, sectionId, path[0]).find(
       (section) => section.id === sectionId,
     )
     if (!section?.source) return { found: false }

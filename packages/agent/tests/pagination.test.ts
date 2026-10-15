@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, it, vi } from 'vitest'
+import { computed } from 'vue'
 import { createDevtoolsKit } from '../../kit/src/kit'
 import type { DevtoolsKit } from '../../kit/src/kit'
 import type { ComponentStateSnapshotMessage, ExpandedValueMessage } from '../../kit/src/protocol'
@@ -98,11 +99,21 @@ it.each(['array', 'object', 'map', 'set'] as const)(
       .result as ComponentStateSnapshotMessage
     const encoded = state.sections[0]!.entries[0]!.value
     if (!('handle' in encoded) || !encoded.handle) throw new Error('Missing handle')
+    const handleCount = kit.runtime.componentState.handleCount
     const target = { appId: 'app:0', handle: encoded.handle, pageSize: 50 }
     let result = (await tools['expand-value'].handler(target)).result as ExpandedValueMessage
     const actual: unknown[] = []
     for (;;) {
       expect(result.pagination!.total).toBe(121)
+      if (result.value.kind === 'map' || result.value.kind === 'set') {
+        expect(kit.runtime.componentState.handleCount).toBe(handleCount)
+        expect(result.value.size).toBe(121)
+        expect(result.value.handle).toBe(encoded.handle)
+        expect(kit.runtime.componentState.getHandleValue(result.value.handle!)).toBe(payload)
+        const key = result.value.preview[0]!.key
+        const expanded = kit.runtime.componentState.expand(result.value.handle!, [key])
+        expect(expanded).toMatchObject({ value: result.value.preview[0]!.value })
+      }
       if (!('preview' in result.value)) throw new Error('Missing preview')
       actual.push(
         ...result.value.preview.map((entry) =>
@@ -278,4 +289,73 @@ it('expires a finished batch once its last page has been handed out', async () =
       snapshotId: first.snapshotId,
     }),
   ).rejects.toThrow(/complete|Read pages in order|expired/)
+})
+
+it.each(['array', 'object', 'string'] as const)(
+  'paginates cached setup computed %s values',
+  async (kind) => {
+    const values = Array.from({ length: 121 }, (_, i) => i)
+    const payload =
+      kind === 'array'
+        ? values
+        : kind === 'object'
+          ? Object.fromEntries(values.map((i) => [`key${i}`, i]))
+          : 'x'.repeat(6000)
+    const getter = vi.fn(() => payload)
+    const cached = computed(getter)
+    void cached.value
+    const { tools, fixture, componentId } = await setup({})
+    Object.assign(fixture.instances[0]!, { setupState: { cached } })
+    const target = {
+      appId: 'app:0',
+      componentId,
+      sectionId: 'setup',
+      path: ['cached'],
+      pageSize: kind === 'string' ? 5000 : 50,
+    }
+    let result = (await tools['component-value'].handler({ ...target, page: 1 })).result as Extract<
+      import('../../kit/src/protocol').StateValueMessage,
+      { found: true }
+    >
+    const actual: unknown[] = []
+    let text = ''
+    for (;;) {
+      expect(result.pagination!.total).toBe(kind === 'string' ? 6000 : 121)
+      if (result.value.kind === 'string') text += result.value.value
+      else if ('preview' in result.value)
+        actual.push(
+          ...result.value.preview.map((entry) =>
+            entry.value.kind === 'number' ? entry.value.value : null,
+          ),
+        )
+      if (!result.pagination!.next) break
+      result = (
+        await tools['component-value'].handler({
+          ...target,
+          page: result.pagination!.next,
+          snapshotId: result.snapshotId,
+        })
+      ).result as typeof result
+    }
+    expect(kind === 'string' ? text : actual).toEqual(kind === 'string' ? payload : values)
+    expect(getter).toHaveBeenCalledOnce()
+  },
+)
+
+it('does not evaluate an unaccessed computed during pagination', async () => {
+  const getter = vi.fn(() => [1, 2, 3])
+  const { tools, fixture, componentId } = await setup({})
+  Object.assign(fixture.instances[0]!, { setupState: { untouched: computed(getter) } })
+  const result = await tools['component-value'].handler({
+    appId: 'app:0',
+    componentId,
+    sectionId: 'setup',
+    path: ['untouched'],
+    page: 1,
+  })
+  expect(result.result).toMatchObject({
+    found: true,
+    value: { kind: 'custom', type: 'computed-not-accessed' },
+  })
+  expect(getter).not.toHaveBeenCalled()
 })

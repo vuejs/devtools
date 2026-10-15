@@ -57,6 +57,10 @@ describe('Vite client injection', () => {
       let server: ViteDevServer | undefined
       let middlewareServer: HttpServer | undefined
       const page = await browser.newPage()
+      // External font stylesheets can block module execution while offline.
+      await page.route('https://fonts.googleapis.com/**', (route) =>
+        route.fulfill({ body: '', contentType: 'text/css' }),
+      )
       const cacheDir = await mkdtemp(resolve(tmpdir(), 'vue-devtools-vite-smoke-'))
 
       try {

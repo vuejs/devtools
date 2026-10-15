@@ -23,6 +23,10 @@ export default defineConfig({
         replacement: fromRoot('./packages/agent/src/devframe.ts'),
       },
       {
+        find: /^@vue\/devtools-agent\/node$/,
+        replacement: fromRoot('./packages/agent/src/node.ts'),
+      },
+      {
         find: '@components',
         replacement: fromRoot('./packages/client/src/components'),
       },

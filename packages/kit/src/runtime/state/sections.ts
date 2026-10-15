@@ -27,92 +27,105 @@ export interface SectionSource {
   meta?: (key: string) => Record<string, unknown> | undefined
 }
 
-export function createSectionSources(instance: InstanceRef): SectionSource[] {
+export function createSectionSources(
+  instance: InstanceRef,
+  sectionId?: string,
+  key?: string,
+): SectionSource[] {
   const record = instance as Record<string, unknown>
   const type = readObject(record, 'type')
   const mergedType = resolveMergedOptions(instance)
   const proxy = readObject(record, 'proxy')
   const computed = readObject(mergedType, 'computed')
-  const rawSetupState = collectSetupBindings(record)
+  const rawSetupState =
+    !sectionId || sectionId === 'setup' || sectionId === 'setup-other'
+      ? collectSetupBindings(record, key)
+      : undefined
   const setupState = createSetupStateReaders(rawSetupState)
 
-  return [
-    {
+  const sections: Record<string, () => SectionSource> = {
+    props: () => ({
       id: 'props',
       label: 'Props',
       source: readObject(record, 'props'),
       editable: true,
       meta: createPropMetaReader(type),
-    },
-    {
+    }),
+    data: () => ({
       id: 'data',
       label: 'Data',
-      source: createDataReader(record, mergedType),
+      source: createDataReader(record, mergedType, key),
       editable: true,
-    },
-    {
+    }),
+    setup: () => ({
       id: 'setup',
       label: 'Setup',
       source: setupState.state,
       editable: true,
       meta: createSetupStateMetaReader(rawSetupState),
-    },
-    {
+    }),
+    'setup-other': () => ({
       id: 'setup-other',
       label: 'Setup (other)',
       source: setupState.other,
       editable: false,
       meta: createSetupStateMetaReader(rawSetupState),
-    },
-    {
+    }),
+    computed: () => ({
       id: 'computed',
       label: 'Computed',
       source: computed ? createComputedReader(computed, proxy, record) : undefined,
       editable: true,
       meta: createComputedMetaReader(computed),
-    },
-    {
+    }),
+    attrs: () => ({
       id: 'attrs',
       label: 'Attrs',
       source: readObject(record, 'attrs'),
       editable: false,
-    },
-    {
+    }),
+    provide: () => ({
       id: 'provide',
       label: 'Provided',
       source: readObject(record, 'provides'),
       editable: false,
-    },
-    {
+    }),
+    inject: () => ({
       id: 'inject',
       label: 'Injected',
       source: createInjectReader(record, mergedType),
       editable: false,
-    },
-    {
+    }),
+    refs: () => ({
       id: 'refs',
       label: 'Refs',
       source: readObject(record, 'refs'),
       editable: false,
-    },
-    {
+    }),
+    listeners: () => ({
       id: 'listeners',
       label: 'Listeners',
       source: createListenerReader(readObject(readObject(record, 'vnode'), 'props'), type),
       editable: false,
-    },
-  ]
+    }),
+  }
+  return sectionId
+    ? Object.hasOwn(sections, sectionId)
+      ? [sections[sectionId]!()]
+      : []
+    : Object.values(sections).map((create) => create())
 }
 
 function createDataReader(
   record: Record<string, unknown>,
   type: object | undefined,
+  key?: string,
 ): object | undefined {
   const props = readObject(type, 'props')
   const computed = readObject(type, 'computed')
   const vuex = readObject(type, 'vuex')
   const getters = readObject(vuex, 'getters')
-  const data = mergeObjects(readObject(record, 'data'), readObject(record, 'renderContext'))
+  const data = mergeObjects([readObject(record, 'data'), readObject(record, 'renderContext')], key)
   if (!data) return
 
   const result: Record<string, unknown> = {}
@@ -346,13 +359,15 @@ function readPropType(definition: object): string {
   return 'any'
 }
 
-function mergeObjects(...objects: Array<object | undefined>): object | undefined {
+function mergeObjects(objects: Array<object | undefined>, key?: string): object | undefined {
   const result: Record<string, unknown> = {}
   let hasValue = false
 
   for (const object of objects) {
     if (!object) continue
-    Object.assign(result, object)
+    if (key === undefined) Object.assign(result, object)
+    else if (Object.prototype.propertyIsEnumerable.call(object, key))
+      result[key] = readObjectValue(object, key)
     hasValue = true
   }
 

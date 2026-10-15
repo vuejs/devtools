@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, it, vi } from 'vitest'
-import { computed, readonly, ref, shallowReadonly } from 'vue'
+import { computed, customRef, readonly, ref, shallowReadonly } from 'vue'
 import { z } from 'zod'
 import { createDevtoolsKit } from '../../kit/src/kit'
 import type { DevtoolsKit } from '../../kit/src/kit'
@@ -170,6 +170,10 @@ it('reads and edits Inspector state via plugin hooks, returning the actual plugi
   const edited = await tools['edit-inspector-state']!.handler({ ...input, value: 99 })
   expect(edited.result).toMatchObject({ status: 1, state: { value: { value: 10 } } })
   expect(values.count).toBe(10)
+  await expect(
+    tools['edit-inspector-state']!.handler({ ...input, appId: 'wrong', value: 2 }),
+  ).rejects.toThrow('not found')
+  expect(values.count).toBe(10)
   expect(tools['edit-inspector-state']!.returns.safeParse(edited).success).toBe(true)
   await expect(
     tools['edit-inspector-state']!.handler({ ...input, path: ['readonly'], value: 5 }),
@@ -202,4 +206,39 @@ it('exports JSON output schemas and only advertises mutations on command-capable
     }),
   ).rejects.toThrow('Rejected by plugin')
   expect(failure).toHaveBeenCalledOnce()
+})
+
+it('reads and edits a requested binding without accessing unrelated setup or data getters', async () => {
+  const { tools, fixture, componentId } = await setup()
+  const unread = vi.fn(() => {
+    throw new Error('Unrelated state was accessed')
+  })
+  const data = { count: 1 }
+  Object.defineProperty(data, 'broken', { enumerable: true, get: unread })
+  Object.assign(fixture.instances[0]!, {
+    data,
+    setupState: {
+      count: ref(1),
+      broken: customRef(() => ({ get: unread, set() {} })),
+    },
+  })
+  for (const sectionId of ['props', 'data', 'setup']) {
+    const input = {
+      appId: 'app:0',
+      componentId,
+      sectionId,
+      path: [sectionId === 'props' ? 'field600' : 'count'],
+    }
+    expect((await tools['component-value'].handler(input)).result).toMatchObject({
+      found: true,
+      editable: true,
+    })
+    expect(
+      (await tools['edit-component-state']!.handler({ ...input, value: 8 })).result,
+    ).toMatchObject({
+      status: 1,
+      state: { value: { kind: 'number', value: 8 } },
+    })
+  }
+  expect(unread).not.toHaveBeenCalled()
 })
