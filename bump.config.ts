@@ -5,6 +5,7 @@ export default defineConfig({
     'package.json',
     'packages/kit/package.json',
     'packages/devtools-api/package.json',
+    'packages/agent/package.json',
     'packages/client/package.json',
     'packages/vite/package.json',
   ],
