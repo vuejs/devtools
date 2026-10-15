@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { DevtoolsKit } from '../../../packages/kit/src/kit'
+import type { DevToolsPluginAPI } from '../../../packages/kit/src/plugin'
 import type { EncodedValue } from '../../../packages/kit/src/codec'
 import { createDevtoolsKit } from '../../../packages/kit/src/kit'
 import { createComponentTreeFixture } from '../../fixtures'
@@ -627,5 +628,116 @@ describe('v6/v7 plugin payload compatibility', () => {
       'global-inspector',
     ])
     expect(onSecond.inspectors.map((inspector) => inspector.id)).toEqual(['global-inspector'])
+  })
+  function initSecondApp(target: DevtoolsKit) {
+    const fixture = createComponentTreeFixture(1)
+    target.runtime.dispatch({
+      type: 'app:init',
+      app: fixture.app,
+      time: 2,
+      version: '3.5.0',
+      vueTypes: {},
+    })
+    return fixture
+  }
+
+  // Pinia registers the same plugin and inspector id once per app.
+  it('keeps hooks scoped to each app when one plugin id registers for several apps', async () => {
+    kit = createKit()
+    const first = initApp(kit)
+    const second = initSecondApp(kit)
+
+    for (const [store, app] of [
+      ['storeA', first.app],
+      ['storeB', second.app],
+    ] as const) {
+      await kit.plugins.register({ id: 'dev.esm.pinia', app }, (api) => {
+        api.addInspector({ id: 'pinia', label: 'Pinia' })
+        api.on.getInspectorTree((payload) => {
+          if (payload.app === app && payload.inspectorId === 'pinia')
+            payload.rootNodes.push({ id: store, label: store })
+        })
+      })
+    }
+
+    const onFirst = await kit.runtime.query({
+      appId: 'app:0',
+      type: 'inspectors:treeSnapshot',
+      payload: { inspectorId: 'pinia' },
+    })
+    const onSecond = await kit.runtime.query({
+      appId: 'app:1',
+      type: 'inspectors:treeSnapshot',
+      payload: { inspectorId: 'pinia' },
+    })
+    expect(onFirst.rootNodes.map((node) => node.id)).toEqual(['storeA'])
+    expect(onSecond.rootNodes.map((node) => node.id)).toEqual(['storeB'])
+  })
+
+  it('runs setPluginSettings handlers from every app of a shared plugin id', async () => {
+    kit = createKit()
+    const first = initApp(kit)
+    const second = initSecondApp(kit)
+    const settings = { flag: { label: 'Flag', type: 'boolean' as const, defaultValue: false } }
+    const seen: string[] = []
+
+    for (const [name, app] of [
+      ['first', first.app],
+      ['second', second.app],
+    ] as const) {
+      await kit.plugins.register({ id: 'plugin:shared', app, settings }, (api) => {
+        api.on.setPluginSettings(() => {
+          seen.push(name)
+        })
+      })
+    }
+
+    await kit.plugins.adapters.get('plugin:shared')!.updateSetting('flag', true)
+    expect(seen).toEqual(['first', 'second'])
+  })
+
+  it('registers the same hook handler only once per app', async () => {
+    kit = createKit()
+    const fixture = initApp(kit)
+    const handler = vi.fn()
+
+    await kit.plugins.register({ id: 'plugin:dedupe', app: fixture.app }, (api) => {
+      api.on.inspectComponent(handler)
+      api.on.inspectComponent(handler)
+    })
+
+    await kit.runtime.callPluginHook('inspectComponent', {
+      app: fixture.app,
+      componentInstance: fixture.instances[0],
+      instanceData: {},
+    })
+    expect(handler).toHaveBeenCalledOnce()
+  })
+
+  it('shares plugin settings across apps that register the same plugin id', async () => {
+    kit = createKit()
+    const first = initApp(kit)
+    const second = initSecondApp(kit)
+    const settings = { flag: { label: 'Flag', type: 'boolean' as const, defaultValue: false } }
+    let secondApi: DevToolsPluginAPI | undefined
+
+    await kit.plugins.register({ id: 'plugin:shared', app: first.app, settings }, () => {})
+    await kit.runtime.command({
+      type: 'plugins:updateSetting',
+      payload: { pluginId: 'plugin:shared', key: 'flag', value: true },
+    })
+    await kit.plugins.register({ id: 'plugin:shared', app: second.app, settings }, (api) => {
+      secondApi = api
+    })
+    expect(secondApi?.getSettings()).toEqual({ flag: true })
+
+    await kit.runtime.command({
+      type: 'plugins:updateSetting',
+      payload: { pluginId: 'plugin:shared', key: 'flag', value: false },
+    })
+    expect(secondApi?.getSettings()).toEqual({ flag: false })
+
+    const snapshot = await kit.runtime.query({ type: 'plugins:snapshot' })
+    expect(snapshot.plugins.map((plugin) => plugin.id)).toEqual(['plugin:shared'])
   })
 })
