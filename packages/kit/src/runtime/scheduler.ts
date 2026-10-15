@@ -14,7 +14,11 @@ export function createRuntimeScheduler(): RuntimeScheduler {
   let generation = 0
 
   function run(): Promise<void> {
-    if (running) return running.then(() => (tasks.size ? run() : undefined))
+    if (running) {
+      // Drain queued work even when the in-flight batch rejects; its caller sees that error.
+      const next = () => (tasks.size ? run() : undefined)
+      return running.then(next, next)
+    }
     pending = false
     if (timer) clearTimeout(timer)
     timer = undefined

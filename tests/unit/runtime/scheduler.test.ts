@@ -68,3 +68,26 @@ it('flushes reentrant work once and preserves coalescing', async () => {
   await scheduler.flush()
   expect(calls).toEqual(['first', 'latest'])
 })
+
+it('keeps scheduling after a batch rejects while work is queued behind it', async () => {
+  const scheduler = createRuntimeScheduler()
+  let release!: () => void
+  scheduler.schedule('failing', async () => {
+    await new Promise<void>((resolve) => (release = resolve))
+    throw new Error('boom')
+  })
+  const first = scheduler.flush()
+  const queued = vi.fn()
+  scheduler.schedule('queued', queued)
+  const second = scheduler.flush()
+  await vi.waitFor(() => expect(release).toBeTypeOf('function'))
+  release()
+  await expect(first).rejects.toThrow('boom')
+  await second
+  expect(queued).toHaveBeenCalledOnce()
+
+  const later = vi.fn()
+  scheduler.schedule('later', later)
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(later).toHaveBeenCalledOnce()
+})
