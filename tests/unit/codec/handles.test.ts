@@ -73,4 +73,15 @@ describe('ValueHandleRegistry', () => {
     registry.releaseScope('state:component-a')
     expect(registry.get(childHandle)).toBeUndefined()
   })
+
+  it('does not reuse handle ids after clear', () => {
+    const registry = new ValueHandleRegistry()
+    const stale = registry.getOrCreate({ old: true })
+    registry.clear()
+    const fresh = { fresh: true }
+    const handle = registry.getOrCreate(fresh)
+    expect(handle).not.toBe(stale)
+    expect(registry.get(stale)).toBeUndefined()
+    expect(registry.get(handle)).toBe(fresh)
+  })
 })
