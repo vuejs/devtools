@@ -6,13 +6,30 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  npm-tag:
     if: github.repository == 'vuejs/devtools'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - id: resolve
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME%%+*}"
+          tag=latest
+          if [[ "$version" == *-* ]]; then
+            prerelease="${version#*-}"
+            tag="${prerelease%%.*}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: npm-tag
     uses: sxzz/workflows/.github/workflows/release.yml@v1
     with:
       publish: true
       build: pnpm run build
-      tag: ${{ contains(github.ref_name, '-') && 'beta' || 'latest' }}
+      tag: ${{ needs.npm-tag.outputs.tag }}
     permissions:
       contents: write
       id-token: write
