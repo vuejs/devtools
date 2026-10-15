@@ -9,6 +9,11 @@ import { useDevtoolsClient } from '../composables/devtools-client'
 
 interface TimelineEventRow extends TimelineEntry {
   color: string
+  delta?: number
+  grouped: boolean
+  repeatsTitle: boolean
+  groupStart: boolean
+  groupEnd: boolean
 }
 
 interface InfoRow {
@@ -27,8 +32,8 @@ interface RecycleScrollerHandle {
   scrollToItem: (index: number) => void
 }
 
-const EVENT_COLORS = ['#3e5770', '#42b983', '#0098c4']
-const EVENT_ROW_HEIGHT = 52
+const LIMITED_COLOR = '#a17646'
+const EVENT_ROW_HEIGHT = 28
 const BUILTIN_LAYERS: TimelineLayerEntry[] = [
   { id: 'mouse', label: 'Mouse' },
   { id: 'keyboard', label: 'Keyboard' },
@@ -39,7 +44,6 @@ const BUILTIN_LAYERS: TimelineLayerEntry[] = [
 const {
   apps,
   clearTimelineEvents,
-  formatTime,
   formatValue,
   isTimelineLayerEnabled,
   inspectTimelineEvent,
@@ -57,6 +61,7 @@ const container = ref<HTMLElement>()
 const horizontal = ref(false)
 const activeTimelineLayer = selectedTimelineLayerId
 const selectedEventId = ref<number>()
+const collapsedSections = ref(new Set<string>())
 const eventListScroller = ref<RecycleScrollerHandle>()
 
 let observer: ResizeObserver | undefined
@@ -95,16 +100,23 @@ const selectedLayerEvents = computed(() =>
 )
 
 const eventRows = computed<TimelineEventRow[]>(() => {
-  let colorIndex = -1
-  let currentGroupId = 0
+  const events = selectedLayerEvents.value
+  const color = selectedLayer.value ? getLayerColor(selectedLayer.value) : '#42b983'
 
-  return selectedLayerEvents.value.map((event) => {
-    if (event.type === 'timeline:eventsLimited') return { ...event, color: '#a17646' }
-    if (event.groupId !== currentGroupId || colorIndex === -1)
-      colorIndex = (colorIndex + 1) % EVENT_COLORS.length
-
-    currentGroupId = event.groupId ?? currentGroupId
-    return { ...event, color: EVENT_COLORS[colorIndex] }
+  return events.map((event, index) => {
+    const prev = events[index - 1]
+    const next = events[index + 1]
+    const inGroup = (other?: TimelineEntry) =>
+      event.groupId != null && other?.groupId === event.groupId
+    return {
+      ...event,
+      color: event.type === 'timeline:eventsLimited' ? LIMITED_COLOR : color,
+      delta: prev && event.time >= prev.time ? event.time - prev.time : undefined,
+      grouped: inGroup(prev),
+      groupStart: !inGroup(prev) && inGroup(next),
+      repeatsTitle: inGroup(prev) && (prev!.title ?? prev!.label) === (event.title ?? event.label),
+      groupEnd: inGroup(prev) && !inGroup(next),
+    }
   })
 })
 const selectedEvent = computed(
@@ -122,11 +134,16 @@ const infoSections = computed<InfoSection[]>(() => {
   if (!event) return []
 
   const sections: InfoSection[] = []
-  const eventRows = createEventInfoRows(event)
-  if (eventRows.length) sections.push({ id: 'event', label: 'Event Info', rows: eventRows })
+  sections.push({ id: 'event', label: 'Event', rows: createEventInfoRows(event) })
+
+  if (event.data)
+    sections.push({ id: 'data', label: 'Data', rows: createEncodedValueRows(event.data) })
+
+  if (event.meta)
+    sections.push({ id: 'meta', label: 'Meta', rows: createEncodedValueRows(event.meta) })
 
   const groupRows = createGroupInfoRows(event)
-  if (groupRows.length) sections.push({ id: 'group', label: 'Group Info', rows: groupRows })
+  if (groupRows.length) sections.push({ id: 'group', label: 'Group', rows: groupRows })
 
   return sections
 })
@@ -151,6 +168,12 @@ watch(
   { immediate: true },
 )
 
+function toggleSection(id: string) {
+  const next = new Set(collapsedSections.value)
+  if (!next.delete(id)) next.add(id)
+  collapsedSections.value = next
+}
+
 function selectLayer(layerId: string) {
   selectTimelineLayer(layerId)
 }
@@ -174,19 +197,17 @@ function clearEvents() {
   selectedEventId.value = undefined
 }
 
-function createEventInfoRows(event: TimelineEntry): InfoRow[] {
+function createEventInfoRows(event: TimelineEventRow): InfoRow[] {
   const rows: InfoRow[] = [
     { key: 'title', value: event.title ?? event.label },
-    { key: 'time', value: formatTime(event.time) },
+    { key: 'timestamp', value: formatClock(event.time) },
   ]
+
+  if (event.delta != null) rows.push({ key: 'delta', value: formatDelta(event.delta) })
 
   if (event.subtitle) rows.push({ key: 'subtitle', value: event.subtitle })
   if (event.layerId) rows.push({ key: 'layer', value: event.layerId })
   if (event.logType) rows.push({ key: 'logType', value: event.logType })
-
-  if (event.data) rows.push(...createEncodedValueRows(event.data))
-  if (event.meta)
-    rows.push({ key: 'meta', value: formatValue(event.meta), children: previewRows(event.meta) })
 
   return rows
 }
@@ -228,6 +249,19 @@ function getTimelineValuePreview(value: EncodedValue): ValueEntry[] {
   return 'preview' in value && Array.isArray(value.preview) ? value.preview.slice(0, 12) : []
 }
 
+function formatClock(time: number): string {
+  const date = new Date(time)
+  const pad = (value: number, length = 2) => String(value).padStart(length, '0')
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`
+}
+
+function formatDelta(delta: number | undefined): string {
+  if (delta == null) return ''
+  if (delta < 1000) return `+${Math.max(0, Math.round(delta))}ms`
+  if (delta < 60_000) return `+${(delta / 1000).toFixed(1)}s`
+  return `+${Math.round(delta / 60_000)}m`
+}
+
 function getLayerColor(layer: TimelineLayerEntry): string {
   return layer.color == null ? '#42b983' : `#${layer.color.toString(16).padStart(6, '0')}`
 }
@@ -266,11 +300,11 @@ onUnmounted(() => {
 <template>
   <div ref="container" class="h-full w-full">
     <Splitpanes class="h-full min-h-0 overflow-hidden" :horizontal="horizontal">
-      <Pane v-if="apps.length > 1" class="h-full min-h-0" min-size="12" size="20">
+      <Pane v-if="apps.length > 1" class="h-full min-h-0" min-size="12" size="18">
         <AppList />
       </Pane>
 
-      <Pane class="h-full min-h-0" min-size="20" :size="apps.length > 1 ? 22 : 28">
+      <Pane class="h-full min-h-0" min-size="20" :size="apps.length > 1 ? 22 : 25">
         <div class="h-full min-h-0 flex flex-col p-2">
           <div
             class="relative mb-1 min-h-7 w-full shrink-0 flex items-center justify-end border-b border-b-dashed border-base pb-1"
@@ -346,12 +380,12 @@ onUnmounted(() => {
         </div>
       </Pane>
 
-      <Pane class="h-full min-h-0" min-size="40" size="65">
+      <Pane class="h-full min-h-0" :size="apps.length > 1 ? 60 : 75" min-size="40">
         <div class="relative h-full min-h-0 flex flex-col">
           <template v-if="eventRows.length">
             <Splitpanes class="h-full min-h-0">
               <Pane class="h-full min-h-0" min-size="30" size="40">
-                <div class="h-full min-h-0 box-border p-5">
+                <div class="h-full min-h-0 box-border py-2">
                   <RecycleScroller
                     ref="eventListScroller"
                     class="no-scrollbar h-full min-h-0 select-none overflow-auto"
@@ -365,55 +399,65 @@ onUnmounted(() => {
                     :buffer="520"
                     :prerender="20"
                   >
-                    <template #default="{ item: event, index }">
+                    <template #default="{ item: event }">
                       <div
-                        class="relative h-6 cursor-pointer"
-                        :style="{
-                          color:
-                            event.type !== 'timeline:eventsLimited' &&
-                            selectedEvent?.id === event.id
-                              ? event.color
-                              : '',
-                        }"
+                        class="relative h-7 cursor-pointer pl-3 pr-3 flex items-center gap-3 text-3.25 hover:bg-#8881"
+                        :class="{ 'bg-#8882! hover:bg-#8882': selectedEvent?.id === event.id }"
                         @click="selectEvent(event.id)"
                       >
                         <span
-                          class="absolute left-0 top-1.5 inline-block h-3 w-3 box-border rounded-full"
-                          :style="{ border: `3px solid ${event.color}` }"
+                          class="relative h-full w-3 shrink-0 flex items-center justify-center"
                           aria-hidden="true"
-                        />
-                        <span
-                          v-if="index < eventRows.length - 1"
-                          class="absolute top-4.5 w-0 border-l-2 border-l-solid border-gray-200 dark:border-gray-700"
-                          :style="{
-                            left: 'calc(0.375rem - 1px)',
-                            height: `calc(${EVENT_ROW_HEIGHT}px - 0.75rem)`,
-                          }"
-                          aria-hidden="true"
-                        />
-                        <p class="m-0 h-full min-w-0 flex items-center truncate pl-5">
-                          <span class="absolute top-5 pr-2 text-3 op40">
-                            [{{ formatTime(event.time) }}]
-                          </span>
+                        >
                           <span
-                            class="min-w-0 truncate"
+                            v-if="event.grouped || event.groupStart"
+                            class="absolute left-1/2 w-0 border-l border-l-solid border-gray-300 dark:border-gray-600"
                             :class="
-                              event.type === 'timeline:eventsLimited'
-                                ? undefined
-                                : getTimelineLogTypeClass(event.logType)
+                              event.groupStart
+                                ? 'top-1/2 h-1/2'
+                                : event.groupEnd
+                                  ? 'top-0 h-1/2'
+                                  : 'top-0 h-full'
                             "
-                            :style="
-                              event.type === 'timeline:eventsLimited'
-                                ? { color: event.color }
-                                : undefined
-                            "
-                          >
-                            {{ event.title ?? event.label }}
-                          </span>
-                          <span v-if="event.subtitle" class="pl-2 op30">
-                            {{ event.subtitle }}
-                          </span>
-                        </p>
+                          />
+                          <span
+                            v-if="event.grouped"
+                            class="absolute left-1/2 top-1/2 w-1.5 border-t border-t-solid border-gray-300 dark:border-gray-600"
+                          />
+                          <span
+                            v-else
+                            class="h-2 w-2 rounded-full"
+                            :style="{ backgroundColor: event.color }"
+                          />
+                        </span>
+                        <span
+                          v-if="!event.repeatsTitle || !event.subtitle"
+                          class="min-w-0 truncate"
+                          :class="
+                            event.type === 'timeline:eventsLimited'
+                              ? undefined
+                              : getTimelineLogTypeClass(event.logType) || 'color-base'
+                          "
+                          :style="
+                            event.type === 'timeline:eventsLimited'
+                              ? { color: event.color }
+                              : undefined
+                          "
+                        >
+                          {{ event.title ?? event.label }}
+                        </span>
+                        <span
+                          v-if="event.subtitle && !event.groupStart"
+                          class="max-w-2/5 shrink-0 truncate color-muted op70"
+                        >
+                          {{ event.subtitle }}
+                        </span>
+                        <span
+                          class="ml-auto w-23 shrink-0 text-right font-mono text-3 color-muted tabular-nums"
+                        >
+                          <span class="op50">{{ formatClock(event.time).slice(0, 6) }}</span
+                          >{{ formatClock(event.time).slice(6) }}
+                        </span>
                       </div>
                     </template>
                   </RecycleScroller>
@@ -423,34 +467,45 @@ onUnmounted(() => {
               <Pane class="h-full min-h-0" min-size="36" size="60">
                 <div class="no-scrollbar h-full min-h-0 overflow-auto p-5">
                   <section v-for="section in infoSections" :key="section.id" class="mb-3">
-                    <div class="flex items-center">
+                    <button
+                      class="w-full cursor-pointer border-0 bg-transparent p-0 color-inherit flex items-center"
+                      type="button"
+                      :aria-expanded="!collapsedSections.has(section.id)"
+                      @click="toggleSection(section.id)"
+                    >
                       <span
-                        class="i-carbon-chevron-right rotate-90 flex-none text-4 op50"
+                        class="i-carbon-chevron-right flex-none text-4 op50 transition-transform"
+                        :class="{ 'rotate-90': !collapsedSections.has(section.id) }"
                         aria-hidden="true"
                       />
                       <span class="font-state-field text-3.5 text-#a3a3a3">
                         {{ section.label }}
                       </span>
-                    </div>
-                    <div class="font-state-field text-3.5">
-                      <div
-                        v-for="row in section.rows"
-                        :key="`${section.id}-${row.key}`"
-                        class="min-w-0 py-0.5 pl-5"
-                      >
-                        <span class="state-key op70">{{ row.key }}</span>
-                        <span class="colon mx-1">:</span>
-                        <span class="state-value">{{ row.value }}</span>
+                    </button>
+                    <div
+                      v-if="!collapsedSections.has(section.id)"
+                      class="font-state-field grid grid-cols-[max-content_auto_minmax(0,1fr)] pl-5 text-3.5"
+                    >
+                      <template v-for="row in section.rows" :key="`${section.id}-${row.key}`">
+                        <span class="state-key py-0.5 op70">{{ row.key }}</span>
+                        <span class="colon mx-1 py-0.5">:</span>
+                        <span class="state-value min-w-0 break-all py-0.5">{{ row.value }}</span>
                         <div
-                          v-for="child in row.children"
-                          :key="`${section.id}-${row.key}-${child.key}`"
-                          class="min-w-0 py-0.5 pl-4"
+                          v-if="row.children?.length"
+                          class="col-span-3 grid grid-cols-[max-content_auto_minmax(0,1fr)] pl-4"
                         >
-                          <span class="state-key op70">{{ child.key }}</span>
-                          <span class="colon mx-1">:</span>
-                          <span class="state-value">{{ child.value }}</span>
+                          <template
+                            v-for="child in row.children"
+                            :key="`${section.id}-${row.key}-${child.key}`"
+                          >
+                            <span class="state-key py-0.5 op70">{{ child.key }}</span>
+                            <span class="colon mx-1 py-0.5">:</span>
+                            <span class="state-value min-w-0 break-all py-0.5">{{
+                              child.value
+                            }}</span>
+                          </template>
                         </div>
-                      </div>
+                      </template>
                     </div>
                   </section>
                 </div>
