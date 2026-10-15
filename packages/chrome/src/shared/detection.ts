@@ -1,6 +1,7 @@
 export const VUE_DEVTOOLS_EXTENSION_MESSAGE_SOURCE = 'vue-devtools:chrome'
 export const VUE_DEVTOOLS_DETECTION_EVENT = 'vue-devtools:detection'
 export const VUE_DEVTOOLS_DETECTION_QUERY = 'vue-devtools:detection-query'
+export const VUE_DEVTOOLS_DETECTION_REQUEST = 'vue-devtools:detection-request'
 
 export interface VueDevtoolsDetectionPayload {
   appCount: number
@@ -55,6 +56,30 @@ export function isVueDevtoolsDetectionQueryMessage(
     message.source === VUE_DEVTOOLS_EXTENSION_MESSAGE_SOURCE &&
     message.type === VUE_DEVTOOLS_DETECTION_QUERY &&
     typeof message.tabId === 'number'
+  )
+}
+
+export interface VueDevtoolsDetectionRequestMessage {
+  source: typeof VUE_DEVTOOLS_EXTENSION_MESSAGE_SOURCE
+  type: typeof VUE_DEVTOOLS_DETECTION_REQUEST
+}
+
+export function createVueDevtoolsDetectionRequestMessage(): VueDevtoolsDetectionRequestMessage {
+  return {
+    source: VUE_DEVTOOLS_EXTENSION_MESSAGE_SOURCE,
+    type: VUE_DEVTOOLS_DETECTION_REQUEST,
+  }
+}
+
+export function isVueDevtoolsDetectionRequestMessage(
+  value: unknown,
+): value is VueDevtoolsDetectionRequestMessage {
+  if (!value || typeof value !== 'object') return false
+
+  const message = value as Partial<VueDevtoolsDetectionRequestMessage>
+  return (
+    message.source === VUE_DEVTOOLS_EXTENSION_MESSAGE_SOURCE &&
+    message.type === VUE_DEVTOOLS_DETECTION_REQUEST
   )
 }
 

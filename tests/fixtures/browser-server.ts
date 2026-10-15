@@ -5,6 +5,8 @@ import { createServer } from 'node:http'
 export interface BrowserFixtureServers {
   frameUrl: string
   mainUrl: string
+  /** Top frame without Vue that embeds the Vue frame. */
+  subframeOnlyUrl: string
   close(): Promise<void>
 }
 
@@ -24,6 +26,10 @@ export async function startBrowserFixtureServers(): Promise<BrowserFixtureServer
     }
 
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+    if (request.url === '/subframe-only') {
+      response.end(createPage('Subframe-only Fixture', `<iframe src="${frameUrl}"></iframe>`))
+      return
+    }
     response.end(
       createVueDetectionPage(
         'Vue Devtools Smoke Fixture',
@@ -36,6 +42,7 @@ export async function startBrowserFixtureServers(): Promise<BrowserFixtureServer
   return {
     frameUrl,
     mainUrl: getServerUrl(mainServer),
+    subframeOnlyUrl: `${getServerUrl(mainServer)}subframe-only`,
     async close() {
       await Promise.all([closeServer(mainServer), closeServer(frameServer)])
     },
@@ -43,13 +50,16 @@ export async function startBrowserFixtureServers(): Promise<BrowserFixtureServer
 }
 
 function createVueDetectionPage(title: string, body = ''): string {
+  return createPage(title, `${body}\n    <script>window.__VUE__ = true</script>`)
+}
+
+function createPage(title: string, body: string): string {
   return `<!doctype html>
 <html>
   <head><meta charset="utf-8"><title>${title}</title></head>
   <body>
     <h1>${title}</h1>
     ${body}
-    <script>window.__VUE__ = true</script>
   </body>
 </html>`
 }
