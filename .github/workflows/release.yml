@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -9,13 +10,19 @@ jobs:
   npm-tag:
     if: github.repository == 'vuejs/devtools'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       tag: ${{ steps.resolve.outputs.tag }}
     steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
       - id: resolve
         shell: bash
         run: |
-          version="${GITHUB_REF_NAME%%+*}"
+          version="$(node -p 'require("./package.json").version')"
+          version="${version%%+*}"
           tag=latest
           if [[ "$version" == *-* ]]; then
             prerelease="${version#*-}"
@@ -27,6 +34,7 @@ jobs:
     needs: npm-tag
     uses: sxzz/workflows/.github/workflows/release.yml@v1
     with:
+      github-release: ${{ github.event_name == 'push' }}
       publish: true
       build: pnpm run build
       tag: ${{ needs.npm-tag.outputs.tag }}
