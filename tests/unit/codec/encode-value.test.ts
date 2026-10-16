@@ -56,9 +56,42 @@ describe('encodeValue', () => {
     expect(encoded).toMatchObject({ entries: 2, kind: 'object' })
     if (encoded.kind !== 'object') return
     expect(encoded.preview).toEqual([
-      { key: 'ok', value: { kind: 'number', value: 1 } },
       { key: 'broken', value: { kind: 'error', message: 'getter exploded', name: 'Error' } },
+      { key: 'ok', value: { kind: 'number', value: 1 } },
     ])
+  })
+
+  it('preserves an explicit key snapshot order without mutating it', () => {
+    const entryKeys = ['zebra', 'alpha', 'middle']
+    const encoded = encodeValue(
+      { alpha: 1, middle: 2, zebra: 3 },
+      { entryKeys, entryOffset: 1, maxEntries: 1 },
+    )
+
+    expect(encoded).toMatchObject({
+      kind: 'object',
+      preview: [{ key: 'alpha', value: { kind: 'number', value: 1 } }],
+    })
+    expect(entryKeys).toEqual(['zebra', 'alpha', 'middle'])
+  })
+
+  it('preserves array indices and Map/Set insertion order', () => {
+    const values = [
+      { value: ['zebra', 'alpha'], keys: ['0', '1'] },
+      {
+        value: new Map([
+          ['zebra', 1],
+          ['alpha', 2],
+        ]),
+        keys: ['zebra', 'alpha'],
+      },
+      { value: new Set(['zebra', 'alpha']), keys: ['0', '1'] },
+    ]
+
+    for (const { value, keys } of values) {
+      const encoded = encodeValue(value)
+      expect('preview' in encoded && encoded.preview.map((entry) => entry.key)).toEqual(keys)
+    }
   })
 
   it('never executes prototype accessors of class instances', () => {
