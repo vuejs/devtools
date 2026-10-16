@@ -99,6 +99,43 @@ describe('Chrome MV3 extension smoke test', () => {
       .toBe(false)
   })
 
+  // Chrome reports `loading` for same-document navigations too, which resets the tab state.
+  it('keeps the Vue popup across same-document navigations', async () => {
+    if (!context || !fixture || !serviceWorker) throw new Error('Smoke fixture did not start')
+
+    const page = await context.newPage()
+    await page.goto(fixture.mainUrl)
+    await waitForVueDetection(page)
+    const getPopup = () =>
+      serviceWorker!.evaluate(async (pageUrl) => {
+        const chromeApi = (
+          globalThis as typeof globalThis & {
+            chrome: {
+              action: { getPopup(options: { tabId: number }): Promise<string> }
+              tabs: { query(options: object): Promise<Array<{ id?: number; url?: string }>> }
+            }
+          }
+        ).chrome
+        const tab = (await chromeApi.tabs.query({})).find((candidate) => candidate.url === pageUrl)
+        if (tab?.id == null) throw new Error(`Unable to find fixture tab: ${pageUrl}`)
+        return await chromeApi.action.getPopup({ tabId: tab.id })
+      }, page.url())
+
+    await expect.poll(getPopup, { timeout: 5_000 }).toContain('/app/popups/disabled.html')
+
+    await page.evaluate(() => history.pushState({}, '', '/routed'))
+    await page.waitForTimeout(1_000)
+    await expect.poll(getPopup, { timeout: 5_000 }).toContain('/app/popups/disabled.html')
+
+    await page.evaluate(() => {
+      location.hash = '#section'
+    })
+    await page.waitForTimeout(1_000)
+    await expect.poll(getPopup, { timeout: 5_000 }).toContain('/app/popups/disabled.html')
+
+    await page.close()
+  })
+
   // Chrome stops an idle service worker and its in-memory detection state with it.
   it('recovers subframe-only detection after the service worker restarts', async () => {
     if (!context || !fixture || !serviceWorker) throw new Error('Smoke fixture did not start')
