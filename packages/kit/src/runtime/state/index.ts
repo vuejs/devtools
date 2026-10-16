@@ -254,7 +254,7 @@ export class ComponentStateCollector {
         const setItems = value instanceof Set ? Array.from(value) : undefined
         const objectKeys =
           value && typeof value === 'object' && !Array.isArray(value) && !mapEntries && !setItems
-            ? safeOwnEnumerableStringKeys(value)
+            ? safeOwnEnumerableStringKeys(value).sort()
             : undefined
         const encodeOptions = {
           handles: this.handles,

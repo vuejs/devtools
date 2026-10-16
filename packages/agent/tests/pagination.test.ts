@@ -86,11 +86,12 @@ it.each(['array', 'object', 'map', 'set'] as const)(
   'pages through nested %s values in order',
   async (kind) => {
     const values = Array.from({ length: 121 }, (_, i) => i)
+    // Keep the fixture's numeric values aligned with alphabetical object keys.
     const payload =
       kind === 'array'
         ? values
         : kind === 'object'
-          ? Object.fromEntries(values.map((i) => [`key${i}`, i]))
+          ? Object.fromEntries(values.map((i) => [`key${String(i).padStart(3, '0')}`, i]))
           : kind === 'map'
             ? new Map(values.map((i) => [`key${i}`, i]))
             : new Set(values)
@@ -295,11 +296,12 @@ it.each(['array', 'object', 'string'] as const)(
   'paginates cached setup computed %s values',
   async (kind) => {
     const values = Array.from({ length: 121 }, (_, i) => i)
+    // Keep the fixture's numeric values aligned with alphabetical object keys.
     const payload =
       kind === 'array'
         ? values
         : kind === 'object'
-          ? Object.fromEntries(values.map((i) => [`key${i}`, i]))
+          ? Object.fromEntries(values.map((i) => [`key${String(i).padStart(3, '0')}`, i]))
           : 'x'.repeat(6000)
     const getter = vi.fn(() => payload)
     const cached = computed(getter)
