@@ -112,6 +112,12 @@ export function createDevtoolsKit(options: DevtoolsKitOptions): DevtoolsKit {
     plugins,
     install() {
       if (installed) return
+      // dispose() clears the runtime handlers and RPC; reinstalling would give a hook
+      // feeding a runtime that answers nothing. Create a new kit instead.
+      if (disposed) {
+        console.warn('[vue-devtools] install() called on a disposed kit; create a new kit instead')
+        return
+      }
 
       const owners = ownerTarget[DEVTOOLS_KIT_OWNERS] ?? new Map<string, DevtoolsKit>()
       const previousOwner = owners.get(clientName)
@@ -120,7 +126,6 @@ export function createDevtoolsKit(options: DevtoolsKitOptions): DevtoolsKit {
       ownerTarget[DEVTOOLS_KIT_OWNERS] = owners
 
       installed = true
-      disposed = false
 
       if (enabled && options.hook?.install !== false) {
         installedHook = installDevtoolsHook({
