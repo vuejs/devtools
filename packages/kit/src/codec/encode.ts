@@ -178,6 +178,7 @@ function encodeUnsafe(value: unknown, state: EncodeState): EncodedValue {
 
 function encodeObject(value: object, handle: ValueHandle, state: EncodeState): EncodedValue {
   const keys = state.entryKeys ?? safeOwnEnumerableStringKeys(value)
+  if (!state.entryKeys) keys.sort()
   const previewKeys = keys.slice(state.entryOffset, state.entryOffset + state.maxEntries)
   return {
     kind: 'object',
