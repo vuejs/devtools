@@ -108,6 +108,13 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
   }
   state.listeners.add(listener)
   state.bufferedPlugins.forEach(listener)
+  // An unmounted app never comes back, so a later kit must not replay its setups.
+  const disposeUnmount = runtime.subscribe('app:unmount', (event) => {
+    if (event.type !== 'app:unmount' || event.app == null) return
+    state.bufferedPlugins = state.bufferedPlugins.filter(
+      ([descriptor]) => descriptor.app !== event.app,
+    )
+  })
 
   async function callAdapterHook(adapter: PluginApiAdapter, key: string, payload: unknown) {
     if (!acceptsApp(adapter.descriptor, payload)) return
@@ -131,6 +138,7 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
     },
     dispose() {
       state.listeners.delete(listener)
+      disposeUnmount()
       plugins.clear()
       adapters.clear()
     },
