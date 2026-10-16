@@ -6,6 +6,7 @@ import type {
   PluginSetupFunction,
 } from './api'
 import { createPluginApiAdapter, reportPluginError } from './api'
+import { PluginSettings } from './settings'
 
 type PluginEntry = [PluginDescriptor, PluginSetupFunction]
 type PluginListener = (entry: PluginEntry) => void
@@ -38,42 +39,66 @@ export interface PluginController {
   dispose(): void
 }
 
+/**
+ * Everything registered under one plugin id. Plugins such as Pinia call setup once per app
+ * with the same id; each app gets its own adapter, so hooks and commands stay scoped to it,
+ * while settings stay shared.
+ */
+class RegisteredPlugin {
+  readonly adapters: PluginApiAdapter[] = []
+  private readonly settings: PluginSettings
+
+  constructor(
+    descriptor: PluginDescriptor,
+    private readonly runtime: DevtoolsRuntime,
+    private readonly resolvePluginSettings: (
+      pluginId: string,
+    ) => Record<string, unknown> | undefined,
+  ) {
+    this.settings = new PluginSettings(descriptor)
+  }
+
+  adapterFor(descriptor: PluginDescriptor): PluginApiAdapter {
+    if (this.adapters.length) {
+      for (const adapter of this.adapters) mergeDescriptor(adapter.descriptor, descriptor)
+      this.settings.sync()
+    }
+    // A setup without an app joins the first adapter.
+    const existing =
+      descriptor.app == null
+        ? this.adapters[0]
+        : this.adapters.find((adapter) => adapter.descriptor.app === descriptor.app)
+    if (existing) return existing
+
+    const adapter = createPluginApiAdapter(
+      descriptor,
+      this.runtime,
+      this.resolvePluginSettings,
+      this.settings,
+    )
+    this.adapters.push(adapter)
+    return adapter
+  }
+}
+
 export function createPluginController(runtime: DevtoolsRuntime): PluginController {
   const state = getPluginRegistryState()
+  const plugins = new Map<string, RegisteredPlugin>()
+  // First adapter per plugin id: what the plugin snapshot and settings commands use.
   const adapters = new Map<string, PluginApiAdapter>()
+  const resolvePluginSettings = (pluginId: string) => adapters.get(pluginId)?.getSettings()
 
   async function register(
     descriptor: PluginDescriptor,
     setupFn: PluginSetupFunction,
   ): Promise<PluginApiAdapter> {
-    const registeredAdapter = adapters.get(descriptor.id)
-    if (registeredAdapter) {
-      registeredAdapter.descriptor.label = descriptor.label ?? registeredAdapter.descriptor.label
-      registeredAdapter.descriptor.logo = descriptor.logo ?? registeredAdapter.descriptor.logo
-      registeredAdapter.descriptor.packageName =
-        descriptor.packageName ?? registeredAdapter.descriptor.packageName
-      registeredAdapter.descriptor.homepage =
-        descriptor.homepage ?? registeredAdapter.descriptor.homepage
-      registeredAdapter.descriptor.app = descriptor.app ?? registeredAdapter.descriptor.app
-      registeredAdapter.descriptor.componentStateTypes =
-        descriptor.componentStateTypes ?? registeredAdapter.descriptor.componentStateTypes
-      registeredAdapter.descriptor.disableAppScope =
-        descriptor.disableAppScope ?? registeredAdapter.descriptor.disableAppScope
-      registeredAdapter.descriptor.disablePluginScope =
-        descriptor.disablePluginScope ?? registeredAdapter.descriptor.disablePluginScope
-      registeredAdapter.descriptor.enableEarlyProxy =
-        descriptor.enableEarlyProxy ?? registeredAdapter.descriptor.enableEarlyProxy
-      registeredAdapter.descriptor.settings =
-        descriptor.settings ?? registeredAdapter.descriptor.settings
-      registeredAdapter.syncSettings()
-      await runPluginSetup(descriptor.id, setupFn, registeredAdapter.api)
-      return registeredAdapter
+    let plugin = plugins.get(descriptor.id)
+    if (!plugin) {
+      plugin = new RegisteredPlugin(descriptor, runtime, resolvePluginSettings)
+      plugins.set(descriptor.id, plugin)
     }
-
-    const adapter = createPluginApiAdapter(descriptor, runtime, (pluginId) =>
-      adapters.get(pluginId)?.getSettings(),
-    )
-    adapters.set(descriptor.id, adapter)
+    const adapter = plugin.adapterFor(descriptor)
+    if (!adapters.has(descriptor.id)) adapters.set(descriptor.id, adapter)
     await runPluginSetup(descriptor.id, setupFn, adapter.api)
     return adapter
   }
@@ -84,35 +109,44 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
   state.listeners.add(listener)
   state.bufferedPlugins.forEach(listener)
 
+  async function callAdapterHook(adapter: PluginApiAdapter, key: string, payload: unknown) {
+    if (!acceptsApp(adapter.descriptor, payload)) return
+    try {
+      await adapter.callHook(key as never, payload as never)
+    } catch (error) {
+      reportPluginError(adapter.descriptor.id, `"${key}" hook`, error)
+    }
+  }
+
   return {
     adapters,
     register,
     async callHook(key, payload) {
-      await Promise.all(
-        [...adapters.values()].map(async (adapter) => {
-          if (!acceptsApp(adapter.descriptor, payload)) return
-          try {
-            await adapter.callHook(key as never, payload as never)
-          } catch (error) {
-            reportPluginError(adapter.descriptor.id, `"${key}" hook`, error)
-          }
-        }),
-      )
+      const all = [...plugins.values()].flatMap((plugin) => plugin.adapters)
+      await Promise.all(all.map((adapter) => callAdapterHook(adapter, key, payload)))
     },
     async callHookFor(pluginId, key, payload) {
-      const adapter = adapters.get(pluginId)
-      if (!adapter || !acceptsApp(adapter.descriptor, payload)) return
-      try {
-        await adapter.callHook(key as never, payload as never)
-      } catch (error) {
-        reportPluginError(adapter.descriptor.id, `"${key}" hook`, error)
-      }
+      const all = plugins.get(pluginId)?.adapters ?? []
+      await Promise.all(all.map((adapter) => callAdapterHook(adapter, key, payload)))
     },
     dispose() {
       state.listeners.delete(listener)
+      plugins.clear()
       adapters.clear()
     },
   }
+}
+
+function mergeDescriptor(target: PluginDescriptor, descriptor: PluginDescriptor): void {
+  target.label = descriptor.label ?? target.label
+  target.logo = descriptor.logo ?? target.logo
+  target.packageName = descriptor.packageName ?? target.packageName
+  target.homepage = descriptor.homepage ?? target.homepage
+  target.componentStateTypes = descriptor.componentStateTypes ?? target.componentStateTypes
+  target.disableAppScope = descriptor.disableAppScope ?? target.disableAppScope
+  target.disablePluginScope = descriptor.disablePluginScope ?? target.disablePluginScope
+  target.enableEarlyProxy = descriptor.enableEarlyProxy ?? target.enableEarlyProxy
+  target.settings = descriptor.settings ?? target.settings
 }
 
 function acceptsApp(descriptor: PluginDescriptor, payload: unknown): boolean {

@@ -1,4 +1,5 @@
 import type { ComponentId, DevtoolsRuntime, InspectorId, MaybePromise, PluginId } from '../runtime'
+import { PluginSettings } from './settings'
 
 export interface PluginDescriptor {
   id: PluginId
@@ -208,9 +209,20 @@ export function createPluginApiAdapter(
   descriptor: PluginDescriptor,
   runtime: DevtoolsRuntime,
   resolvePluginSettings?: (pluginId: string) => Record<string, unknown> | undefined,
+  settings: PluginSettings = new PluginSettings(descriptor),
 ): PluginApiAdapter {
   const handlers = new Map<keyof DevToolsPluginAPIHooks, Set<Function>>()
-  let settingsValues = readSettingsDefaults(descriptor.settings)
+  settings.subscribe(async ({ key, value, oldValue, settings: snapshot }) => {
+    await callHook('setPluginSettings', {
+      app: descriptor.app,
+      pluginId: descriptor.id,
+      key,
+      newValue: value,
+      oldValue,
+      value,
+      settings: snapshot,
+    })
+  })
 
   function addHook<K extends keyof DevToolsPluginAPIHooks>(
     key: K,
@@ -309,32 +321,15 @@ export function createPluginApiAdapter(
 
   function getSettingsSnapshot(pluginId?: string): Record<string, unknown> {
     if (pluginId && pluginId !== descriptor.id) return resolvePluginSettings?.(pluginId) ?? {}
-    return { ...settingsValues }
+    return settings.get()
   }
 
   function syncSettings() {
-    settingsValues = readSettingsDefaults(descriptor.settings, settingsValues)
+    settings.sync()
   }
 
   async function updateSetting(key: string, value: unknown) {
-    if (!descriptor.settings || !(key in descriptor.settings)) return
-
-    const oldValue = settingsValues[key]
-
-    settingsValues = {
-      ...settingsValues,
-      [key]: value,
-    }
-
-    await callHook('setPluginSettings', {
-      app: descriptor.app,
-      pluginId: descriptor.id,
-      key,
-      newValue: value,
-      oldValue,
-      value,
-      settings: getSettingsSnapshot(),
-    })
+    await settings.update(key, value)
   }
 
   async function callHook<K extends keyof DevToolsPluginAPIHooks>(
@@ -401,18 +396,4 @@ function createHookRegistrarProxy(
       }
     },
   })
-}
-
-function readSettingsDefaults(
-  settings: PluginDescriptor['settings'] | undefined,
-  current: Record<string, unknown> = {},
-): Record<string, unknown> {
-  const result: Record<string, unknown> = {}
-  if (!settings) return result
-
-  for (const [key, value] of Object.entries(settings)) {
-    result[key] = key in current ? current[key] : value.defaultValue
-  }
-
-  return result
 }
