@@ -161,7 +161,7 @@ function encodeUnsafe(value: unknown, state: EncodeState): EncodedValue {
       preview:
         state.depth >= state.maxDepth
           ? []
-          : value.slice(offset, offset + state.maxEntries).map((item, index) => ({
+          : Array.from(value.slice(offset, offset + state.maxEntries), (item, index) => ({
               key: String(index + offset),
               value: encode(item, nextState(state)),
             })),
