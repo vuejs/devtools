@@ -73,6 +73,68 @@ describe('collection state editing', () => {
     ])
   })
 
+  it.each([
+    { key: 1, label: '1' },
+    { key: true, label: 'true' },
+    { key: 1n, label: '1' },
+    { key: Symbol('key'), label: 'key' },
+    { key: { id: 1 }, label: 'Object' },
+    { key: null, label: 'null' },
+    { key: undefined, label: 'undefined' },
+  ])('rejects renaming to an existing key label $label before writing', ({ key, label }) => {
+    const map = new Map<unknown, unknown>([
+      [key, 'existing'],
+      ['source', 'original'],
+    ])
+
+    expect(setStateValue({ map }, ['map', 'source'], 'replacement', label)).toBe(false)
+    expect([...map]).toEqual([
+      [key, 'existing'],
+      ['source', 'original'],
+    ])
+  })
+
+  it('does not notify reactive effects when a rename would create a duplicate label', () => {
+    const map = reactive(
+      new Map<unknown, unknown>([
+        [1, 'existing'],
+        ['source', 'original'],
+      ]),
+    )
+    let updates = 0
+    effect(() => {
+      map.get('source')
+      updates++
+    })
+
+    expect(setStateValue({ map }, ['map', 'source'], 'replacement', '1')).toBe(false)
+    expect(updates).toBe(1)
+    expect(map.get('source')).toBe('original')
+  })
+
+  it('still renames a non-string Map key to an unused label', () => {
+    const map = new Map<unknown, unknown>([[1, 'original']])
+
+    expect(setStateValue({ map }, ['map', '1'], 'replacement', 'count')).toBe(true)
+    expect([...map]).toEqual([['count', 'replacement']])
+  })
+
+  it('skips existing preview labels when generating a new Map key', () => {
+    const key = Symbol('newProp1')
+    const map = new Map<unknown, unknown>([
+      [key, 'symbol'],
+      ['newProp2', 'string'],
+    ])
+
+    expect(addStateValue({ map }, ['map'], 'added')).toBe(true)
+    expect([...map]).toEqual([
+      [key, 'symbol'],
+      ['newProp2', 'string'],
+      ['newProp3', 'added'],
+    ])
+    expect(resolvePath({ map }, ['map', 'newProp1'])).toEqual({ found: true, value: 'symbol' })
+  })
+
   it.each(['native', 'legacy'])('notifies effects through %s collection edits', (mode) => {
     const map = reactive(new Map([['x', 1]]))
     const set = reactive(new Set([1]))
