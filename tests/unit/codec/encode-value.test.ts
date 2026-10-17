@@ -3,6 +3,44 @@ import { encodeValue } from '../../../packages/kit/src/codec/encode'
 import { createDeepCyclicStateFixture } from '../../fixtures'
 
 describe('encodeValue', () => {
+  it('encodes sparse array slots as explicit entries that survive JSON transport', () => {
+    const value: unknown[] = []
+    value.length = 3
+    value[1] = 'visible'
+
+    const encoded = encodeValue(value)
+    const transported = JSON.parse(JSON.stringify(encoded))
+
+    expect(transported).toMatchObject({
+      kind: 'array',
+      length: 3,
+      preview: [
+        { key: '0', value: { kind: 'undefined' } },
+        { key: '1', value: { kind: 'string', value: 'visible' } },
+        { key: '2', value: { kind: 'undefined' } },
+      ],
+    })
+    expect(Object.hasOwn(value, 0)).toBe(false)
+    expect(Object.hasOwn(value, 2)).toBe(false)
+  })
+
+  it('keeps sparse array preview keys aligned with the requested offset', () => {
+    const value: unknown[] = []
+    value.length = 5
+    value[3] = 42
+
+    const encoded = encodeValue(value, { entryOffset: 2, maxEntries: 2 })
+
+    expect(encoded).toMatchObject({
+      kind: 'array',
+      length: 5,
+      preview: [
+        { key: '2', value: { kind: 'undefined' } },
+        { key: '3', value: { kind: 'number', value: 42 } },
+      ],
+    })
+  })
+
   it('preserves class names and enumerable fields for EventTarget subclasses', () => {
     class Dialog extends EventTarget {
       id = 'dialog-1'
