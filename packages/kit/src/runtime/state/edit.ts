@@ -57,7 +57,8 @@ export function setStateValue(
   if (newKey && newKey !== field) {
     const raw = toRaw(unwrapped)
     if (Array.isArray(raw) || raw instanceof Set) return false
-    if (raw instanceof Map ? raw.has(newKey) : hasOwn(unwrapped as object, newKey)) return false
+    if (raw instanceof Map ? hasMapPreviewKey(raw, newKey) : hasOwn(unwrapped as object, newKey))
+      return false
   }
   const written = writeEditableValue(unwrapped, field, value)
   if (!written || !newKey || newKey === field) return written
@@ -87,6 +88,13 @@ export function addStateValue(target: object, path: string[], value: unknown): b
   }
 
   return addEditableValue(unwrapEditableValue(object), value)
+}
+
+function hasMapPreviewKey(target: Map<unknown, unknown>, field: string): boolean {
+  for (const key of target.keys()) {
+    if (formatPreviewKey(key) === field) return true
+  }
+  return false
 }
 
 function resolveMapKey(
@@ -201,7 +209,7 @@ function renameEditableValue(target: unknown, previousField: string, nextField: 
   const rawTarget = toRaw(target)
   if (rawTarget instanceof Map) {
     const key = resolveMapKey(rawTarget, previousField)
-    if (!key.found || rawTarget.has(nextField)) return false
+    if (!key.found || hasMapPreviewKey(rawTarget, nextField)) return false
     const collection = target as Map<unknown, unknown>
     const value = collection.get(key.key)
     collection.delete(key.key)
@@ -300,8 +308,9 @@ function getNextAvailableObjectKey(target: object): string {
 }
 
 function getNextAvailableMapKey(target: Map<unknown, unknown>): string {
+  const labels = new Set(Array.from(target.keys(), formatPreviewKey))
   for (let i = 1; ; i++) {
     const key = `newProp${i}`
-    if (!target.has(key)) return key
+    if (!labels.has(key)) return key
   }
 }
