@@ -92,7 +92,7 @@ export class ValueHandleRegistry {
     this.handleToScope.clear()
     this.scopeToHandles.clear()
     this.objectToHandle = new WeakMap()
-    this.seed = 0
+    // Keep seed: a stale handle from before clear() must miss, not resolve to a new object.
   }
 
   private evictOverflow(): void {
