@@ -42,18 +42,14 @@ describe('Chrome tab detection aggregation', () => {
     expect(merged.appCount).toBe(5)
   })
 
-  it('keeps framework flags and the vite client URL from any frame', () => {
+  it('keeps framework flags from any frame', () => {
     const merged = mergeDetectionPayloads([
       payload({ nuxtDetected: true, vueDetected: true }),
-      payload({
-        vitePluginDetected: true,
-        vitePluginClientUrl: 'http://localhost:5173/__devtools',
-      }),
+      payload({ vitePluginDetected: true }),
     ])
 
     expect(merged.nuxtDetected).toBe(true)
     expect(merged.vitePluginDetected).toBe(true)
-    expect(merged.vitePluginClientUrl).toBe('http://localhost:5173/__devtools')
   })
 
   it('stays not-found when no frame detects Vue', () => {

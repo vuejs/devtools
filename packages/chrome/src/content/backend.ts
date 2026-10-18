@@ -20,7 +20,6 @@ interface VueDevtoolsPageTarget extends Window, DevtoolsHookTarget {
   __VUE_DEVTOOLS_BROWSER_EXTENSION_DETECTED__?: boolean
   __VUE_DEVTOOLS_EXTENSION_BACKEND__?: VueDevtoolsExtensionBackend
   __VUE_DEVTOOLS_EXTENSION_STATE__?: VueDevtoolsDetectionPayload
-  __VUE_DEVTOOLS_VITE_PLUGIN_CLIENT_URL__?: string
   __VUE_DEVTOOLS_VITE_PLUGIN_DETECTED__?: boolean
 }
 
@@ -130,7 +129,6 @@ function readDetection(page: VueDevtoolsPageTarget, kit: DevtoolsKit): VueDevtoo
     devtoolsEnabled: appCount > 0,
     installed: true,
     nuxtDetected,
-    vitePluginClientUrl: page.__VUE_DEVTOOLS_VITE_PLUGIN_CLIENT_URL__,
     vitePluginDetected: !!page.__VUE_DEVTOOLS_VITE_PLUGIN_DETECTED__,
     vitePressDetected,
     vueDetected,

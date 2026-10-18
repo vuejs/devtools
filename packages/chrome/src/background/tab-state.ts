@@ -42,8 +42,6 @@ export function mergeDetectionPayloads(
     devtoolsEnabled: payloads.some((payload) => payload.devtoolsEnabled),
     installed: payloads.some((payload) => payload.installed),
     nuxtDetected: payloads.some((payload) => payload.nuxtDetected),
-    vitePluginClientUrl: payloads.find((payload) => payload.vitePluginClientUrl != null)
-      ?.vitePluginClientUrl,
     vitePluginDetected: payloads.some((payload) => payload.vitePluginDetected),
     vitePressDetected: payloads.some((payload) => payload.vitePressDetected),
     vueDetected: payloads.some((payload) => payload.vueDetected),
