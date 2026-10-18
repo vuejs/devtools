@@ -353,24 +353,32 @@ onUnmounted(() => {
             <li
               v-for="layer in layerOptions"
               :key="layer.id"
-              class="group relative min-h-7 cursor-pointer rounded-1 px-2 py-1 color-base flex items-center gap-2 text-3.5 hover:bg-active"
+              class="timeline-layer group relative rounded-1 color-base text-3.5 hover:bg-active"
               :class="{
                 'active bg-primary-600! text-white hover:bg-primary-600!':
                   layer.id === activeTimelineLayer,
-                op60: !isLayerEnabled(layer.id),
               }"
-              @click="selectLayer(layer.id)"
             >
-              <span
-                class="h-2.5 w-2.5 shrink-0 rounded-full"
-                :style="{ backgroundColor: getLayerColor(layer) }"
-                aria-hidden="true"
-              />
-              <span class="min-w-0 flex-1 truncate">{{ layer.label }}</span>
               <button
-                class="absolute right-2 rounded-1 border-0 bg-primary-500 px-1 color-white text-3 op0 group-hover:op80 hover:op100 [.active_&]:(bg-primary-400 dark:bg-gray-600)"
+                class="timeline-layer-select min-h-7 min-w-0 w-full rounded-1 border-0 bg-transparent py-1 pl-2 pr-18 color-inherit flex items-center gap-2 text-left"
                 type="button"
-                :aria-label="isLayerEnabled(layer.id) ? 'Disable layer' : 'Enable layer'"
+                :aria-pressed="layer.id === activeTimelineLayer"
+                @click="selectLayer(layer.id)"
+              >
+                <span
+                  class="h-2.5 w-2.5 shrink-0 rounded-full"
+                  :class="{ op60: !isLayerEnabled(layer.id) }"
+                  :style="{ backgroundColor: getLayerColor(layer) }"
+                  aria-hidden="true"
+                />
+                <span class="min-w-0 flex-1 truncate" :class="{ op60: !isLayerEnabled(layer.id) }">
+                  {{ layer.label }}
+                </span>
+              </button>
+              <button
+                class="timeline-layer-toggle absolute right-2 top-1/2 -translate-y-1/2 rounded-1 border-0 bg-primary-500 px-1 color-white text-3 op0 group-hover:op80 hover:op100 [.active_&]:(bg-primary-400 dark:bg-gray-600)"
+                type="button"
+                :aria-label="`${isLayerEnabled(layer.id) ? 'Disable' : 'Enable'} ${layer.label} layer`"
                 @click.stop="toggleLayerEnabled(layer.id)"
               >
                 {{ isLayerEnabled(layer.id) ? 'Disable' : 'Enable' }}
@@ -541,5 +549,15 @@ onUnmounted(() => {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   transition-duration: 1s;
   box-shadow: #ef4444 0 0 8px;
+}
+
+.timeline-layer:focus-within .timeline-layer-toggle {
+  opacity: 1;
+}
+
+.timeline-layer-select:focus-visible,
+.timeline-layer-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
 }
 </style>
