@@ -62,6 +62,9 @@ function requestTabDetection(tabId: number): void {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status === 'loading') resetTabDetectionState(tabId)
+  // Same-document navigations (history.pushState, hash changes) also report `loading`, but the
+  // page is not reloaded, so it never publishes again on its own. Ask once loading completes.
+  else if (changeInfo.status === 'complete') requestTabDetection(tabId)
 })
 
 chrome.tabs.onRemoved.addListener((tabId) => {
