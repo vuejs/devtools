@@ -586,11 +586,10 @@ importers:
         version: 0.23.0(@vitejs/devtools@0.7.6)(@volar/typescript@2.4.28(typescript@6.0.3))(@vue/language-core@3.3.11)(publint@0.3.21)(typescript@6.0.3)(vue-tsc@3.3.11(typescript@6.0.3))
 
   packages/kit:
-    dependencies:
+    devDependencies:
       devframe:
         specifier: ^1.1.0
         version: 1.1.0(@devframes/agentic@1.1.0)(cac@7.0.0)(srvx@1.0.4)
-    devDependencies:
       tsdown:
         specifier: 'catalog:'
         version: 0.23.0(@vitejs/devtools@0.7.6)(@volar/typescript@2.4.28(typescript@6.0.3))(@vue/language-core@3.3.11)(typescript@6.0.3)(vue-tsc@3.3.11(typescript@6.0.3))

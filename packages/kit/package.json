@@ -34,10 +34,8 @@
     "build": "tsdown",
     "dev": "tsdown --watch"
   },
-  "dependencies": {
-    "devframe": "catalog:"
-  },
   "devDependencies": {
+    "devframe": "catalog:",
     "tsdown": "catalog:"
   },
   "engines": {
