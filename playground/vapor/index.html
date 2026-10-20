@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Vapor Playground</title>
+    <style>
+      html,
+      body {
+        background: #111;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-secondary color-base">
+    <main class="grid gap-6 p-6 lg:grid-cols-2">
+      <section>
+        <h2 class="section-title">createVaporApp</h2>
+        <div id="vapor-app"></div>
+      </section>
+      <section>
+        <h2 class="section-title">createApp + vaporInteropPlugin</h2>
+        <div id="interop-app"></div>
+      </section>
+    </main>
+    <div id="teleport-target" class="fixed right-4 bottom-4"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "@vue/devtools-playground-vapor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite dev --host 127.0.0.1 --port 3003",
+    "preview": "vite preview --host 127.0.0.1 --port 3003"
+  },
+  "dependencies": {
+    "@antfu/design": "catalog:",
+    "@antfu/utils": "^9.3.0",
+    "@unocss/reset": "catalog:",
+    "@unocss/transformer-directives": "^66.10.5",
+    "vue": "3.6.0-rc.5"
+  },
+  "devDependencies": {
+    "@vitejs/devtools": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "typescript": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-vue-devtools": "workspace:*"
+  }
+}

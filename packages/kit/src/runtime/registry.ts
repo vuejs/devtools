@@ -4,6 +4,7 @@ import type {
   ComponentTreeNodeTag,
   ComponentTreeNodeSnapshot,
 } from '../protocol/messages'
+import { isVaporApp } from './vapor'
 import type { AppId, AppRef, ComponentId, InstanceRef, RuntimeEvent, VueTypeMap } from './types'
 
 export interface ComponentRecord {
@@ -40,6 +41,7 @@ export interface AppRecord {
   app: AppRef
   vueTypes?: VueTypeMap
   rootInstance?: InstanceRef
+  vapor?: boolean
   components: Map<ComponentId, ComponentRecord>
   createdAt: number
   updatedAt: number
@@ -160,6 +162,7 @@ export class RuntimeRegistry {
       app,
       vueTypes,
       rootInstance,
+      vapor: isVaporApp(app) || undefined,
       components: new Map(),
       createdAt: time,
       updatedAt: time,
