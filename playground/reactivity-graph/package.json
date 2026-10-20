@@ -13,10 +13,10 @@
     "@antfu/utils": "^9.3.0",
     "@iconify-json/ph": "^1.2.2",
     "@unocss/reset": "catalog:",
-    "@unocss/transformer-directives": "^66.10.5",
+    "@unocss/transformer-directives": "^66.11.0",
     "@vue/runtime-dom": "3.6.0-rc.5",
     "colorjs.io": "^0.7.1",
-    "reka-ui": "^2.10.5",
+    "reka-ui": "^2.11.0",
     "vue": "3.6.0-rc.5"
   },
   "devDependencies": {

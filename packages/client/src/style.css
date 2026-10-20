@@ -43,13 +43,7 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none;
   font-family:
-    'DM Sans',
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
+    'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 html.dark {

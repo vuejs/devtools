@@ -4,53 +4,53 @@ packages:
   - docs
 
 catalog:
-  safe-stable-stringify: ^2.5.0
-  '@modelcontextprotocol/client': ^2.2.0
-  '@devframes/agentic': ^1.1.0
-  cac: ^7.0.0
-  zod: ^4.6.5
+  safe-stable-stringify: ^3.0.0
+  '@modelcontextprotocol/client': ^2.3.1
+  '@devframes/agentic': ^1.2.6
+  cac: ^7.1.0
+  zod: ^4.6.7
   colorjs.io: ^0.7.1
-  '@antfu/design': ^0.5.3
+  '@antfu/design': ^0.6.0
   '@iconify-json/carbon': ^1.2.28
   '@iconify-json/ic': ^1.2.4
-  '@iconify-json/logos': ^1.2.14
+  '@iconify-json/logos': ^1.2.17
   '@iconify-json/ri': ^1.2.10
-  '@types/chrome': ^0.3.0
-  '@types/node': ^26.6.3
-  '@unocss/reset': ^66.10.5
-  '@vitejs/devtools': ^0.7.6
-  '@vitejs/devtools-kit': ^0.7.6
-  '@vitejs/plugin-vue': ^6.0.9
+  '@types/chrome': ^0.3.5
+  '@types/node': ^26.6.5
+  '@unocss/reset': ^66.11.0
+  '@vitejs/devtools': ^0.8.0
+  '@vitejs/devtools-kit': ^0.8.0
+  '@vitejs/plugin-vue': ^6.0.10
   '@vitest/coverage-v8': 4.1.11
   '@vue/test-utils': ^2.5.1
   '@vueuse/core': ^15.0.0
   '@types/d3-selection': ^3.0.12
   '@types/d3-force': ^3.0.10
-  '@types/d3-zoom': ^3.0.8
-  devframe: ^1.1.0
+  '@types/d3-zoom': ^3.0.9
+  devframe: ^1.2.6
   d3-force: ^3.0.0
   d3-selection: ^3.0.0
   d3-zoom: ^3.0.0
   floating-vue: 5.2.2
   fuse.js: ^7.5.0
-  happy-dom: ^20.14.5
+  happy-dom: ^21.0.3
   nano-staged: ^1.0.2
-  pinia: ^4.0.3
-  playwright: ^1.63.0
+  pinia: ^4.1.0
+  playwright: ^1.64.1
   pkg-pr-new: 0.0.88
   splitpanes: ^4.1.2
   simple-git-hooks: ^2.14.0
-  taze: ^21.2.0
-  tsdown: ^0.23.0
+  taze: ^21.3.0
+  tsdown: ^0.23.1
   typescript: ^6.0.3
-  unocss: ^66.10.5
-  vite: ^8.3.1
-  vite-plus: ^1.0.0
+  unocss: ^66.11.0
+  vite: ^8.3.4
+  vite-plus: ^1.3.0
   vitest: 4.1.11
-  vue: ^3.5.43
-  vue-tsc: ^3.3.11
+  vue: ^3.5.44
+  vue-tsc: ^3.3.13
   vue-virtual-scroller: ^3.0.5
-  vue-router: ^5.3.1
+  vue-router: ^5.4.0
   '@clack/prompts': ^1.8.1
   archiver: ^8.0.0
   bumpp: ^12.3.0
@@ -59,16 +59,16 @@ catalog:
   nue-glow: 0.2.5
 
 overrides:
-  '@devframes/hub': ^1.1.0
-  '@devframes/json-render': ^1.1.0
-  '@devframes/plugin-inspect': ^1.1.0
-  '@devframes/plugin-messages': ^1.1.0
-  '@devframes/plugin-terminals': ^1.1.0
-  '@vitejs/devtools': ^0.7.6
-  '@vitejs/devtools-kit': ^0.7.6
-  crossws: ^0.4.12
-  devframe: ^1.1.0
-  vite: ^8.3.1
+  '@devframes/hub': ^1.2.6
+  '@devframes/json-render': ^1.2.6
+  '@devframes/plugin-inspect': ^1.2.6
+  '@devframes/plugin-messages': ^1.2.6
+  '@devframes/plugin-terminals': ^1.2.6
+  '@vitejs/devtools': ^0.8.0
+  '@vitejs/devtools-kit': ^0.8.0
+  crossws: ^0.4.15
+  devframe: ^1.2.6
+  vite: ^8.3.4
 
 catalogMode: prefer
 

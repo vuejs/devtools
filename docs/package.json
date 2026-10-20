@@ -14,7 +14,7 @@
     "unocss": "catalog:",
     "unplugin-vue-components": "^32.1.0",
     "vitepress": "2.0.0-alpha.20",
-    "vitepress-plugin-group-icons": "^1.7.6",
+    "vitepress-plugin-group-icons": "^1.8.1",
     "vue": "catalog:"
   }
 }
