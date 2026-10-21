@@ -33,6 +33,7 @@
     "pack": "pnpm build",
     "play": "pnpm --filter @vue/devtools-playground-basic dev",
     "play:reactivity-graph": "pnpm --filter @vue/devtools-playground-reactivity-graph dev",
+    "play:vapor": "pnpm --filter @vue/devtools-playground-vapor dev",
     "postinstall": "simple-git-hooks",
     "release": "bumpp -r",
     "release-extension": "pnpm build && node scripts/release-extension.mjs && pnpm zip",
@@ -74,6 +75,7 @@
     "vite-plus": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
+    "vue-3.6": "catalog:",
     "vue-tsc": "catalog:"
   },
   "simple-git-hooks": {
