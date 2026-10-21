@@ -4,7 +4,15 @@ import type {
   ComponentTreeNodeTag,
   ComponentTreeNodeSnapshot,
 } from '../protocol/messages'
-import { isVaporApp } from './vapor'
+import {
+  isForBlock,
+  isForFragment,
+  isInteropFragment,
+  isTeleportFragment,
+  isVaporApp,
+  isVaporFragment,
+  isVaporInstance,
+} from './vapor'
 import type { AppId, AppRef, ComponentId, InstanceRef, RuntimeEvent, VueTypeMap } from './types'
 
 export interface ComponentRecord {
@@ -51,6 +59,8 @@ export type { AppSnapshot, ComponentTreeNodeTag } from '../protocol/messages'
 export type ComponentSnapshot = ComponentTreeNodeSnapshot
 
 interface ComponentRecordOverrides {
+  // Vapor `v-for` keys live on the enclosing `ForBlock`, not on the instance.
+  renderKey?: unknown
   inactive?: boolean
   tags?: ComponentTreeNodeTag[]
   domOrder?: number[]
@@ -62,6 +72,7 @@ export interface WalkedComponentChild {
   instance: InstanceRef
   tags?: ComponentTreeNodeTag[]
   inactive?: boolean
+  renderKey?: unknown
 }
 
 // Cross-task caches must observe child-list mutations, including equal-length
@@ -219,7 +230,9 @@ export class RuntimeRegistry {
       existing.parentId = parentId
       existing.name = readComponentName(instance)
       existing.file = readComponentFile(instance)
-      existing.renderKey = readComponentRenderKey(instance)
+      existing.renderKey =
+        readComponentRenderKey(instance, overrides.renderKey) ??
+        (isVaporInstance(instance) ? existing.renderKey : undefined)
       existing.inactive = overrides.inactive ?? isComponentInactive(instance)
       existing.isFragment = isFragmentComponent(instance, app)
       existing.hidden = isComponentHidden(instance)
@@ -239,7 +252,7 @@ export class RuntimeRegistry {
       parentId,
       name: readComponentName(instance),
       file: readComponentFile(instance),
-      renderKey: readComponentRenderKey(instance),
+      renderKey: readComponentRenderKey(instance, overrides.renderKey),
       inactive: overrides.inactive ?? isComponentInactive(instance),
       isFragment: isFragmentComponent(instance, app),
       hidden: isComponentHidden(instance),
@@ -296,6 +309,7 @@ export class RuntimeRegistry {
         walk(child.instance, instance, depth + 1, {
           inactive: overrides.inactive || child.inactive,
           tags: child.tags,
+          renderKey: child.renderKey,
         })
       }
 
@@ -413,6 +427,7 @@ export class RuntimeRegistry {
       {
         inactive: parent.inactive || child.inactive,
         tags: child.tags,
+        renderKey: child.renderKey,
       },
       cache,
     )
@@ -484,11 +499,17 @@ function readComponentFile(instance: object): string | undefined {
   return type ? readStringProperty(type, '__file') : undefined
 }
 
-function readComponentRenderKey(instance: object): string | number | undefined {
-  const vnode = readObjectProperty(instance, 'vnode')
-  if (!vnode) return
-
-  const value = readUnknownProperty(vnode, 'key')
+function readComponentRenderKey(
+  instance: object,
+  walkedKey?: unknown,
+): string | number | undefined {
+  let value = walkedKey
+  if (value == null) {
+    const vapor = isVaporInstance(instance)
+    const keyOwner = vapor ? instance : readObjectProperty(instance, 'vnode')
+    if (!keyOwner) return
+    value = readUnknownProperty(keyOwner, vapor ? '$key' : 'key')
+  }
   if (value == null) return
   if (typeof value === 'number') return value
   if (typeof value === 'string') return `'${value}'`
@@ -508,6 +529,8 @@ function isComponentInactive(instance: object): boolean {
 }
 
 function isFragmentComponent(instance: object, app: AppRecord): boolean {
+  if (isVaporInstance(instance)) return isVaporFragmentRoot(readUnknownProperty(instance, 'block'))
+
   const subtree = readObjectProperty(instance, 'subTree')
   if (!subtree) return false
   return readUnknownProperty(subtree, 'type') === app.vueTypes?.Fragment
@@ -585,9 +608,54 @@ function readComponentDomOrder(
   return indexList.reverse()
 }
 
+// Mirrors VDOM: a root renders as a fragment when it is a list or a `v-for`.
+function isVaporFragmentRoot(block: unknown): boolean {
+  if (Array.isArray(block)) return block.length > 1 || isVaporFragmentRoot(block[0])
+  if (!isVaporFragment(block)) return false
+  if (isInteropFragment(block)) return false
+  return isForFragment(block) || isVaporFragmentRoot(readUnknownProperty(block, 'nodes'))
+}
+
 function getInternalInstanceChildren(instance: object): WalkedComponentChild[] {
+  if (isVaporInstance(instance)) {
+    const block =
+      readUnknownProperty(instance, 'pendingBlock') ?? readUnknownProperty(instance, 'block')
+    return getInternalInstanceChildrenFromBlock(block)
+  }
   const subtree = readObjectProperty(instance, 'subTree')
   return subtree ? getInternalInstanceChildrenFromVNode(subtree) : []
+}
+
+const TELEPORT_TAG: ComponentTreeNodeTag = {
+  label: 'teleport',
+  textColor: 0xffffff,
+  backgroundColor: 0x8b5cf6,
+}
+
+// Walks a Vapor `Block` (Node | VaporComponentInstance | VaporFragment | Block[]).
+function getInternalInstanceChildrenFromBlock(
+  block: unknown,
+  tags: ComponentTreeNodeTag[] = [],
+  renderKey?: unknown,
+): WalkedComponentChild[] {
+  if (block == null || typeof block !== 'object') return []
+  if (Array.isArray(block)) {
+    return block.flatMap((child) => getInternalInstanceChildrenFromBlock(child, tags, renderKey))
+  }
+  if (isVaporInstance(block)) {
+    return !isBeingDestroyed(block) && !isComponentHidden(block)
+      ? [{ instance: block, tags, renderKey }]
+      : []
+  }
+  if (!isVaporFragment(block)) return []
+  if (isInteropFragment(block)) {
+    return block.vnode ? getInternalInstanceChildrenFromVNode(block.vnode, tags) : []
+  }
+  const nextTags =
+    isTeleportFragment(block) && !tags.includes(TELEPORT_TAG) ? [...tags, TELEPORT_TAG] : tags
+  // Only a component directly inside a `v-for` item takes the item key.
+  const nextKey = isForBlock(block) ? readUnknownProperty(block, 'key') : undefined
+  return getInternalInstanceChildrenFromBlock(block.nodes, nextTags, nextKey)
 }
 
 function getInternalInstanceChildrenFromVNode(
@@ -639,12 +707,14 @@ function getKeepAliveCachedInstances(instance: object): InstanceRef[] {
   const cache = readUnknownProperty(instance, '__v_cache')
   if (!(cache instanceof Map)) return []
 
+  // VDOM caches vnodes; Vapor caches instances or interop fragments wrapping a vnode.
   return Array.from(cache.values())
-    .map((vnode) =>
-      vnode != null && typeof vnode === 'object'
-        ? readObjectProperty(vnode, 'component')
-        : undefined,
-    )
+    .map((entry) => {
+      if (entry == null || typeof entry !== 'object') return
+      if (isVaporInstance(entry)) return entry
+      const vnode = isInteropFragment(entry) ? entry.vnode : entry
+      return vnode ? readObjectProperty(vnode, 'component') : undefined
+    })
     .filter((component): component is InstanceRef => !!component)
 }
 

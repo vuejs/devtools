@@ -95,7 +95,7 @@ Tick each item when it lands. Phase 0 landed in #1174.
 
 ### Phase 1 — Component tree (core feature)
 
-- [ ] Generalise `getInternalInstanceChildren(instance)`:
+- [x] Generalise `getInternalInstanceChildren(instance)`:
   - VDOM: unchanged (`subTree`).
   - Vapor: `walkBlockForChildren(instance.block)`:
     - `Node` → skip
@@ -104,15 +104,17 @@ Tick each item when it lands. Phase 0 landed in #1174.
     - fragment with bit 64 → `getInternalInstanceChildrenFromVNode(frag.vnode)`
     - other fragment → recurse `nodes` (teleport included)
     - pending suspense → `instance.pendingBlock` if present
-- [ ] In `getInternalInstanceChildrenFromVNode`, a `vnode.component` that is Vapor already
+- [x] In `getInternalInstanceChildrenFromVNode`, a `vnode.component` that is Vapor already
       works (it's returned as the child) — the Vapor walk above then descends from it.
-- [ ] Skip the interop wrapper on `vnode.vi`; collapse `VaporAsyncComponentWrapper` the same
-      way VDOM async wrappers are treated.
-- [ ] KeepAlive: relax `isKeepAlive` to accept `type.__isKeepAlive` on Vapor instances;
+- [x] Skip the interop wrapper on `vnode.vi`; collapse `VaporAsyncComponentWrapper` the same
+      way VDOM async wrappers are treated. Nothing needed: `vnode.vi` is a factory function, so
+      the wrapper is never reached, and VDOM does not collapse async wrappers either.
+- [x] KeepAlive: relax `isKeepAlive` to accept `type.__isKeepAlive` on Vapor instances;
       for cache entries use `entry.vapor ? entry : entry.vnode?.component`.
-- [ ] Fragment flag for Vapor: `Array.isArray(block)` or a multi-node fragment root.
-      Render key: `instance.$key` if present.
-- [ ] Tags: add `teleport` tag for children found under a teleport fragment, and
+- [x] Fragment flag for Vapor: `Array.isArray(block)` or a multi-node fragment root.
+      Render key: `instance.$key` if present. `v-for` keys live on the `ForBlock`, so the
+      walk passes them down as `WalkedComponentChild.renderKey`.
+- [x] Tags: add `teleport` tag for children found under a teleport fragment, and
       `v-for`/`v-if` are not shown (same as VDOM).
 
 ### Phase 2 — Tree liveness (no add/remove events)
