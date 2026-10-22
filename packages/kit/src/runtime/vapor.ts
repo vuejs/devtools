@@ -54,6 +54,10 @@ export function isForFragment(value: unknown): value is VaporFragmentLike {
   return hasFragmentBit(value, VF.FOR)
 }
 
+export function isForBlock(value: unknown): value is VaporFragmentLike {
+  return hasFragmentBit(value, VF.FOR_BLOCK)
+}
+
 function hasFragmentBit(value: unknown, bit: number): boolean {
   return isVaporFragment(value) && (value.__vf & bit) !== 0
 }
