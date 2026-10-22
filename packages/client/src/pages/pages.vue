@@ -169,6 +169,7 @@ function isParamPart(part: string): boolean {
             class="w-full border-0 bg-transparent color-inherit outline-none placeholder-color-gray-500 dark:placeholder-gray-300"
             type="text"
             placeholder="/"
+            aria-label="Route path"
             @keydown.enter="navigate"
           />
         </div>
@@ -260,8 +261,8 @@ function isParamPart(part: string): boolean {
                         </button>
 
                         <Dropdown v-else>
-                          <code
-                            class="block cursor-pointer font-mono"
+                          <button
+                            class="block cursor-pointer border-0 bg-transparent p-0 color-inherit font-mono"
                             :class="
                               routeMatches(currentRoute?.matched ?? [], item)
                                 ? 'text-primary-400'
@@ -269,6 +270,7 @@ function isParamPart(part: string): boolean {
                                   ? 'text-teal'
                                   : ''
                             "
+                            type="button"
                           >
                             <span
                               v-for="(part, index) in getRouteParts(item)"
@@ -281,7 +283,7 @@ function isParamPart(part: string): boolean {
                             >
                               {{ isParamPart(part) ? part.slice(1) : part }}
                             </span>
-                          </code>
+                          </button>
 
                           <template #popper="{ hide }">
                             <div class="p-2">
@@ -304,6 +306,7 @@ function isParamPart(part: string): boolean {
                                       v-if="isParamPart(part)"
                                       class="w-20 rounded-1 border border-primary-100 bg-transparent px-2 py-0.75 color-inherit outline-none dark:border-gray-700"
                                       :placeholder="part.slice(1)"
+                                      :aria-label="`Route param ${part.slice(1)}`"
                                       :value="getRouteInput(item, index)"
                                       @input="setRouteInput(item, index, getInputValue($event))"
                                     />
@@ -331,13 +334,16 @@ function isParamPart(part: string): boolean {
                       v-if="metaFieldVisible"
                       class="w-50 whitespace-nowrap pr-1 text-left font-mono text-sm op50 hover:text-primary hover:op100"
                     >
-                      <span
-                        class="inline-block w-50 cursor-pointer overflow-hidden text-ellipsis"
+                      <button
+                        v-if="hasMeta(item)"
+                        class="block w-50 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap border-0 bg-transparent p-0 text-left color-inherit font-mono text-sm"
+                        type="button"
                         :title="metaToString(item.meta, 2)"
                         @click="selectMeta(item.meta)"
                       >
                         {{ metaToString(item.meta) }}
-                      </span>
+                      </button>
+                      <span v-else class="inline-block w-50">-</span>
                     </td>
                   </tr>
                 </tbody>
