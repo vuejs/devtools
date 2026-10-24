@@ -63,6 +63,7 @@ interface EncodeState {
   entryOffset: number
   depth: number
   seen: WeakMap<object, ValueHandle>
+  expanded: WeakSet<object>
   handles: ValueHandleRegistry
   handleScope?: string
   maxDepth: number
@@ -77,6 +78,7 @@ export function encodeValue(value: unknown, options: ValueCodecOptions = {}): En
     entryOffset: options.entryOffset ?? 0,
     entryKeys: options.entryKeys,
     seen: new WeakMap(),
+    expanded: new WeakSet(),
     handles,
     handleScope: options.handleScope,
     maxDepth: options.maxDepth ?? 2,
@@ -138,8 +140,19 @@ function encodeUnsafe(value: unknown, state: EncodeState): EncodedValue {
   if (circular) return { kind: 'circular', handle: circular }
 
   const handle = state.handles.getOrCreate(value, state.handleScope)
+  // Only ancestors on the current path are circular. A value repeated elsewhere
+  // is encoded again, but its children are walked only once per encodeValue call.
+  const repeated = state.expanded.has(value)
+  if (state.depth < state.maxDepth) state.expanded.add(value)
   state.seen.set(value, handle)
+  try {
+    return encodeReference(value, handle, repeated ? { ...state, maxDepth: state.depth } : state)
+  } finally {
+    state.seen.delete(value)
+  }
+}
 
+function encodeReference(value: object, handle: ValueHandle, state: EncodeState): EncodedValue {
   if (isCustomValue(value)) return encodeCustomValue(value, handle, state)
 
   if (isDomElement(value)) return encodeDomElement(value)

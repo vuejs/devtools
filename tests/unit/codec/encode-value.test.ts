@@ -73,6 +73,43 @@ describe('encodeValue', () => {
     expect(secondChild.preview.find((entry) => entry.key === 'root')?.value.kind).toBe('circular')
   })
 
+  it('does not mark repeated non-circular references as circular', () => {
+    const item = { id: 1 }
+    const day = new Date(0)
+
+    const encoded = encodeValue({ items: [item, item], start: day, end: day }, { maxDepth: 3 })
+
+    expect(encoded.kind).toBe('object')
+    if (encoded.kind !== 'object') return
+
+    const items = encoded.preview.find((entry) => entry.key === 'items')?.value
+    expect(items?.kind).toBe('array')
+    if (items?.kind !== 'array') return
+
+    const [first, second] = items.preview.map((entry) => entry.value)
+    expect(first).toMatchObject({
+      kind: 'object',
+      entries: 1,
+      preview: [{ key: 'id', value: { kind: 'number', value: 1 } }],
+    })
+    if (first?.kind !== 'object') return
+    // The repeat keeps its handle, so its fields load on expand like a value at the depth limit.
+    expect(second).toEqual({ ...first, preview: [] })
+
+    const date = { kind: 'date', value: '1970-01-01T00:00:00.000Z' }
+    expect(encoded.preview.find((entry) => entry.key === 'start')?.value).toEqual(date)
+    expect(encoded.preview.find((entry) => entry.key === 'end')?.value).toEqual(date)
+  })
+
+  it('walks a shared subtree once instead of once per path', () => {
+    let node: object = { leaf: true }
+    for (let level = 0; level < 16; level++) node = { left: node, right: node }
+
+    const encoded = encodeValue(node, { maxDepth: 20 })
+
+    expect(JSON.stringify(encoded).length).toBeLessThan(10_000)
+  })
+
   it('truncates previews according to the configured state budget', () => {
     const encoded = encodeValue({ first: 1, second: 2, third: 3 }, { maxEntries: 2 })
 
