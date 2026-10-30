@@ -12,15 +12,15 @@ Nothing in the devtools source handles Vapor. Every component-structure read in
 
 ### What Vue 3.6 gives us
 
-| Signal                     | Vapor behaviour                                                                                                             | Source                                               |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `app:init` / `app:unmount` | Fired; `app._instance` = root `VaporComponentInstance`, `app.vapor = true`                                                  | runtime-vapor `createVaporApp` → core `createAppAPI` |
-| `component:added`          | **Only** on VaporKeepAlive activate/deactivate                                                                              | runtime-vapor `activate$1`/`deactivate$1`            |
-| `component:updated`        | **Never** for Vapor instances                                                                                               | —                                                    |
-| `component:removed`        | **Never** for Vapor instances (also not for Vapor children of VDOM parents: core returns before `devtoolsComponentRemoved`) | core `unmountComponent`                              |
-| `component:emit`           | Fired, payload instance is the Vapor instance                                                                               | core `baseEmit`                                      |
-| `perf:start/end`           | Phases `init`, `mount`, `renderEffect` (new). No `render`/`patch`                                                           | core `startMeasure`                                  |
-| DOM → instance             | **None.** No `__vueParentComponent` / `__vnode` on Vapor-rendered nodes                                                     | —                                                    |
+| Signal                     | Vapor behaviour                                                            | Source                                               |
+| -------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `app:init` / `app:unmount` | Fired; `app._instance` = root `VaporComponentInstance`, `app.vapor = true` | runtime-vapor `createVaporApp` → core `createAppAPI` |
+| `component:added`          | Mount (core#16027) and VaporKeepAlive activate/deactivate                  | runtime-vapor `mountComponent`, KeepAlive            |
+| `component:updated`        | **Never** for Vapor instances                                              | —                                                    |
+| `component:removed`        | Unmount of mounted instances (core#16027); not on KeepAlive deactivation   | runtime-vapor `unmountComponent`                     |
+| `component:emit`           | Fired, payload instance is the Vapor instance                              | core `baseEmit`                                      |
+| `perf:start/end`           | Phases `init`, `mount`, `renderEffect` (new). No `render`/`patch`          | core `startMeasure`                                  |
+| DOM → instance             | **None.** No `__vueParentComponent` / `__vnode` on Vapor-rendered nodes    | —                                                    |
 
 ### Vapor instance shape (what we can read)
 
@@ -71,7 +71,7 @@ Fragments have `nodes` and a bit field `__vf`:
 | Listeners section                                                 | `kit/src/runtime/state/sections.ts:105-110` (`vnode.props`)           | Empty                                                           |
 | Data / options computed / inject                                  | `sections.ts`, `state/computed.ts` (`proxy`, `ctx`, `data`, `effect`) | Empty (expected: Vapor is Composition-API-only)                 |
 | Props editing                                                     | `state/edit.ts` writes `instance.props`                               | Silently ignored (warns in console)                             |
-| Tree liveness                                                     | `runtime/runtime.ts`, `hook/normalize.ts` rely on add/update/remove   | Mounts/unmounts/HMR never reported                              |
+| Tree liveness                                                     | `runtime/runtime.ts`, `hook/normalize.ts` rely on add/update/remove   | Fixed by core#16027 (Phase 2); no `component:updated`           |
 | Update flash / timing                                             | `runtime/update-highlight.ts:51-83` (`patch` phase)                   | No update flashes for Vapor                                     |
 | Render code                                                       | `component-inspector.ts:173-183`                                      | Works for dev (`type.render`)                                   |
 | Name / file / open-in-editor / emits timeline / perf mount        | —                                                                     | Should already work                                             |
@@ -117,24 +117,19 @@ Tick each item when it lands. Phase 0 landed in #1174.
 - [x] Tags: add `teleport` tag for children found under a teleport fragment, and
       `v-for`/`v-if` are not shown (same as VDOM).
 
-### Phase 2 — Tree liveness (no add/remove events)
+### Phase 2 — Tree liveness
 
-Vapor gives no lifecycle events, so the tree must be refreshed by re-walking.
-
-- [ ] When an app is Vapor or has interop enabled (`app._context.vapor`), mark it
-      `walkOnly`. Snapshots/expands already call `refreshComponentTree`; make
-      `refreshChild` / `getComponentChildren` treat records whose instance is
-      `isUnmounted` as removed and emit removal patches.
-- [ ] Triggers for re-walking expanded/visible subtrees, debounced per app:
-  - `perf:end` with phase `mount` or `renderEffect` for any instance in the app
-    (dev only; gives near-real-time updates since `v-if`/`v-for` changes run render effects),
-  - `component:emit`,
-  - `component:added` from KeepAlive,
-  - HMR: `__VUE_HMR_RUNTIME__` is not hooked; fall back to a low-frequency poll
-    (e.g. 1 s) while the Components tab is open.
-- [ ] Garbage-collect records whose instance has `isUnmounted === true` during the walk.
-- [ ] Upstream ask (optional, parallel): propose `devtoolsComponentAdded/Removed` calls in
-      runtime-vapor `mountComponent`/`unmountComponent`. Keep the walker as fallback.
+- [x] Upstream: runtime-vapor `mountComponent` / `unmountComponent` now emit
+      `component:added` / `component:removed`
+      ([vuejs/core#16027](https://github.com/vuejs/core/pull/16027)). Interop mounts go
+      through the same functions, so each instance is reported once. Kept-alive
+      deactivation is not reported as removed; an async setup unmounted before it
+      resolves is never reported.
+- [x] The kit's existing `component:add` / `component:remove` handling covers Vapor; no
+      re-walk, polling, or Vapor-specific liveness code.
+      Test: `tests/integration/runtime/vapor-tree-hooks.test.ts`.
+- Vapor never emits `component:updated` (no component-level re-render). Child ordering
+  after a `v-for` reorder is covered in Phase 3.
 
 ### Phase 3 — DOM: bounds, highlight, scroll, ordering
 
@@ -148,6 +143,22 @@ Vapor gives no lifecycle events, so the tree must be refreshed by re-walking.
 - [ ] Reuse the existing `isVisibleRootNode` filter so anchors (`<!--if-->`, empty text)
       are skipped.
 - [ ] `readComponentDomOrder` then works unchanged.
+- [ ] Regression: `v-for` reorder ordering. Today `readComponentDomOrder` returns `[-1]`
+      for every Vapor instance, so siblings sort by id. Repro: a Vapor `Root` renders
+      `createFor(() => items.value, () => createComponent(Item), item => item)`, then
+      `items.value` goes `['a', 'b', 'c']` → `['c', 'b', 'a']`:
+
+      | | live (client applies patches) | `components.snapshot()` |
+      | --- | --- | --- |
+      | VDOM | `a b c` | `c b a` |
+      | Vapor | `a b c` | `a b c` (should be `c b a`) |
+
+      - Snapshot order: Vapor-specific, caused by the missing Vapor root nodes above.
+        Once this phase lands, add the reorder case to `vapor-tree-hooks.test.ts`
+        asserting `snapshot` keys are `'c', 'b', 'a'`.
+      - Live order: not Vapor-specific. `applyComponentTreePatches` ignores `domOrder`,
+        so VDOM is stale too until the next snapshot. Not caused by the missing
+        `component:updated`; out of scope here.
 
 ### Phase 4 — Element picker
 
@@ -204,8 +215,8 @@ Vapor nodes have no back-reference.
 
 ## 5. Open questions
 
-1. Is periodic polling acceptable for HMR/unmount detection, or should we push upstream
-   for proper `component:added/removed` events first?
+1. ~~Is periodic polling acceptable for HMR/unmount detection, or should we push upstream
+   for proper `component:added/removed` events first?~~ Resolved upstream in core#16027.
 2. Production-devtools Vapor builds have no setup state — acceptable limitation?
 3. Should interop wrapper uids / `VaporAsyncComponentWrapper` be hidden by default?
 4. Vue 3.6 is still RC: re-verify field names (`__vf` bits, `block`, `pendingBlock`,

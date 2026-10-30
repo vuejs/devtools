@@ -57,7 +57,7 @@ catalog:
   picocolors: ^1.1.1
   verkit: ^0.5.0
   nue-glow: 0.2.5
-  vue-3.6: npm:vue@3.6.0-rc.5
+  vue-3.6: npm:vue@3.6.0-rc.14
 
 overrides:
   '@devframes/hub': ^1.2.6
