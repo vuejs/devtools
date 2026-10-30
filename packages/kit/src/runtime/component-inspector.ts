@@ -1,4 +1,5 @@
 import type { ComponentRecord } from './registry'
+import { isInteropFragment, isVaporFragment, isVaporInstance } from './vapor'
 import type { AppId, ComponentId, InstanceRef } from './types'
 import type { DevtoolsRuntime } from './runtime'
 
@@ -419,6 +420,9 @@ export function getRootNodesFromInstance(instance: InstanceRef, seen = new Set<o
   if (seen.has(instance)) return []
   seen.add(instance)
 
+  if (isVaporInstance(instance))
+    return getRootNodesFromBlock(readUnknownProperty(instance, 'block'), seen)
+
   const subtree = readObjectProperty(instance, 'subTree') ?? readObjectProperty(instance, 'vnode')
   return subtree ? getRootNodesFromVNode(subtree, seen) : []
 }
@@ -448,6 +452,17 @@ function getRootNodesFromVNode(vnode: object, seen: Set<object>): Node[] {
   if (!Array.isArray(children)) return isNode(el) ? [el] : []
 
   return children.flatMap((child) => (isObject(child) ? getRootNodesFromVNode(child, seen) : []))
+}
+
+// Walks a Vapor `Block` (Node | VaporComponentInstance | VaporFragment | Block[]).
+// Fragment anchors are comments or empty text and are dropped as invisible nodes.
+function getRootNodesFromBlock(block: unknown, seen: Set<object>): Node[] {
+  if (isNode(block)) return isVisibleRootNode(block) && !isEmptyText(block) ? [block] : []
+  if (Array.isArray(block)) return block.flatMap((child) => getRootNodesFromBlock(child, seen))
+  if (isVaporInstance(block)) return getRootNodesFromInstance(block as InstanceRef, seen)
+  if (!isVaporFragment(block)) return []
+  if (isInteropFragment(block)) return block.vnode ? getRootNodesFromVNode(block.vnode, seen) : []
+  return getRootNodesFromBlock(block.nodes, seen)
 }
 
 function getNodeRect(node: Node): ComponentBounds | undefined {
@@ -502,6 +517,10 @@ async function restoreDockPanelSafely(restore: ComponentInspectorDockRestore | u
   } catch {
     // Restoring the dock is best-effort; inspect result delivery should not be blocked by it.
   }
+}
+
+function isEmptyText(node: Node): boolean {
+  return node.nodeType === Node.TEXT_NODE && !node.textContent
 }
 
 function isNode(value: unknown): value is Node {
