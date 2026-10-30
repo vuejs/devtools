@@ -433,6 +433,10 @@ export class RuntimeRegistry {
     )
   }
 
+  refreshDomOrder(record: ComponentRecord, cache: ComponentDomOrderCache): void {
+    record.domOrder = readComponentDomOrder(record.instance, cache)
+  }
+
   toAppSnapshot(record: AppRecord): AppSnapshot {
     return {
       id: record.id,

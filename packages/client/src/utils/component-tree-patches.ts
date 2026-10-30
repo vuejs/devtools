@@ -68,11 +68,32 @@ export function applyComponentTreePatches(
         break
       }
       case 'reorder':
+        reorderSiblings(byId, patch.children)
         break
     }
   }
 
   return orderComponentTree([...byId.values()])
+}
+
+// Siblings render in insertion order, so move the listed ones to the first
+// listed sibling's slot in the given order.
+function reorderSiblings(byId: Map<string, ComponentTreeNodeSnapshot>, order: string[]): void {
+  const listed = new Set(order)
+  const previous = new Map(byId)
+  byId.clear()
+  let placed = false
+  for (const [id, node] of previous) {
+    if (!listed.has(id)) {
+      byId.set(id, node)
+    } else if (!placed) {
+      placed = true
+      for (const orderedId of order) {
+        const ordered = previous.get(orderedId)
+        if (ordered) byId.set(orderedId, ordered)
+      }
+    }
+  }
 }
 
 function orderComponentTree(nodes: ComponentTreeNodeSnapshot[]): ComponentTreeNodeSnapshot[] {
