@@ -20,6 +20,50 @@ import StateEntryRow from '../../../packages/client/src/components/components/St
 import { useDevtoolsClient } from '../../../packages/client/src/composables/devtools-client'
 
 describe('StateEntryRow', () => {
+  it('exposes a focusable native toggle and keeps mouse and action clicks independent', async () => {
+    const entry: StateEntry = {
+      key: 'payload',
+      path: ['State', 'a11y-payload'],
+      editable: true,
+      value: {
+        kind: 'object',
+        name: 'Object',
+        entries: 1,
+        preview: [{ key: 'count', value: { kind: 'number', value: 1 } }],
+      },
+    }
+    const wrapper = mountStateEntry(entry)
+    const toggle = wrapper.get<HTMLButtonElement>('button[aria-expanded]')
+    expect(toggle.attributes('type')).toBe('button')
+    expect(toggle.attributes('aria-label')).toBe('Toggle payload')
+    expect(toggle.element.tabIndex).toBe(0)
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+    expect(toggle.find('button, input, [tabindex]').exists()).toBe(false)
+
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+    expect(wrapper.findAll('[class~="group/state-row"]')).toHaveLength(2)
+
+    const child = wrapper.findAll('[class~="group/state-row"]')[1]!
+    await child.get('[aria-label="Edit state value"]').trigger('click')
+    expect(child.find('input').exists()).toBe(true)
+    expect(wrapper.find('button button, button input, [role="button"] button').exists()).toBe(false)
+    await child.get('[aria-label="Cancel state value edit"]').trigger('click')
+    expect(child.find('input').exists()).toBe(false)
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+
+    await wrapper.get('[aria-label="Copy state path"]').trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+    await wrapper.get('[class~="group/state-row"]').trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+
+    await wrapper.setProps({ entry: { ...entry, value: { kind: 'number', value: 2 } } })
+    expect(wrapper.find('[aria-expanded]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it.each([
     ['Object', { kind: 'object', name: 'Object', entries: 0, preview: [], handle: 'empty-object' }],
     ['Array', { kind: 'array', length: 0, preview: [], handle: 'empty-array' }],
@@ -36,6 +80,7 @@ describe('StateEntryRow', () => {
       })
 
       expect(wrapper.find('.i-carbon-chevron-right').exists()).toBe(false)
+      expect(wrapper.find('[aria-expanded]').exists()).toBe(false)
 
       await wrapper.find('[class~="group/state-row"]').trigger('click')
       expect(query).not.toHaveBeenCalled()
@@ -44,7 +89,7 @@ describe('StateEntryRow', () => {
     },
   )
 
-  it('keeps the expand icon for a non-empty value awaiting lazy children', async () => {
+  it('announces lazy expansion and reuses cached children when toggled again', async () => {
     const wrapper = mountStateEntry({
       key: 'lazy',
       path: ['State', 'lazy'],
@@ -70,10 +115,13 @@ describe('StateEntryRow', () => {
     })
 
     expect(wrapper.find('.i-carbon-chevron-right').exists()).toBe(true)
+    const toggle = wrapper.get('button[aria-expanded]')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
 
-    await wrapper.find('[class~="group/state-row"]').trigger('click')
+    await toggle.trigger('click')
     await flushPromises()
 
+    expect(toggle.attributes('aria-expanded')).toBe('true')
     expect(query).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'values:expand',
@@ -81,6 +129,15 @@ describe('StateEntryRow', () => {
       }),
     )
     expect(wrapper.text()).toContain('child')
+
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+    expect(wrapper.findAll('[class~="group/state-row"]')).toHaveLength(1)
+    await toggle.trigger('click')
+    await flushPromises()
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).toContain('child')
+    expect(query).toHaveBeenCalledTimes(1)
 
     wrapper.unmount()
   })
@@ -120,6 +177,7 @@ describe('StateEntryRow', () => {
     await flushPromises()
     expect(wrapper.text()).toContain('new-child')
     expect(wrapper.text()).not.toContain('old-child')
+    expect(wrapper.get('button[aria-expanded]').attributes('aria-expanded')).toBe('true')
     wrapper.unmount()
   })
 
