@@ -400,9 +400,16 @@ onUnmounted(() => {
                     :prerender="20"
                   >
                     <template #default="{ item: event }">
-                      <div
-                        class="relative h-7 cursor-pointer pl-3 pr-3 flex items-center gap-3 text-3.25 hover:bg-#8881"
+                      <button
+                        class="timeline-event relative h-7 w-full cursor-pointer border-0 bg-transparent pl-3 pr-3 py-0 color-base flex items-center gap-3 text-left text-3.25 hover:bg-#8881"
                         :class="{ 'bg-#8882! hover:bg-#8882': selectedEvent?.id === event.id }"
+                        type="button"
+                        :aria-pressed="selectedEvent?.id === event.id"
+                        :aria-label="
+                          [event.title ?? event.label, event.subtitle, formatClock(event.time)]
+                            .filter(Boolean)
+                            .join(', ')
+                        "
                         @click="selectEvent(event.id)"
                       >
                         <span
@@ -458,7 +465,7 @@ onUnmounted(() => {
                           <span class="op50">{{ formatClock(event.time).slice(0, 6) }}</span
                           >{{ formatClock(event.time).slice(6) }}
                         </span>
-                      </div>
+                      </button>
                     </template>
                   </RecycleScroller>
                 </div>
@@ -531,6 +538,11 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.timeline-event:focus-visible {
+  outline: 2px solid #00a86f;
+  outline-offset: -2px;
+}
+
 @keyframes pulse {
   50% {
     opacity: 0.5;
