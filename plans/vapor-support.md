@@ -133,32 +133,32 @@ Tick each item when it lands. Phase 0 landed in #1174.
 
 ### Phase 3 — DOM: bounds, highlight, scroll, ordering
 
-- [ ] `getRootNodesFromInstance`: if Vapor, `collectBlockNodes(instance.block)`:
+- [x] `getRootNodesFromInstance`: if Vapor, `collectBlockNodes(instance.block)`:
   - `Node` → itself
   - Vapor instance → recurse into its `block`
   - array → flatten
-  - teleport fragment → `nodes` (target side) only for bounds; `placeholder` for ordering
+  - teleport fragment → `nodes` (target side), same as VDOM teleported roots
   - fragment → `nodes`, ignore comment anchors for bounds
   - interop fragment → existing `getRootNodesFromVNode(frag.vnode)`
-- [ ] Reuse the existing `isVisibleRootNode` filter so anchors (`<!--if-->`, empty text)
-      are skipped.
-- [ ] `readComponentDomOrder` then works unchanged.
-- [ ] Regression: `v-for` reorder ordering. Today `readComponentDomOrder` returns `[-1]`
-      for every Vapor instance, so siblings sort by id. Repro: a Vapor `Root` renders
+- [x] Reuse the existing `isVisibleRootNode` filter so anchors (`<!--if-->`, empty text)
+      are skipped. Empty text is dropped on the Vapor path only.
+- [x] `readComponentDomOrder` then works unchanged.
+- [x] Regression: `v-for` reorder ordering. Before this phase `readComponentDomOrder` returned
+      `[-1]` for every Vapor instance, so siblings sorted by id. Repro: a Vapor `Root` renders
       `createFor(() => items.value, () => createComponent(Item), item => item)`, then
       `items.value` goes `['a', 'b', 'c']` → `['c', 'b', 'a']`:
 
       | | live (client applies patches) | `components.snapshot()` |
       | --- | --- | --- |
       | VDOM | `a b c` | `c b a` |
-      | Vapor | `a b c` | `a b c` (should be `c b a`) |
+      | Vapor | `a b c` | `c b a` (was `a b c` before this phase) |
 
       - Snapshot order: Vapor-specific, caused by the missing Vapor root nodes above.
-        Once this phase lands, add the reorder case to `vapor-tree-hooks.test.ts`
-        asserting `snapshot` keys are `'c', 'b', 'a'`.
+        Covered by the reorder case in `vapor-tree-hooks.test.ts`.
       - Live order: not Vapor-specific. `applyComponentTreePatches` ignores `domOrder`,
-        so VDOM is stale too until the next snapshot. Not caused by the missing
-        `component:updated`; out of scope here.
+        and the kit only refreshes the updated parent, not its children's `domOrder`,
+        so VDOM is stale too until the next snapshot. Fixed for VDOM in a separate PR
+        (`fix/component-tree-live-order`); the Vapor trigger is a Phase 6 item.
 
 ### Phase 4 — Element picker
 
@@ -195,6 +195,20 @@ Vapor nodes have no back-reference.
 - [ ] Accept the `renderEffect` perf phase: map it to "update" for timing and
       `update-highlight` flashes (currently keyed on `patch`).
 - [ ] Emits timeline: verify — should work as-is.
+- [ ] Live `v-for` reorder for Vapor. Needs Phase 3 (Vapor `domOrder`) and the
+      `fix/component-tree-live-order` PR, which makes a VDOM `component:updated` recompute
+      the visible children's `domOrder` and lets the client re-sort siblings when
+      `domOrder` changes. Vapor never emits `component:updated`, so that path never runs:
+  - Trigger the same child `domOrder` refresh from `perf:end` with phase `renderEffect`,
+    for the instance that owns the effect (`payload` instance), only when that instance
+    is visible and expanded in the tree. Debounce with `updateDebounceMs`, keyed like
+    `component:update`.
+  - Reuse the VDOM refresh function from the fix PR; do not add a Vapor-only path.
+  - Regression test in `vapor-tree-hooks.test.ts`: Vapor `Root` renders
+    `createFor(() => items.value, () => createComponent(Item), item => item)`; after
+    `items.value` goes `['a', 'b', 'c']` → `['c', 'b', 'a']`, the tree built by applying
+    `components:treePatched` patches (not a fresh snapshot) lists keys `'c', 'b', 'a'`.
+    Today it stays `'a', 'b', 'c'`.
 
 ### Phase 7 — Client / UI
 
