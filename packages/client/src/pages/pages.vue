@@ -23,7 +23,9 @@ let matchTimer: ReturnType<typeof setTimeout> | undefined
 const currentRoute = computed(() => routerSnapshot.value.currentRoute)
 const currentPath = computed(() => currentRoute.value?.path ?? currentRoute.value?.fullPath ?? '')
 const routes = computed<RouteRow[]>(() =>
-  flattenRoutes(routerSnapshot.value.routes).sort((a, b) => a.path.localeCompare(b.path)),
+  routerSnapshot.value.routes
+    .map((route, index) => ({ ...route, id: `route:${index}:${route.path}` }))
+    .sort((a, b) => a.path.localeCompare(b.path)),
 )
 const routeInputMatched = computed(() =>
   routeInput.value === currentRoute.value?.path ? [] : matchedRoutes.value,
@@ -66,16 +68,6 @@ async function navigateToRoute(path: string) {
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err)
   }
-}
-
-function flattenRoutes(
-  routesToFlatten: RouterRouteRecordSnapshot[],
-  parentId = 'route',
-): RouteRow[] {
-  return routesToFlatten.flatMap((route, index) => {
-    const id = `${parentId}:${index}:${route.path}`
-    return [{ ...route, id }, ...flattenRoutes(route.children ?? [], id)]
-  })
 }
 
 function routeMatches(
