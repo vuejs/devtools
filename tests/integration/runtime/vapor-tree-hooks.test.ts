@@ -87,4 +87,30 @@ describe('Vapor tree via devtools hooks', () => {
     await settle()
     expect(names().sort()).toEqual(['Item', 'Item', 'Item', 'Root'])
   })
+
+  it('orders v-for children by DOM position after a reorder', async () => {
+    const items = ref(['a', 'b', 'c'])
+    const Item = defineVaporComponent({ name: 'Item', setup: () => template('<i></i>')() })
+    await mount(
+      defineVaporComponent({
+        name: 'Root',
+        setup: () =>
+          createFor(
+            () => items.value,
+            () => createComponent(Item),
+            (item: string) => item,
+          ),
+      }),
+    )
+    const keys = () =>
+      runtime!.components
+        .snapshot()
+        .nodes.filter((node) => node.name === 'Item')
+        .map((node) => node.renderKey)
+    expect(keys()).toEqual(["'a'", "'b'", "'c'"])
+
+    items.value = ['c', 'b', 'a']
+    await settle()
+    expect(keys()).toEqual(["'c'", "'b'", "'a'"])
+  })
 })
