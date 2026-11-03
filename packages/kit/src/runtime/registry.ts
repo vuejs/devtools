@@ -122,6 +122,11 @@ export class RuntimeRegistry {
   private apps = new Map<AppId, AppRecord>()
   private componentIds = new WeakMap<InstanceRef, ComponentId>()
   private retiredApps = new WeakSet<AppRef>()
+  // Children reported by `component:added` under a Vapor parent. A Vapor block only
+  // holds child instances that are block roots; children inserted into an element
+  // (`<div><Child /></div>`) are not reachable from the parent at all. Filled by the
+  // hook (`trackVaporChild`), including events that arrive before `app:init`.
+  private vaporChildren = new WeakMap<InstanceRef, Set<InstanceRef>>()
   private eventDomOrder?: ComponentDomOrderCache
 
   private getEventDomOrder(): ComponentDomOrderCache {
@@ -302,7 +307,7 @@ export class RuntimeRegistry {
       records.push(record)
       if (depth >= maxDepth) return
 
-      const children = getInternalInstanceChildren(instance)
+      const children = this.getInstanceChildren(instance)
       const activeChildren = new Set(children.map((child) => child.instance))
 
       for (const child of children) {
@@ -340,6 +345,36 @@ export class RuntimeRegistry {
 
     app.components.delete(id)
     return record
+  }
+
+  // Block-walked children first (they carry tags and render keys), then any
+  // reported child the block does not reach. Kept-alive children that are
+  // deactivated are left to the KeepAlive cache walk.
+  getInstanceChildren(instance: InstanceRef): WalkedComponentChild[] {
+    const children = getInternalInstanceChildren(instance)
+    const tracked = isVaporInstance(instance) ? this.vaporChildren.get(instance) : undefined
+    if (!tracked?.size) return children
+
+    const walked = new Set(children.map((child) => child.instance))
+    for (const child of tracked) {
+      if (walked.has(child) || isBeingDestroyed(child) || isComponentHidden(child)) continue
+      if (isComponentInactive(child)) continue
+      children.push({ instance: child })
+    }
+    return children
+  }
+
+  trackVaporChild(instance: InstanceRef): void {
+    const parent = readObjectProperty(instance, 'parent')
+    if (!parent || !isVaporInstance(parent)) return
+    const children = this.vaporChildren.get(parent) ?? new Set<InstanceRef>()
+    children.add(instance)
+    this.vaporChildren.set(parent, children)
+  }
+
+  untrackVaporChild(instance: InstanceRef): void {
+    const parent = readObjectProperty(instance, 'parent')
+    if (parent) this.vaporChildren.get(parent)?.delete(instance)
   }
 
   getApp(appId: AppId): AppRecord | undefined {
@@ -392,7 +427,7 @@ export class RuntimeRegistry {
   }
 
   getComponentChildCount(record: ComponentRecord): number {
-    const children = getInternalInstanceChildren(record.instance).map((child) => child.instance)
+    const children = this.getInstanceChildren(record.instance).map((child) => child.instance)
     const childInstances = new Set(children)
     if (isKeepAlive(record.instance)) {
       for (const cached of getKeepAliveCachedInstances(record.instance)) childInstances.add(cached)
@@ -401,7 +436,7 @@ export class RuntimeRegistry {
   }
 
   getComponentChildren(record: ComponentRecord): WalkedComponentChild[] {
-    const children = getInternalInstanceChildren(record.instance)
+    const children = this.getInstanceChildren(record.instance)
     if (isKeepAlive(record.instance)) {
       const active = new Set(children.map((child) => child.instance))
       for (const instance of getKeepAliveCachedInstances(record.instance)) {

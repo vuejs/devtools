@@ -128,6 +128,12 @@ Tick each item when it lands. Phase 0 landed in #1174.
 - [x] The kit's existing `component:add` / `component:remove` handling covers Vapor; no
       re-walk, polling, or Vapor-specific liveness code.
       Test: `tests/integration/runtime/vapor-tree-hooks.test.ts`.
+- [x] Children inserted into an element (`<div><Child /></div>`, the usual SFC shape) are
+      not reachable from the parent's `block`, and on first mount their `component:added`
+      fires before `app:init`, so they were dropped and missing from the tree. The hook
+      records `instance.parent → instance` for every `component:added` / `removed`,
+      whether or not the app is registered yet, and `RuntimeRegistry.getInstanceChildren`
+      merges those children with the block walk. Tests: `vapor-tree-hooks.test.ts`, `vapor-picker.test.ts`.
 - Vapor never emits `component:updated` (no component-level re-render). Child ordering
   after a `v-for` reorder is covered in Phase 3.
 
@@ -164,13 +170,18 @@ Tick each item when it lands. Phase 0 landed in #1174.
 
 Vapor nodes have no back-reference.
 
-- [ ] Build `WeakMap<Node, VaporInstance>` lazily: when the picker starts (and on refresh),
-      walk every registered Vapor app from `app._instance` with `collectBlockNodes`,
-      mapping each node to its **innermost** owning instance.
-- [ ] `findComponentRecordFromTarget`: walk `parentNode` upward checking
-      `__vueParentComponent` **or** the map; first hit wins.
-- [ ] Rebuild the map on picker start and after Phase 2 refreshes; it is cheap enough for
-      playground-scale trees, measure on a large `v-for`.
+- [x] `VaporNodeOwnerIndex` in `component-inspector.ts`: a `WeakMap<Node, VaporInstance>`
+      built by walking every registered app from `rootInstance` with
+      `getInternalInstanceChildren`, so Vapor components under a VDOM root are covered.
+      Each Vapor instance maps the nodes its own block renders (not those of child
+      instances or interop VNodes); nested elements resolve by walking `parentNode`.
+- [x] `findComponentRecordFromTarget`: each ancestor checks `__vueParentComponent`, then
+      the index; first hit wins.
+- [x] Freshness: Vapor `v-if` / `v-for` swap nodes without any devtools event, so the
+      index is rebuilt on lookup when older than 250 ms. Not yet measured on a large `v-for`.
+      Test: `tests/integration/runtime/vapor-picker.test.ts`.
+- Slot content maps to the component whose block holds it, not `slotOwner` (VDOM picks
+  the owner that rendered the slot). Revisit if it is confusing in the playground.
 
 ### Phase 5 — State inspector
 

@@ -71,6 +71,7 @@ export function installDevtoolsHook(options: InstallDevtoolsHookOptions): Instal
   for (const eventName of eventNames) {
     disposers.push(
       hook.on(eventName, (...payload: unknown[]) => {
+        trackVaporChild(options.runtime, eventName, payload)
         const event = normalizeHookEvent(options.runtime.registry, eventName, payload)
         if (event) options.runtime.dispatch(event)
       }),
@@ -102,6 +103,17 @@ export function installDevtoolsHook(options: InstallDevtoolsHookOptions): Instal
       disposers.forEach((dispose) => dispose())
     },
   }
+}
+
+// A Vapor child inserted into an element (`<div><Child /></div>`) is not reachable from
+// its parent's block, and on first mount its `component:added` fires before `app:init`,
+// when the app is not registered yet. Record the parent link from every hook event,
+// whether or not the app is known, so the tree can find the child later.
+function trackVaporChild(runtime: DevtoolsRuntime, eventName: string, payload: unknown[]) {
+  const instance = payload[3]
+  if (!instance || typeof instance !== 'object') return
+  if (eventName === 'component:added') runtime.registry.trackVaporChild(instance)
+  else if (eventName === 'component:removed') runtime.registry.untrackVaporChild(instance)
 }
 
 function createDevtoolsHookableBridge(): DevtoolsHookableBridge {

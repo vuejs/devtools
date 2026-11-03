@@ -9,6 +9,7 @@ import {
   createComponent,
   createFor,
   createIf,
+  insert,
   createVaporApp,
   defineVaporComponent,
   nextTick,
@@ -58,6 +59,23 @@ async function settle() {
 }
 
 describe('Vapor tree via devtools hooks', () => {
+  it('keeps children inserted into an element at initial mount', async () => {
+    // Compiled `<div><Child /></div>`: `Child` is not in the root block and its
+    // `component:added` fires before `app:init`.
+    const Child = defineVaporComponent({ name: 'Child', setup: () => template('<b></b>')() })
+    const tree = await mount(
+      defineVaporComponent({
+        name: 'Root',
+        setup: () => {
+          const div = template('<div></div>')() as Element
+          insert(createComponent(Child) as never, div)
+          return div
+        },
+      }),
+    )
+    expect(tree.nodes().map((node) => node.name)).toEqual(['Root', 'Child'])
+  })
+
   it('adds and removes v-if / v-for children', async () => {
     const show = ref(true)
     const items = ref([1, 2])
