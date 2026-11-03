@@ -68,4 +68,17 @@ describe('component tree patch application', () => {
     ])
     expect(result.map((item) => item.id)).toEqual([...nodes.map((item) => item.id), 'orphan'])
   })
+  it('reorders siblings and keeps their subtrees attached', () => {
+    const nodes = [
+      node('root'),
+      node('a', 'root'),
+      node('a1', 'a'),
+      node('b', 'root'),
+      node('c', 'root'),
+    ]
+    const result = applyComponentTreePatches(nodes, [
+      { op: 'reorder', parentId: 'root', children: ['c', 'b', 'a'] },
+    ])
+    expect(result.map((item) => item.id)).toEqual(['root', 'c', 'b', 'a', 'a1'])
+  })
 })
