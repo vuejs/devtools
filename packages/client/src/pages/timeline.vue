@@ -539,7 +539,7 @@ onUnmounted(() => {
 
 <style scoped>
 .timeline-event:focus-visible {
-  outline: 2px solid #00a86f;
+  outline: 2px solid currentColor;
   outline-offset: -2px;
 }
 
