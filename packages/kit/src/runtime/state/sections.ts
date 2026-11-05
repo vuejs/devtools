@@ -16,6 +16,7 @@ import {
 } from './instance'
 import { createComputedReader, readComputedSource } from './computed'
 import { isComputedRef } from '../../codec'
+import { isVaporInstance } from '../vapor'
 
 type SectionId = ComponentStateSection['id']
 
@@ -34,6 +35,7 @@ export function createSectionSources(
 ): SectionSource[] {
   const record = instance as Record<string, unknown>
   const type = readObject(record, 'type')
+  const vapor = isVaporInstance(instance)
   const mergedType = resolveMergedOptions(instance)
   const proxy = readObject(record, 'proxy')
   const computed = readObject(mergedType, 'computed')
@@ -48,7 +50,8 @@ export function createSectionSources(
       id: 'props',
       label: 'Props',
       source: readObject(record, 'props'),
-      editable: true,
+      // Vapor props are a read-only proxy over the parent's getters; writes are ignored.
+      editable: !vapor,
       meta: createPropMetaReader(type),
     }),
     data: () => ({
@@ -105,7 +108,12 @@ export function createSectionSources(
     listeners: () => ({
       id: 'listeners',
       label: 'Listeners',
-      source: createListenerReader(readObject(readObject(record, 'vnode'), 'props'), type),
+      source: createListenerReader(
+        vapor
+          ? readVaporListenerProps(readObject(record, 'rawProps'))
+          : readObject(readObject(record, 'vnode'), 'props'),
+        type,
+      ),
       editable: false,
     }),
   }
@@ -320,6 +328,29 @@ function createListenerReader(
     }
   }
 
+  return listeners
+}
+
+// Vapor has no `vnode.props`; listeners live in `rawProps` as `onXxx` getters, plus
+// `rawProps.$` dynamic sources (`v-bind="obj"`). A function source is read only when
+// Vue has already resolved it (`_cache`), so devtools never runs user getters.
+function readVaporListenerProps(rawProps: object | undefined): object | undefined {
+  if (!rawProps) return
+
+  const listeners: Record<string, true> = {}
+  const add = (source: unknown) => {
+    if (source == null || typeof source !== 'object') return
+    for (const key of Object.keys(source)) if (/^on[A-Z]/.test(key)) listeners[key] = true
+  }
+
+  add(rawProps)
+  const dynamicSources = readUnknownProperty(rawProps, '$')
+  if (Array.isArray(dynamicSources)) {
+    for (const source of dynamicSources) {
+      if (typeof source !== 'function') add(source)
+      else add(readUnknownProperty(readObject(source, '_cache') ?? {}, 'value'))
+    }
+  }
   return listeners
 }
 
