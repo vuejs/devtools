@@ -12,7 +12,7 @@
     "@antfu/design": "catalog:",
     "@antfu/utils": "^9.3.0",
     "@unocss/reset": "catalog:",
-    "@unocss/transformer-directives": "^66.10.5",
+    "@unocss/transformer-directives": "^66.12.0",
     "vue": "3.6.0-rc.14"
   },
   "devDependencies": {
