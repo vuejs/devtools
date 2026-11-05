@@ -9,12 +9,14 @@ import {
   createComponent,
   createFor,
   createIf,
+  insert,
   createVaporApp,
   defineVaporComponent,
   nextTick,
   ref,
   setDevtoolsHook,
   template,
+  VaporKeepAlive,
 } from 'vue-3.6/dist/vue.runtime-with-vapor.esm-browser.js'
 import { installDevtoolsHook } from '../../../packages/kit/src/hook/install'
 import { createDevtoolsRuntime } from '../../../packages/kit/src/runtime/runtime'
@@ -58,6 +60,54 @@ async function settle() {
 }
 
 describe('Vapor tree via devtools hooks', () => {
+  it('keeps element-inserted descendants of a deactivated kept-alive component', async () => {
+    const show = ref(true)
+    const Leaf = defineVaporComponent({ name: 'Leaf', setup: () => template('<b></b>')() })
+    const Cached = defineVaporComponent({
+      name: 'Cached',
+      setup: () => {
+        const div = template('<div></div>')() as Element
+        insert(createComponent(Leaf) as never, div)
+        return div
+      },
+    })
+    await mount(
+      defineVaporComponent({
+        name: 'Root',
+        setup: () =>
+          createComponent(VaporKeepAlive, null, {
+            default: () =>
+              createIf(
+                () => show.value,
+                () => createComponent(Cached),
+              ),
+          }),
+      }),
+    )
+    show.value = false
+    await settle()
+    // `Leaf` sits below the initial depth, so check the collapsed node's child count.
+    const cached = runtime!.components.snapshot().nodes.find((node) => node.name === 'Cached')
+    expect(cached).toMatchObject({ inactive: true, childCount: 1 })
+  })
+
+  it('keeps children inserted into an element at initial mount', async () => {
+    // Compiled `<div><Child /></div>`: `Child` is not in the root block and its
+    // `component:added` fires before `app:init`.
+    const Child = defineVaporComponent({ name: 'Child', setup: () => template('<b></b>')() })
+    const tree = await mount(
+      defineVaporComponent({
+        name: 'Root',
+        setup: () => {
+          const div = template('<div></div>')() as Element
+          insert(createComponent(Child) as never, div)
+          return div
+        },
+      }),
+    )
+    expect(tree.nodes().map((node) => node.name)).toEqual(['Root', 'Child'])
+  })
+
   it('adds and removes v-if / v-for children', async () => {
     const show = ref(true)
     const items = ref([1, 2])

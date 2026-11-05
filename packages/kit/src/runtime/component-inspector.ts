@@ -55,6 +55,7 @@ export function inspectComponentInPage(
   const inspectedDocument = context.document
 
   cancelComponentInspection()
+  const vaporNodes = new VaporNodeOwnerIndex(runtime)
 
   return new Promise((resolve) => {
     let restoreDockPanel: (() => Promise<void>) | undefined
@@ -79,7 +80,7 @@ export function inspectComponentInPage(
     }
 
     function onMouseOver(event: MouseEvent) {
-      const record = findComponentRecord(runtime, event)
+      const record = findComponentRecord(runtime, vaporNodes, event)
       if (!record) {
         removeOverlay(inspectedDocument)
         return
@@ -88,7 +89,9 @@ export function inspectComponentInPage(
     }
 
     function onClick(event: MouseEvent) {
-      const record = findComponentRecord(runtime, event)
+      // Hover lookups are throttled; the click must see nodes mounted since then.
+      vaporNodes.invalidate()
+      const record = findComponentRecord(runtime, vaporNodes, event)
       if (!record) return
 
       event.preventDefault()
@@ -244,22 +247,77 @@ export function exposeValueAsGlobal(value: unknown): string | undefined {
   return name
 }
 
+// Vapor-rendered nodes carry no `__vueParentComponent`, so the picker maps each node
+// a Vapor instance renders directly (not through a child component) back to it.
+// Vapor `v-if` / `v-for` swap nodes without any devtools event, so the index is
+// rebuilt on lookup once it is older than `VAPOR_INDEX_TTL_MS`.
+const VAPOR_INDEX_TTL_MS = 250
+
+class VaporNodeOwnerIndex {
+  private owners: WeakMap<Node, InstanceRef> | undefined
+  private builtAt = 0
+
+  constructor(private readonly runtime: DevtoolsRuntime) {}
+
+  invalidate(): void {
+    this.owners = undefined
+  }
+
+  get(node: Node): InstanceRef | undefined {
+    if (!this.owners || Date.now() - this.builtAt >= VAPOR_INDEX_TTL_MS) this.build()
+    return this.owners!.get(node)
+  }
+
+  private build() {
+    const owners = new WeakMap<Node, InstanceRef>()
+    const visited = new Set<object>()
+    const stack: object[] = []
+    for (const app of this.runtime.registry.listApps())
+      if (app.rootInstance) stack.push(app.rootInstance)
+
+    while (stack.length) {
+      const instance = stack.pop()!
+      if (visited.has(instance)) continue
+      visited.add(instance)
+      if (isVaporInstance(instance)) {
+        for (const node of getOwnNodesFromBlock(readUnknownProperty(instance, 'block')))
+          owners.set(node, instance)
+      }
+      for (const child of this.runtime.registry.getInstanceChildren(instance))
+        stack.push(child.instance)
+    }
+
+    this.owners = owners
+    this.builtAt = Date.now()
+  }
+}
+
+// Nodes a Vapor block renders itself; child instances and interop VNodes own theirs.
+function getOwnNodesFromBlock(block: unknown): Node[] {
+  if (isNode(block)) return [block]
+  if (Array.isArray(block)) return block.flatMap(getOwnNodesFromBlock)
+  if (!isVaporFragment(block) || isInteropFragment(block)) return []
+  return getOwnNodesFromBlock(block.nodes)
+}
+
 function findComponentRecord(
   runtime: DevtoolsRuntime,
+  vaporNodes: VaporNodeOwnerIndex,
   event: MouseEvent,
 ): ComponentRecord | undefined {
   const targets = typeof event.composedPath === 'function' ? event.composedPath() : [event.target]
 
   for (const target of targets) {
-    const record = findComponentRecordFromTarget(runtime, target)
+    const record = findComponentRecordFromTarget(runtime, vaporNodes, target)
     if (record) return record
   }
 
-  return findComponentRecordFromTarget(runtime, event.target)
+  return findComponentRecordFromTarget(runtime, vaporNodes, event.target)
 }
 
 function findComponentRecordFromTarget(
   runtime: DevtoolsRuntime,
+  vaporNodes: VaporNodeOwnerIndex,
   target: EventTarget | null,
 ): ComponentRecord | undefined {
   let node = isNode(target) ? target : undefined
@@ -267,7 +325,7 @@ function findComponentRecordFromTarget(
   while (node) {
     const record = findComponentRecordFromInstance(
       runtime,
-      readObjectProperty(node, '__vueParentComponent'),
+      readObjectProperty(node, '__vueParentComponent') ?? vaporNodes.get(node),
     )
     if (record) return record
 

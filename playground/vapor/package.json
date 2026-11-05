@@ -13,7 +13,7 @@
     "@antfu/utils": "^9.3.0",
     "@unocss/reset": "catalog:",
     "@unocss/transformer-directives": "^66.10.5",
-    "vue": "3.6.0-rc.5"
+    "vue": "3.6.0-rc.14"
   },
   "devDependencies": {
     "@vitejs/devtools": "catalog:",

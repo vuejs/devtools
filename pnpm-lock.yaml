@@ -715,7 +715,7 @@ importers:
     dependencies:
       '@antfu/design':
         specifier: 'catalog:'
-        version: 0.6.0(@antfu/utils@9.3.0)(@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.5(typescript@6.0.3)))(@unocss/core@66.11.0)(colorjs.io@0.7.1)(playwright@1.64.1)(reka-ui@2.11.0(vue@3.6.0-rc.5(typescript@6.0.3)))(splitpanes@4.1.2(vue@3.6.0-rc.5(typescript@6.0.3)))(unocss@66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4))(vue@3.6.0-rc.5(typescript@6.0.3))
+        version: 0.6.0(@antfu/utils@9.3.0)(@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.14(typescript@6.0.3)))(@unocss/core@66.11.0)(colorjs.io@0.7.1)(playwright@1.64.1)(reka-ui@2.11.0(vue@3.6.0-rc.14(typescript@6.0.3)))(splitpanes@4.1.2(vue@3.6.0-rc.14(typescript@6.0.3)))(unocss@66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4))(vue@3.6.0-rc.14(typescript@6.0.3))
       '@antfu/utils':
         specifier: ^9.3.0
         version: 9.3.0
@@ -726,15 +726,15 @@ importers:
         specifier: ^66.10.5
         version: 66.11.0
       vue:
-        specifier: 3.6.0-rc.5
-        version: 3.6.0-rc.5(typescript@6.0.3)
+        specifier: 3.6.0-rc.14
+        version: 3.6.0-rc.14(typescript@6.0.3)
     devDependencies:
       '@vitejs/devtools':
         specifier: ^0.8.0
         version: 0.8.0(crossws@0.4.15(srvx@1.0.6))(srvx@1.0.6)(vite@8.3.4)
       '@vitejs/plugin-vue':
         specifier: 'catalog:'
-        version: 6.0.10(vite@8.3.4)(vue@3.6.0-rc.5(typescript@6.0.3))
+        version: 6.0.10(vite@8.3.4)(vue@3.6.0-rc.14(typescript@6.0.3))
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -4264,24 +4264,24 @@ snapshots:
       reka-ui: 2.11.0(vue@3.5.44(typescript@6.0.3))
       splitpanes: 4.1.2(vue@3.5.44(typescript@6.0.3))
 
+  '@antfu/design@0.6.0(@antfu/utils@9.3.0)(@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.14(typescript@6.0.3)))(@unocss/core@66.11.0)(colorjs.io@0.7.1)(playwright@1.64.1)(reka-ui@2.11.0(vue@3.6.0-rc.14(typescript@6.0.3)))(splitpanes@4.1.2(vue@3.6.0-rc.14(typescript@6.0.3)))(unocss@66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4))(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      '@vueuse/core': 15.0.0(vue@3.6.0-rc.14(typescript@6.0.3))
+      unocss: 66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4)
+      vue: 3.6.0-rc.14(typescript@6.0.3)
+    optionalDependencies:
+      '@antfu/utils': 9.3.0
+      '@tanstack/vue-virtual': 3.13.39(vue@3.6.0-rc.14(typescript@6.0.3))
+      '@unocss/core': 66.11.0
+      colorjs.io: 0.7.1
+      playwright: 1.64.1
+      reka-ui: 2.11.0(vue@3.6.0-rc.14(typescript@6.0.3))
+      splitpanes: 4.1.2(vue@3.6.0-rc.14(typescript@6.0.3))
+
   '@antfu/design@0.6.0(@antfu/utils@9.3.0)(@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.5(typescript@6.0.3)))(@unocss/core@66.11.0)(colorjs.io@0.7.1)(playwright@1.64.1)(reka-ui@2.11.0(vue@3.6.0-rc.5(typescript@6.0.3)))(splitpanes@4.1.2(vue@3.6.0-rc.5(typescript@6.0.3)))(unocss@66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.0.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4))(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 15.0.0(vue@3.6.0-rc.5(typescript@6.0.3))
       unocss: 66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.0.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4)
-      vue: 3.6.0-rc.5(typescript@6.0.3)
-    optionalDependencies:
-      '@antfu/utils': 9.3.0
-      '@tanstack/vue-virtual': 3.13.39(vue@3.6.0-rc.5(typescript@6.0.3))
-      '@unocss/core': 66.11.0
-      colorjs.io: 0.7.1
-      playwright: 1.64.1
-      reka-ui: 2.11.0(vue@3.6.0-rc.5(typescript@6.0.3))
-      splitpanes: 4.1.2(vue@3.6.0-rc.5(typescript@6.0.3))
-
-  '@antfu/design@0.6.0(@antfu/utils@9.3.0)(@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.5(typescript@6.0.3)))(@unocss/core@66.11.0)(colorjs.io@0.7.1)(playwright@1.64.1)(reka-ui@2.11.0(vue@3.6.0-rc.5(typescript@6.0.3)))(splitpanes@4.1.2(vue@3.6.0-rc.5(typescript@6.0.3)))(unocss@66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4))(vue@3.6.0-rc.5(typescript@6.0.3))':
-    dependencies:
-      '@vueuse/core': 15.0.0(vue@3.6.0-rc.5(typescript@6.0.3))
-      unocss: 66.11.0(@devframes/agentic@1.2.6)(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.63.0)(srvx@1.0.6)(vite@8.3.4)
       vue: 3.6.0-rc.5(typescript@6.0.3)
     optionalDependencies:
       '@antfu/utils': 9.3.0
@@ -4562,6 +4562,13 @@ snapshots:
       '@floating-ui/dom': 1.8.0
       '@floating-ui/utils': 0.2.12
       vue: 3.5.44(typescript@6.0.3)
+    optional: true
+
+  '@floating-ui/vue@2.0.1(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      '@floating-ui/dom': 1.8.0
+      '@floating-ui/utils': 0.2.12
+      vue: 3.6.0-rc.14(typescript@6.0.3)
     optional: true
 
   '@floating-ui/vue@2.0.1(vue@3.6.0-rc.5(typescript@6.0.3))':
@@ -5054,6 +5061,12 @@ snapshots:
       vue: 3.5.44(typescript@6.0.3)
     optional: true
 
+  '@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      '@tanstack/virtual-core': 3.17.11
+      vue: 3.6.0-rc.14(typescript@6.0.3)
+    optional: true
+
   '@tanstack/vue-virtual@3.13.39(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
       '@tanstack/virtual-core': 3.17.11
@@ -5420,6 +5433,12 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.4(@types/node@26.6.5)(@vitejs/devtools@0.8.0)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.0)
       vue: 3.5.44(typescript@6.0.3)
+
+  '@vitejs/plugin-vue@6.0.10(vite@8.3.4)(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      '@rolldown/pluginutils': 1.0.1
+      vite: 8.3.4(@types/node@26.6.5)(@vitejs/devtools@0.8.0)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)
+      vue: 3.6.0-rc.14(typescript@6.0.3)
 
   '@vitejs/plugin-vue@6.0.10(vite@8.3.4)(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
@@ -5901,6 +5920,14 @@ snapshots:
       '@vueuse/shared': 14.4.0(vue@3.5.44(typescript@6.0.3))
       vue: 3.5.44(typescript@6.0.3)
 
+  '@vueuse/core@14.4.0(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 14.4.0
+      '@vueuse/shared': 14.4.0(vue@3.6.0-rc.14(typescript@6.0.3))
+      vue: 3.6.0-rc.14(typescript@6.0.3)
+    optional: true
+
   '@vueuse/core@14.4.0(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
       '@types/web-bluetooth': 0.0.21
@@ -5914,6 +5941,13 @@ snapshots:
       '@vueuse/metadata': 15.0.0
       '@vueuse/shared': 15.0.0(vue@3.5.44(typescript@6.0.3))
       vue: 3.5.44(typescript@6.0.3)
+
+  '@vueuse/core@15.0.0(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 15.0.0
+      '@vueuse/shared': 15.0.0(vue@3.6.0-rc.14(typescript@6.0.3))
+      vue: 3.6.0-rc.14(typescript@6.0.3)
 
   '@vueuse/core@15.0.0(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
@@ -5939,6 +5973,11 @@ snapshots:
     dependencies:
       vue: 3.5.44(typescript@6.0.3)
 
+  '@vueuse/shared@14.4.0(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      vue: 3.6.0-rc.14(typescript@6.0.3)
+    optional: true
+
   '@vueuse/shared@14.4.0(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
       vue: 3.6.0-rc.5(typescript@6.0.3)
@@ -5946,6 +5985,10 @@ snapshots:
   '@vueuse/shared@15.0.0(vue@3.5.44(typescript@6.0.3))':
     dependencies:
       vue: 3.5.44(typescript@6.0.3)
+
+  '@vueuse/shared@15.0.0(vue@3.6.0-rc.14(typescript@6.0.3))':
+    dependencies:
+      vue: 3.6.0-rc.14(typescript@6.0.3)
 
   '@vueuse/shared@15.0.0(vue@3.6.0-rc.5(typescript@6.0.3))':
     dependencies:
@@ -6921,6 +6964,20 @@ snapshots:
       vue: 3.5.44(typescript@6.0.3)
     optional: true
 
+  reka-ui@2.11.0(vue@3.6.0-rc.14(typescript@6.0.3)):
+    dependencies:
+      '@floating-ui/vue': 2.0.1(vue@3.6.0-rc.14(typescript@6.0.3))
+      '@internationalized/date': 3.12.4
+      '@internationalized/number': 3.6.8
+      '@tanstack/vue-virtual': 3.13.39(vue@3.6.0-rc.14(typescript@6.0.3))
+      '@vueuse/core': 14.4.0(vue@3.6.0-rc.14(typescript@6.0.3))
+      '@vueuse/shared': 14.4.0(vue@3.6.0-rc.14(typescript@6.0.3))
+      aria-hidden: 1.2.6
+      defu: 6.1.7
+      ohash: 2.0.12
+      vue: 3.6.0-rc.14(typescript@6.0.3)
+    optional: true
+
   reka-ui@2.11.0(vue@3.6.0-rc.5(typescript@6.0.3)):
     dependencies:
       '@floating-ui/vue': 2.0.1(vue@3.6.0-rc.5(typescript@6.0.3))
@@ -7069,6 +7126,11 @@ snapshots:
   splitpanes@4.1.2(vue@3.5.44(typescript@6.0.3)):
     dependencies:
       vue: 3.5.44(typescript@6.0.3)
+
+  splitpanes@4.1.2(vue@3.6.0-rc.14(typescript@6.0.3)):
+    dependencies:
+      vue: 3.6.0-rc.14(typescript@6.0.3)
+    optional: true
 
   splitpanes@4.1.2(vue@3.6.0-rc.5(typescript@6.0.3)):
     dependencies:
