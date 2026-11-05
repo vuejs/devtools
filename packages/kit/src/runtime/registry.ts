@@ -348,8 +348,9 @@ export class RuntimeRegistry {
   }
 
   // Block-walked children first (they carry tags and render keys), then any
-  // reported child the block does not reach. Kept-alive children that are
-  // deactivated are left to the KeepAlive cache walk.
+  // reported child the block does not reach. A deactivated kept-alive child is left
+  // to the KeepAlive cache walk; only its own flag is checked, so descendants of a
+  // cached component stay in the tree.
   getInstanceChildren(instance: InstanceRef): WalkedComponentChild[] {
     const children = getInternalInstanceChildren(instance)
     const tracked = isVaporInstance(instance) ? this.vaporChildren.get(instance) : undefined
@@ -358,7 +359,7 @@ export class RuntimeRegistry {
     const walked = new Set(children.map((child) => child.instance))
     for (const child of tracked) {
       if (walked.has(child) || isBeingDestroyed(child) || isComponentHidden(child)) continue
-      if (isComponentInactive(child)) continue
+      if (readBooleanProperty(child, 'isDeactivated') === true) continue
       children.push({ instance: child })
     }
     return children

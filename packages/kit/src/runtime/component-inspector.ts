@@ -89,6 +89,8 @@ export function inspectComponentInPage(
     }
 
     function onClick(event: MouseEvent) {
+      // Hover lookups are throttled; the click must see nodes mounted since then.
+      vaporNodes.invalidate()
       const record = findComponentRecord(runtime, vaporNodes, event)
       if (!record) return
 
@@ -256,6 +258,10 @@ class VaporNodeOwnerIndex {
   private builtAt = 0
 
   constructor(private readonly runtime: DevtoolsRuntime) {}
+
+  invalidate(): void {
+    this.owners = undefined
+  }
 
   get(node: Node): InstanceRef | undefined {
     if (!this.owners || Date.now() - this.builtAt >= VAPOR_INDEX_TTL_MS) this.build()

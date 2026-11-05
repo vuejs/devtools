@@ -172,16 +172,28 @@ Vapor nodes have no back-reference.
 
 - [x] `VaporNodeOwnerIndex` in `component-inspector.ts`: a `WeakMap<Node, VaporInstance>`
       built by walking every registered app from `rootInstance` with
-      `getInternalInstanceChildren`, so Vapor components under a VDOM root are covered.
+      `RuntimeRegistry.getInstanceChildren`, so Vapor components under a VDOM root are covered.
       Each Vapor instance maps the nodes its own block renders (not those of child
       instances or interop VNodes); nested elements resolve by walking `parentNode`.
 - [x] `findComponentRecordFromTarget`: each ancestor checks `__vueParentComponent`, then
       the index; first hit wins.
 - [x] Freshness: Vapor `v-if` / `v-for` swap nodes without any devtools event, so the
-      index is rebuilt on lookup when older than 250 ms. Not yet measured on a large `v-for`.
-      Test: `tests/integration/runtime/vapor-picker.test.ts`.
-- Slot content maps to the component whose block holds it, not `slotOwner` (VDOM picks
-  the owner that rendered the slot). Revisit if it is confusing in the playground.
+      index is rebuilt on hover lookups when older than 250 ms, and always on click so a
+      node mounted after the last hover resolves to its own component. Not yet measured
+      on a large `v-for`. Test: `tests/integration/runtime/vapor-picker.test.ts`.
+- Slot content maps to the component rendering the slot outlet, same as VDOM
+  (`__vueParentComponent` is the outlet owner).
+- [ ] Teleported content. It lives in the target, outside `block`, and nothing on the
+      instance points to the teleport (teleports emit no devtools hook), so it is not
+      indexed when the teleport is inserted into an element (`TeleportNotice.vue`).
+      Waiting on [vuejs/core#16142](https://github.com/vuejs/core/pull/16142), which adds a
+      dev-only `instance.teleports: Set<TeleportFragment>`. Follow-up once it lands:
+  - In `VaporNodeOwnerIndex.build`, map each `instance.teleports` fragment's `nodes` to
+    the instance; skip when the field is missing (Vue before the fix).
+  - Bump the test alias and `playground/vapor` to the Vue release that includes it, and
+    add a picker test for a teleport inside an element.
+  - Consider reading `instance.teleports` for the `teleport` tree tag as well, which today
+    only appears when the teleport is a block root.
 
 ### Phase 5 — State inspector
 

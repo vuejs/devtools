@@ -141,6 +141,42 @@ describe('Vapor element picker', () => {
     expect(runtime!.registry.getComponent(result!.componentId)?.name).toBe('Root')
   })
 
+  it('selects a child mounted between a hover and the click', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    const show = ref(false)
+    const Child = defineVaporComponent({
+      name: 'Child',
+      setup: () => template('<b class="late">late</b>')(),
+    })
+    await mount(() =>
+      createVaporApp(
+        defineVaporComponent({
+          name: 'Root',
+          setup: () => {
+            const div = template('<div class="root"></div>')() as Element
+            insert(
+              createIf(
+                () => show.value,
+                () => createComponent(Child),
+              ) as never,
+              div,
+            )
+            return div
+          },
+        }),
+      ),
+    )
+    const inspection = inspectComponentInPage(runtime!)
+    query('.root').dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+
+    // Within the hover throttle window: the click must not reuse the hover index.
+    show.value = true
+    await nextTick()
+    query('.late').dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    const result = await inspection
+    expect(runtime!.registry.getComponent(result!.componentId)?.name).toBe('Child')
+  })
+
   it('maps teleported content to its owner', async () => {
     const target = document.createElement('section')
     document.body.append(target)
