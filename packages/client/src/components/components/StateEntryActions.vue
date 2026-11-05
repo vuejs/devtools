@@ -236,7 +236,10 @@ async function openCustomFile(entry: StateEntry) {
 }
 </script>
 <template>
-  <div class="ml-auto shrink-0 flex pl-1" :class="editing ? '' : 'op0 group-hover/state-row:op100'">
+  <div
+    class="ml-auto shrink-0 flex pl-1"
+    :class="editing ? '' : 'op0 group-hover/state-row:op100 group-focus-within/state-row:op100'"
+  >
     <button
       v-if="getCustomFile(entry) && openInEditorAvailable"
       v-tooltip.bottom="'Open file'"

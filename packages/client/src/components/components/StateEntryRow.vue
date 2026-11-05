@@ -214,12 +214,20 @@ function getStateValueClass(value: EncodedValue): string {
       :style="{ paddingLeft: `${19 + depth * 15}px` }"
       @click="toggleStateEntry"
     >
-      <span
+      <button
         v-if="hasExpandableEntry"
-        class="i-carbon-chevron-right flex-none text-4 op50 transition-transform"
-        :class="collapsed ? '' : 'rotate-90'"
-        aria-hidden="true"
-      />
+        type="button"
+        class="h-4 w-4 flex-none flex items-center justify-center rounded-1 border-0 bg-transparent p-0 color-inherit cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500"
+        :aria-label="`Toggle ${entry.key}`"
+        :aria-expanded="!collapsed"
+        @click.stop="toggleStateEntry"
+      >
+        <span
+          class="i-carbon-chevron-right text-4 op50 transition-transform"
+          :class="collapsed ? '' : 'rotate-90'"
+          aria-hidden="true"
+        />
+      </button>
       <span v-else class="w-4 flex-none" />
       <span
         class="state-key max-w-[40%] shrink-0 overflow-hidden text-ellipsis whitespace-nowrap op70"
