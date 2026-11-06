@@ -1,6 +1,6 @@
 # Vue Vapor support plan
 
-Target: Vue `3.6.0-rc.5` (`@vue/runtime-vapor`), devtools v9 (`feat/vapor-support`).
+Target: Vue `3.6.0-rc.14` (`@vue/runtime-vapor`; test alias and `playground/vapor`), devtools v9 (`feat/vapor-support`).
 Playground: `playground/vapor` (`pnpm play:vapor`) — a pure `createVaporApp` tree and a
 `createApp` + `vaporInteropPlugin` mixed tree.
 
@@ -90,7 +90,7 @@ Tick each item when it lands. Phase 0 landed in #1174.
       Do not import `@vue/runtime-vapor` — kit must keep working with Vue 3.5.
 - [x] Detect Vapor apps in `addApp` (`app.vapor === true`) and store `record.vapor`
       for UI badges and diagnostics.
-- [x] Add a `vue@3.6.0-rc.5` devDependency for tests only (alias, e.g. `vue-3.6`), so the
+- [x] Add a `vue@3.6.0-rc.14` devDependency for tests only (alias, e.g. `vue-3.6`), so the
       existing 3.5 tests are untouched.
 
 ### Phase 1 — Component tree (core feature)
@@ -197,17 +197,21 @@ Vapor nodes have no back-reference.
 
 ### Phase 5 — State inspector
 
-- [ ] `setup`: already reads `devtoolsRawSetupState` / `setupState` — verify on Vapor (dev).
-      For production-devtools builds, show an explanatory empty state
-      ("setup state not available in production Vapor builds").
-- [ ] `props`: read via `instance.props`; mark **read-only** for Vapor (`editable: false`).
-      Meta from `instance.propsOptions` / `type.props`.
-- [ ] `attrs`, `refs`, `provides`: unchanged. `refs` may contain Vapor instances —
-      extend `codec/encode.ts:isComponentInstanceLike` to accept `vapor === true` and
-      encode as `{ kind: 'component' }`.
-- [ ] `listeners`: for Vapor read `instance.rawProps` keys matching `on[A-Z]` (and `$`
-      dynamic sources), combined with `emitsOptions`.
-- [ ] Skip `data`, options `computed`, `inject` for Vapor (no Options API) — return no section.
+- [x] `setup`: works as-is on a dev-mode SFC (`setup` returns bindings, template compiled
+      to `render`), so `devtoolsRawSetupState` / `setupState` are set.
+- [ ] Production-devtools builds inline the template into `setup`, so there is no setup
+      state. Show an explanatory empty state instead of an empty panel.
+- [x] `props`: read-only for Vapor (`editable: false`), and `edit` / `add` / `delete` on
+      `props` return `false`, since the props proxy ignores writes. Nested values are
+      read-only too; edit them on the owning parent.
+- [x] `attrs`, `refs`, `provides`: unchanged. `isComponentInstanceLike` already matches
+      Vapor instances (`uid` + `type`), so `refs` encode as components.
+- [x] `listeners`: Vapor reads `on[A-Z]` keys from `rawProps` and `rawProps.$` dynamic
+      sources, checked against `type.emits`. A function source is read only through its
+      resolved `_cache`; devtools never calls user getters.
+- [x] `data`, options `computed`, `inject`: empty on Vapor, and empty sections are already
+      dropped. No Vapor-specific code.
+      Test: `tests/integration/runtime/vapor-state.test.ts`.
 - [ ] Reactivity graph: classify Vapor render effects (`RenderEffect` constructor; read
       `effect.i` / owning instance). Already gated on `>= 3.6.0`.
 - [ ] Computed recompute: `collectLiveComputedRefs` should also scan
@@ -244,7 +248,7 @@ Vapor nodes have no back-reference.
 - [ ] **Unit fixtures** (`tests/fixtures/runtime.ts`): add `createVaporTreeFixture` building
       fake `{ vapor: true, uid, type, parent, block }` instances with fragments
       (`__vf` bits), teleport, KeepAlive `__v_cache`, and interop fragments.
-- [ ] **Integration** (happy-dom, real `vue@3.6.0-rc.5` via the test alias):
+- [ ] **Integration** (happy-dom, real `vue@3.6.0-rc.14` via the test alias):
       `createVaporApp` and `createApp + vaporInteropPlugin` with `setDevtoolsHook`;
       assert tree shape, `v-if` toggle / `v-for` add/remove reflected after a refresh,
       bounds non-empty, picker resolves Vapor nodes, setup state readable, props read-only.
