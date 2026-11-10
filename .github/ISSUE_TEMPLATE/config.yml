@@ -1,0 +1,7 @@
+contact_links:
+  - name: 🙌 Contribution Guide
+    url: https://devtools-next.vuejs.org/help/contributing
+    about: Please read through before making contributions.
+  - name: ⁉️ Why and How to make a reproduction?
+    url: https://antfu.me/posts/why-reproductions-are-required
+    about: Reproduction is very important for maintainer to help on your issues!
