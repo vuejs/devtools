@@ -2,6 +2,7 @@ import type { InstanceRef } from '../types'
 import { readObject, hasOwn, toRaw, isRef, isReactive } from './shared'
 import { formatPreviewKey } from '../../codec/encode'
 import { findSetupEditTarget } from './instance'
+import { isVaporInstance } from '../vapor'
 
 export function getEditableSectionTarget(
   instance: InstanceRef,
@@ -12,7 +13,8 @@ export function getEditableSectionTarget(
 
   switch (sectionId) {
     case 'props':
-      return readObject(record, 'props')
+      // Vapor props are a read-only proxy over the parent's getters; writes are ignored.
+      return isVaporInstance(instance) ? undefined : readObject(record, 'props')
     case 'data':
       return findDataEditTarget(record, key)
     case 'setup':
