@@ -62,8 +62,13 @@ async function inspectCounter(rawProps: Record<string, unknown>) {
   installed = installDevtoolsHook({ runtime, target: {} })
   vi.stubGlobal('__VUE_DEVTOOLS_GLOBAL_HOOK__', installed.hook)
   setDevtoolsHook(installed.hook as never, globalThis)
+  let instance: Record<string, unknown> | undefined
   app = createVaporApp(
-    defineVaporComponent({ name: 'Root', setup: () => createComponent(Counter, rawProps) }),
+    defineVaporComponent({
+      name: 'Root',
+      setup: () =>
+        (instance = createComponent(Counter, rawProps) as unknown as Record<string, unknown>),
+    }),
   )
   const el = document.createElement('div')
   document.body.append(el)
@@ -72,7 +77,7 @@ async function inspectCounter(rawProps: Record<string, unknown>) {
   const counter = runtime.components.snapshot().nodes.find((node) => node.name === 'Counter')!
   const sections = runtime.componentState.snapshot(counter.id)!.sections
   const section = (id: string) => sections.find((section) => section.id === id)
-  return { id: counter.id, section }
+  return { id: counter.id, instance: instance!, section }
 }
 
 describe('Vapor component state', () => {
@@ -110,5 +115,31 @@ describe('Vapor component state', () => {
       ['extra', 'Not declared'],
       ['spread', 'Not declared'],
     ])
+  })
+
+  it('lists listeners from a function source without invoking it again', async () => {
+    const noop = () => {}
+    const source = vi.fn(() => ({ onBound: noop }))
+    const { id, section } = await inspectCounter({ label: () => 'hi', $: [source] })
+    const calls = source.mock.calls.length
+    expect(section('listeners')?.entries.map((entry) => entry.key)).toEqual(['bound'])
+    runtime!.componentState.snapshot(id)
+    expect(source).toHaveBeenCalledTimes(calls)
+  })
+
+  it('does not re-evaluate a dirty cached source before delivery', async () => {
+    const { id, instance } = await inspectCounter({ label: () => 'hi' })
+    const getter = vi.fn(() => ({ onFresh: () => {} }))
+    const dirty = ref(0)
+    const source = Object.assign(() => getter(), {
+      _cache: computed(() => (dirty.value, getter())),
+    })
+    void source._cache.value
+    dirty.value++
+    getter.mockClear()
+    instance.rawValues = undefined
+    instance.rawProps = { $: [source] }
+    expect(() => runtime!.componentState.snapshot(id)).not.toThrow()
+    expect(getter).not.toHaveBeenCalled()
   })
 })
