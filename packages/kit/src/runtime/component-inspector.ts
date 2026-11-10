@@ -34,6 +34,7 @@ const NAME_ID = '__vue-devtools-component-inspector__name__'
 const SIZE_ID = '__vue-devtools-component-inspector__size__'
 const INSPECT_DOM_TARGET = '__VUE_DEVTOOLS_INSPECT_DOM_TARGET__'
 const MAX_EXPOSED_INSTANCES = 5
+const PRESS_EVENTS = ['pointerdown', 'mousedown', 'pointerup', 'mouseup'] as const
 
 let activeInspection: ActiveInspection | undefined
 let dockController: ComponentInspectorDockController | undefined
@@ -68,6 +69,7 @@ export function inspectComponentInPage(
       inspectedWindow.removeEventListener('mouseover', onMouseOver, true)
       inspectedWindow.removeEventListener('click', onClick, true)
       inspectedWindow.removeEventListener('keydown', onKeyDown, true)
+      for (const type of PRESS_EVENTS) inspectedWindow.removeEventListener(type, onPress, true)
       removeOverlay(inspectedDocument)
 
       if (activeInspection?.cancel === cancel) activeInspection = undefined
@@ -86,6 +88,14 @@ export function inspectComponentInPage(
         return
       }
       highlightComponent(inspectedDocument, record)
+    }
+
+    // Menus open and focus moves on press; swallow press and release like the click.
+    function onPress(event: MouseEvent) {
+      if (!findComponentRecord(runtime, vaporNodes, event)) return
+
+      event.preventDefault()
+      event.stopPropagation()
     }
 
     function onClick(event: MouseEvent) {
@@ -112,6 +122,7 @@ export function inspectComponentInPage(
     inspectedWindow.addEventListener('mouseover', onMouseOver, true)
     inspectedWindow.addEventListener('click', onClick, true)
     inspectedWindow.addEventListener('keydown', onKeyDown, true)
+    for (const type of PRESS_EVENTS) inspectedWindow.addEventListener(type, onPress, true)
     void closeDockPanelForInspection()
       .then((restore) => {
         if (settled) {
