@@ -2,6 +2,7 @@ import type { ComponentTreePatchBatch } from './components'
 import type { ComponentRecord } from './registry'
 import type { AppId, ComponentId, RuntimeEvent } from './types'
 import { getComponentRecordBounds, isComponentInspectionActive } from './component-inspector'
+import { isVaporUpdateMeasure } from './vapor'
 
 type PerfEvent = Extract<RuntimeEvent, { type: 'perf:start' | 'perf:end' }>
 
@@ -27,9 +28,6 @@ interface UpdateHighlightRuntime {
 export const UPDATE_FLASH_CAP = 32
 export const UPDATE_FLASH_MS = 350
 export const UPDATE_FLASH_CONTAINER_ID = '__vue-devtools-update-flash__'
-
-const FLASH_PHASE = 'patch'
-const DURATION_PHASES = new Set(['mount', 'patch'])
 
 export interface ComponentUpdateHighlight {
   isEnabled(): boolean
@@ -73,13 +71,13 @@ export function createComponentUpdateHighlight(
     const record = componentId ? runtime.registry.getComponent(componentId, event.appId) : undefined
     if (!record) return
 
-    if (DURATION_PHASES.has(event.phase)) {
-      if (event.phase === 'mount') record.lastMountMs = duration
-      else record.lastUpdateMs = duration
-      scheduleDurationPatch(runtime, record)
-    }
+    // Vapor updates are measured as `renderEffect`, not `patch`.
+    const update = event.phase === 'patch' || isVaporUpdateMeasure(event.instance, event.phase)
+    if (event.phase === 'mount') record.lastMountMs = duration
+    else if (update) record.lastUpdateMs = duration
+    if (event.phase === 'mount' || update) scheduleDurationPatch(runtime, record)
 
-    if (event.phase === FLASH_PHASE) enqueueFlash(record)
+    if (update) enqueueFlash(record)
   })
 
   return {
