@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useId } from 'vue'
 
 const props = defineProps<{
   code: string
@@ -8,15 +8,27 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: []
 }>()
+
+const closeButton = ref<HTMLButtonElement>()
+const titleId = `render-code-title-${useId()}`
+let returnFocus: HTMLElement | undefined
+
 // Load only when the conditionally rendered panel is opened.
 const parseRow = shallowRef<typeof import('nue-glow').parseRow>()
-onMounted(async () => {
-  try {
-    parseRow.value = (await import('nue-glow')).parseRow
-  } catch {
-    // Keep the original code readable if the chunk cannot be loaded.
-  }
+onMounted(() => {
+  returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined
+  void nextTick(() => closeButton.value?.focus())
+
+  void import('nue-glow')
+    .then(({ parseRow: parse }) => {
+      parseRow.value = parse
+    })
+    .catch(() => {
+      // Keep the original code readable if the chunk cannot be loaded.
+    })
 })
+
+onBeforeUnmount(() => returnFocus?.focus())
 
 const tokens = computed(() => {
   const parse = parseRow.value
@@ -40,10 +52,16 @@ const tokens = computed(() => {
 </script>
 
 <template>
-  <div class="absolute inset-0 z-10 min-h-0 flex flex-col bg-base p-2">
+  <div
+    class="absolute inset-0 z-10 min-h-0 flex flex-col bg-base p-2"
+    role="dialog"
+    :aria-labelledby="titleId"
+    @keydown.esc.stop.prevent="emit('close')"
+  >
     <div class="h-10 shrink-0 flex items-center justify-between border-b border-base px-2">
-      <span class="font-500 text-3.5">Render Code</span>
+      <span :id="titleId" class="font-500 text-3.5">Render Code</span>
       <button
+        ref="closeButton"
         v-tooltip.bottom="'Close render code'"
         class="h-7 w-7 rounded-1 border-0 bg-transparent color-muted flex items-center justify-center hover:bg-active hover:color-base"
         type="button"
