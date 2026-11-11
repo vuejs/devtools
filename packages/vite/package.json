@@ -48,7 +48,8 @@
   "dependencies": {
     "@vitejs/devtools-kit": "catalog:",
     "@vue/devtools-agent": "workspace:*",
-    "@vue/devtools-kit": "workspace:*"
+    "@vue/devtools-kit": "workspace:*",
+    "@vue/devtools-tracer": "workspace:*"
   },
   "devDependencies": {
     "@vue/devtools-client": "workspace:*",
@@ -56,7 +57,7 @@
     "vite": "catalog:"
   },
   "peerDependencies": {
-    "@vitejs/devtools": "^0.7.6",
+    "@vitejs/devtools": "^0.8.2",
     "vite": "^8.3.0"
   },
   "engines": {

@@ -1,0 +1,62 @@
+{
+  "name": "@vue/devtools-tracer",
+  "version": "9.0.0-rc.3",
+  "description": "Source location tracing for Vue DevTools",
+  "license": "MIT",
+  "author": "webfansplz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/devtools.git",
+    "directory": "packages/tracer"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.mts",
+      "default": "./dist/client.mjs"
+    },
+    "./client/devtools": {
+      "types": "./dist/devtools-client.d.mts",
+      "default": "./dist/devtools-client.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run --config vitest.config.ts --root ../.. packages/tracer/tests",
+    "lint": "vp lint src tests tsdown.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vitejs/devtools-kit": "catalog:",
+    "estree-walker": "catalog:",
+    "magic-string": "catalog:",
+    "source-map-js": "catalog:"
+  },
+  "devDependencies": {
+    "@vitejs/devtools": "catalog:",
+    "tsdown": "catalog:",
+    "vite": "catalog:",
+    "vue": "catalog:"
+  },
+  "peerDependencies": {
+    "@vitejs/devtools": "^0.8.2",
+    "vite": "^8.3.0",
+    "vue": "^3.5.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

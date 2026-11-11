@@ -17,14 +17,15 @@ Monorepo (`pnpm` workspaces). ESM TypeScript. Library packages bundle with tsdow
 
 ### Packages
 
-| Package                 | npm                        | Description                                                                                                                                                  |
-| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/kit`          | `@vue/devtools-kit`        | Runtime, codec, RPC, plugin registry. Exports only `dist`.                                                                                                   |
-| `packages/devtools-api` | `@vue/devtools-api`        | Public plugin API surface over the kit.                                                                                                                      |
-| `packages/client`       | `@vue/devtools-client`     | Vue 3 + UnoCSS UI shared by both hosts. Private. Vite plugin copies the build into `packages/vite/client`; the extension loads the same client in its panel. |
-| `packages/vite`         | `vite-plugin-vue-devtools` | Vite host. Serves the static client and registers an iframe dock with `@vitejs/devtools`.                                                                    |
-| `packages/agent`        | `@vue/devtools-agent`      | Agent tools over the kit runtime, Devframe page/host adapters, and the `vue-devtools-agent` stdio MCP CLI. Used by the Vite host only.                       |
-| `packages/chrome`       | `@vue/devtools-chrome`     | Chromium MV3 host (background, content backend, DevTools panel). Private. Zip via `pnpm zip:chrome`.                                                         |
+| Package                 | npm                        | Description                                                                                                                                                                                                                           |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/kit`          | `@vue/devtools-kit`        | Runtime, codec, RPC, plugin registry. Exports only `dist`.                                                                                                                                                                            |
+| `packages/devtools-api` | `@vue/devtools-api`        | Public plugin API surface over the kit.                                                                                                                                                                                               |
+| `packages/client`       | `@vue/devtools-client`     | Vue 3 + UnoCSS UI shared by both hosts. Private. Vite plugin copies the build into `packages/vite/client`; the extension loads the same client in its panel.                                                                          |
+| `packages/vite`         | `vite-plugin-vue-devtools` | Vite host. Serves the static client and registers an iframe dock with `@vitejs/devtools`.                                                                                                                                             |
+| `packages/tracer`       | `@vue/devtools-tracer`     | Template element-to-source line and column mapping ported from `vite-plugin-vue-tracer`. Exports the `tracerTransform()` instrumentation plugin and `./client` queries, composed internally by the Vite host. Vapor is not supported. |
+| `packages/agent`        | `@vue/devtools-agent`      | Agent tools over the kit runtime, Devframe page/host adapters, and the `vue-devtools-agent` stdio MCP CLI. Used by the Vite host only.                                                                                                |
+| `packages/chrome`       | `@vue/devtools-chrome`     | Chromium MV3 host (background, content backend, DevTools panel). Private. Zip via `pnpm zip:chrome`.                                                                                                                                  |
 
 Other top-level directories:
 
@@ -43,6 +44,7 @@ flowchart TD
   kit --> chrome
   kit --> agent["@vue/devtools-agent"]
   agent --> plugin
+  tracer["@vue/devtools-tracer"] --> plugin
   plugin --> viteHost["@vitejs/devtools"]
   viteHost --> hub["@devframes/hub"]
   hub --> devframe

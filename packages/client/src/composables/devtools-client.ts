@@ -45,6 +45,7 @@ const plugins = shallowRef<PluginSnapshot[]>([])
 const routerSnapshot = ref<RouterSnapshotMessage>(emptyRouterSnapshot)
 const selectedAppId = ref<string>()
 const selectedComponentId = ref<string>()
+const selectedComponentSource = ref<ComponentInspectionResult['source']>()
 const loading = ref(false)
 const runtimeVersion = ref(0)
 let refreshVersion = 0
@@ -69,6 +70,14 @@ const openInEditorAvailable = computed(() => capabilities.value.openInEditor)
 let runtimeEventsReady = false
 let refreshAfterInitialSnapshot = false
 const initialTimelineLayers = new Map<string, DevtoolsRpcEvent>()
+
+watch(
+  [selectedAppId, selectedComponentId, runtimeVersion],
+  () => {
+    selectedComponentSource.value = undefined
+  },
+  { flush: 'sync' },
+)
 
 const connection = createDevtoolsConnection({
   refresh: refreshData,
@@ -208,6 +217,7 @@ export function useDevtoolsClient() {
     selectedApp,
     selectedAppId,
     selectedComponent,
+    selectedComponentSource,
     selectedComponentId,
     selectedTimelineLayerId,
     timeline,
@@ -583,6 +593,7 @@ async function callInspectorNodeAction(inspectorId: string, nodeId: string, acti
 async function inspectComponentInPage(): Promise<ComponentInspectionResult | undefined> {
   const client = getRpcClient()
   if (!client) return
+  const version = runtimeVersion.value
 
   componentInspecting.value = true
 
@@ -590,7 +601,7 @@ async function inspectComponentInPage(): Promise<ComponentInspectionResult | und
     const result = await client.query({
       type: 'components:inspect',
     })
-    if (!result) return
+    if (!result || version !== runtimeVersion.value) return
 
     if (result.appId !== selectedAppId.value) {
       selectedAppId.value = result.appId
@@ -599,6 +610,7 @@ async function inspectComponentInPage(): Promise<ComponentInspectionResult | und
       await refreshData()
     }
 
+    if (version !== runtimeVersion.value) return
     if (result.nodes) {
       applyComponentTreePatches(
         result.nodes.map((node) => ({
@@ -609,6 +621,7 @@ async function inspectComponentInPage(): Promise<ComponentInspectionResult | und
       )
     }
     selectedComponentId.value = result.componentId
+    selectedComponentSource.value = result.source
     return result
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err)
@@ -681,7 +694,10 @@ async function getSelectedComponentRenderCode(): Promise<string | undefined> {
 }
 
 async function openSelectedComponentInEditor() {
-  const file = selectedComponent.value?.file
+  const source = selectedComponentSource.value
+  const file = source
+    ? `${source.file}:${source.line}:${source.column + 1}`
+    : selectedComponent.value?.file
   if (!file) {
     error.value = 'No source file available for this component'
     return

@@ -2,10 +2,12 @@ import type { ComponentRecord } from './registry'
 import { isInteropFragment, isVaporFragment, isVaporInstance } from './vapor'
 import type { AppId, ComponentId, InstanceRef } from './types'
 import type { DevtoolsRuntime } from './runtime'
+import type { ComponentInspectionResultMessage } from '../protocol/messages'
 
 export interface ComponentInspectionResult {
   appId: AppId
   componentId: ComponentId
+  source?: ComponentInspectionResultMessage['source']
 }
 
 interface ActiveInspection {
@@ -96,7 +98,8 @@ export function inspectComponentInPage(
 
       event.preventDefault()
       event.stopPropagation()
-      void finish({ appId: record.appId, componentId: record.id })
+      const source = getElementSource(event)
+      void finish({ appId: record.appId, componentId: record.id, ...(source ? { source } : {}) })
     }
 
     function onKeyDown(event: KeyboardEvent) {
@@ -298,6 +301,33 @@ function getOwnNodesFromBlock(block: unknown): Node[] {
   if (Array.isArray(block)) return block.flatMap(getOwnNodesFromBlock)
   if (!isVaporFragment(block) || isInteropFragment(block)) return []
   return getOwnNodesFromBlock(block.nodes)
+}
+
+function getElementSource(event: MouseEvent): ComponentInspectionResult['source'] {
+  const targets = typeof event.composedPath === 'function' ? event.composedPath() : [event.target]
+  const element = targets.find(
+    (target): target is Element => isNode(target) && target.nodeType === Node.ELEMENT_NODE,
+  )
+  if (!element) return
+
+  const tracer = (
+    globalThis as typeof globalThis & {
+      __VUE_DEVTOOLS_TRACER__?: {
+        getElementPosition(
+          element: Element,
+        ): [file: string, line: number, column: number] | undefined
+      }
+    }
+  ).__VUE_DEVTOOLS_TRACER__
+  try {
+    const position = tracer?.getElementPosition(element)
+    if (position) {
+      const [file, line, column] = position
+      return { file, line, column }
+    }
+  } catch {
+    // Optional tracing must not prevent selecting a component.
+  }
 }
 
 function findComponentRecord(

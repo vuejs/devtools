@@ -46,6 +46,7 @@ const {
   scrollToSelectedComponent,
   selectComponent: setSelectedComponent,
   selectedComponent,
+  selectedComponentSource,
   selectedComponentId,
   selectedApp,
   routerSnapshot,
@@ -90,6 +91,11 @@ const selectedComponentNode = computed(() =>
       }
     : undefined,
 )
+
+const componentSourceLocation = computed(() => {
+  const source = selectedComponentSource.value
+  return source ? `${source.file}:${source.line}:${source.column + 1}` : undefined
+})
 
 const componentTreeActions = computed<ComponentPageAction[]>(() => [
   {
@@ -157,7 +163,7 @@ const componentStateActions = computed<ComponentPageAction[]>(() => {
     },
   ]
 
-  if (component.file && openInEditorAvailable.value) {
+  if ((componentSourceLocation.value || component.file) && openInEditorAvailable.value) {
     actions.push({
       icon: 'i-carbon-launch',
       tooltip: 'Open in Editor',
@@ -342,6 +348,13 @@ onUnmounted(() => {
           @node-action="runComponentStateAction"
           @show-more="() => void showMoreComponentStateEntries()"
         >
+          <div
+            v-if="componentSourceLocation"
+            class="shrink-0 truncate px-1 py-2 text-12px color-muted"
+            :title="componentSourceLocation"
+          >
+            {{ componentSourceLocation }}
+          </div>
           <RenderCode
             v-if="componentRenderCodeVisible && componentRenderCode"
             :code="componentRenderCode"
