@@ -48,11 +48,36 @@ describe('component inspector page locator', () => {
     child.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     outside.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     expect(document.getElementById(OVERLAY_ID)).toBeNull()
+    const press = new PointerEvent('pointerdown', { bubbles: true, cancelable: true })
     const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+    outside.dispatchEvent(press)
     outside.dispatchEvent(click)
+    expect(press.defaultPrevented).toBe(false)
     expect(click.defaultPrevented).toBe(false)
     child.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
     await expect(inspection).resolves.toEqual({ appId: 'app:0', componentId: childId })
+  })
+
+  // https://github.com/vuejs/devtools/issues/1177
+  it('keeps the selecting press and click away from the page', async () => {
+    runtime = createDevtoolsRuntime()
+    const { child, childId } = mountStoppedParentTree(runtime)
+    const received: string[] = []
+    const events = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].map((type) => {
+      child.addEventListener(type, () => received.push(type))
+      const EventType = type.startsWith('pointer') ? PointerEvent : MouseEvent
+      return new EventType(type, { bubbles: true, cancelable: true })
+    })
+    const inspection = inspectComponentInPage(runtime)
+
+    for (const event of events) child.dispatchEvent(event)
+
+    await expect(inspection).resolves.toEqual({ appId: 'app:0', componentId: childId })
+    expect(received).toEqual([])
+    expect(events.map((event) => event.defaultPrevented)).toEqual([true, true, true, true, true])
+
+    child.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }))
+    expect(received).toEqual(['pointerdown'])
   })
 
   it('registers an unloaded child and returns its path without loading siblings', async () => {
