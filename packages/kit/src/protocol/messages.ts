@@ -80,6 +80,13 @@ export interface ComponentStateSnapshotMessage {
 export interface ComponentInspectionResultMessage {
   appId: AppId
   componentId: ComponentId
+  source?: {
+    file: string
+    /** One-based source line. */
+    line: number
+    /** Zero-based source column. */
+    column: number
+  }
   nodes?: ComponentTreeNodeSnapshot[]
 }
 

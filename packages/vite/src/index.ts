@@ -1,5 +1,6 @@
 import type { PluginOption } from 'vite'
 import type { VitePluginVueDevToolsOptions } from './options'
+import { tracerTransform } from '@vue/devtools-tracer'
 import { createVueDevToolsClientInjectionPlugin } from './client-injection'
 import { createVueDevToolsDockRegistrationPlugin } from './utils/dock/registration'
 import { resolveClientOptions } from './options'
@@ -15,6 +16,7 @@ export function vueDevtools(options: VitePluginVueDevToolsOptions = {}): PluginO
   return [
     createVueDevToolsClientInjectionPlugin(options, clientOptions),
     createVueDevToolsDockRegistrationPlugin(),
+    tracerTransform(),
   ]
 }
 

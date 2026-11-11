@@ -55,6 +55,66 @@ describe('component inspector page locator', () => {
     await expect(inspection).resolves.toEqual({ appId: 'app:0', componentId: childId })
   })
 
+  it('returns the clicked element source through the inspection query', async () => {
+    runtime = createDevtoolsRuntime()
+    const { child, childId } = mountStoppedParentTree(runtime)
+    const element = document.createElement('b')
+    child.append(element)
+    const getElementPosition = vi.fn(() => ['/src/Child.vue', 12, 0])
+    vi.stubGlobal('__VUE_DEVTOOLS_TRACER__', { getElementPosition })
+    const inspection = runtime.query({ type: 'components:inspect' })
+
+    element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(getElementPosition).toHaveBeenCalledExactlyOnceWith(element)
+    await expect(inspection).resolves.toMatchObject({
+      appId: 'app:0',
+      componentId: childId,
+      source: { file: '/src/Child.vue', line: 12, column: 0 },
+    })
+  })
+
+  it('reads the original element from the composed path of a retargeted click', async () => {
+    runtime = createDevtoolsRuntime()
+    const { child, childId } = mountStoppedParentTree(runtime)
+    const element = document.createElement('button')
+    child.attachShadow({ mode: 'open' }).append(element)
+    const getElementPosition = vi.fn(() => ['/src/Child.vue', 8, 4])
+    vi.stubGlobal('__VUE_DEVTOOLS_TRACER__', { getElementPosition })
+    const inspection = inspectComponentInPage(runtime)
+
+    element.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }))
+
+    expect(getElementPosition).toHaveBeenCalledExactlyOnceWith(element)
+    await expect(inspection).resolves.toEqual({
+      appId: 'app:0',
+      componentId: childId,
+      source: { file: '/src/Child.vue', line: 8, column: 4 },
+    })
+  })
+
+  it.each([
+    ['unavailable', undefined],
+    ['unmapped', { getElementPosition: () => undefined }],
+    [
+      'failing',
+      {
+        getElementPosition: () => {
+          throw new Error('Unavailable source')
+        },
+      },
+    ],
+  ])('keeps the original result when tracing is %s', async (_, tracer) => {
+    runtime = createDevtoolsRuntime()
+    const { child, childId } = mountStoppedParentTree(runtime)
+    vi.stubGlobal('__VUE_DEVTOOLS_TRACER__', tracer)
+    const inspection = inspectComponentInPage(runtime)
+
+    child.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    await expect(inspection).resolves.toEqual({ appId: 'app:0', componentId: childId })
+  })
+
   it('registers an unloaded child and returns its path without loading siblings', async () => {
     runtime = createDevtoolsRuntime({ budget: { components: { maxInitialDepth: 0 } } })
     const { child, childInstance } = mountStoppedParentTree(runtime, false)

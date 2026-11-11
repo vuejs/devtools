@@ -1,6 +1,7 @@
 import type { DevToolsClientContext, DockClientScriptContext } from '@vitejs/devtools-kit/client'
 import type { VueDevtoolsAgentPage } from '@vue/devtools-agent'
 import type { DevtoolsHookTarget, DevtoolsKit } from '@vue/devtools-kit'
+import '@vue/devtools-tracer/client'
 import {
   startIframeDevtoolsRpcHost,
   createDevtoolsKit,
