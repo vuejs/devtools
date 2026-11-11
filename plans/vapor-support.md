@@ -206,9 +206,10 @@ Vapor nodes have no back-reference.
       read-only too; edit them on the owning parent.
 - [x] `attrs`, `refs`, `provides`: unchanged. `isComponentInstanceLike` already matches
       Vapor instances (`uid` + `type`), so `refs` encode as components.
-- [x] `listeners`: Vapor reads `on[A-Z]` keys from `rawProps` and `rawProps.$` dynamic
-      sources, checked against `type.emits`. A function source is read only through its
-      resolved `_cache`; devtools never calls user getters.
+- [x] `listeners`: Vapor reads `on[A-Z]` keys from `instance.rawValues` (delivered inputs,
+      `v-bind="obj"` merged in), checked against `type.emits`. Before delivery it falls back
+      to `rawProps` and `rawProps.$`, reading a function source only through the cached
+      `_value` of its `_cache`; devtools never calls user getters.
 - [x] `data`, options `computed`, `inject`: empty on Vapor, and empty sections are already
       dropped. No Vapor-specific code.
       Test: `tests/integration/runtime/vapor-state.test.ts`.
@@ -219,23 +220,19 @@ Vapor nodes have no back-reference.
 
 ### Phase 6 — Timeline & performance
 
-- [ ] Accept the `renderEffect` perf phase: map it to "update" for timing and
-      `update-highlight` flashes (currently keyed on `patch`).
-- [ ] Emits timeline: verify — should work as-is.
-- [ ] Live `v-for` reorder for Vapor. Needs Phase 3 (Vapor `domOrder`) and the
-      `fix/component-tree-live-order` PR, which makes a VDOM `component:updated` recompute
-      the visible children's `domOrder` and lets the client re-sort siblings when
-      `domOrder` changes. Vapor never emits `component:updated`, so that path never runs:
-  - Trigger the same child `domOrder` refresh from `perf:end` with phase `renderEffect`,
-    for the instance that owns the effect (`payload` instance), only when that instance
-    is visible and expanded in the tree. Debounce with `updateDebounceMs`, keyed like
-    `component:update`.
-  - Reuse the VDOM refresh function from the fix PR; do not add a Vapor-only path.
-  - Regression test in `vapor-tree-hooks.test.ts`: Vapor `Root` renders
-    `createFor(() => items.value, () => createComponent(Item), item => item)`; after
-    `items.value` goes `['a', 'b', 'c']` → `['c', 'b', 'a']`, the tree built by applying
-    `components:treePatched` patches (not a fresh snapshot) lists keys `'c', 'b', 'a'`.
-    Today it stays `'a', 'b', 'c'`.
+- [x] `renderEffect` perf phase on a mounted Vapor instance (`isVaporUpdateMeasure` in
+      `runtime/vapor.ts`) counts as an update: it sets `lastUpdateMs` and flashes in
+      `update-highlight`, same as `patch`. The first render runs before `isMounted` and is
+      ignored. Test: `tests/unit/runtime/update-highlight.test.ts`.
+- [x] Emits timeline: works as-is. Vapor `emit` goes through core `baseEmit`, which fires
+      `component:emit` with the Vapor instance. Test: the emits case in `vapor-tree-hooks.test.ts`.
+- [x] Live `v-for` reorder for Vapor. Vapor never emits `component:updated`, so the runtime
+      turns the same `perf:end` into a `component:update` for that instance. It goes
+      through the VDOM path: debounced with `updateDebounceMs`, skipped unless visible,
+      and the child `domOrder` refresh from #1184 runs only when the instance is expanded.
+      Test: the live reorder case in `vapor-tree-hooks.test.ts`.
+- Perf hooks fire in dev and with `__VUE_PROD_DEVTOOLS__`, regardless of
+  `app.config.performance`.
 
 ### Phase 7 — Client / UI
 

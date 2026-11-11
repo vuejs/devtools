@@ -32,6 +32,16 @@ export function isVaporInstance(value: unknown): boolean {
   return isObject(value) && (value as { vapor?: unknown }).vapor === true
 }
 
+// Vapor has no component-level re-render, so `component:updated` never fires. A
+// `renderEffect` measure on a mounted instance is the closest update signal.
+export function isVaporUpdateMeasure(instance: unknown, phase: string): boolean {
+  return (
+    phase === 'renderEffect' &&
+    isVaporInstance(instance) &&
+    (instance as { isMounted?: unknown }).isMounted === true
+  )
+}
+
 export function isVaporApp(app: unknown): boolean {
   return isObject(app) && (app as { vapor?: unknown }).vapor === true
 }

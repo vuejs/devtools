@@ -89,6 +89,32 @@ describe('component update highlight', () => {
     runtime.dispose()
   })
 
+  it('treats a Vapor renderEffect on a mounted instance as an update', async () => {
+    const { runtime, instance } = createHighlightedFixture()
+    attachBounds(instance, { left: 0, top: 0, width: 20, height: 20 })
+    const vapor = instance as unknown as Record<string, unknown>
+    vapor.vapor = true
+    vapor.block = (instance.subTree as unknown as { el: Node }).el
+    await runtime.command({
+      type: 'components:setHighlightUpdates',
+      payload: { enabled: true },
+    })
+
+    // The first render runs before the instance is mounted.
+    emitPerf(runtime, instance, 'renderEffect', 1, 2)
+    await flushFrames()
+    const record = () => runtime.registry.getComponent(runtime.registry.getComponentId(instance)!)
+    expect(record()?.lastUpdateMs).toBeUndefined()
+    expect(document.getElementById(UPDATE_FLASH_CONTAINER_ID)).toBeNull()
+
+    vapor.isMounted = true
+    emitPerf(runtime, instance, 'renderEffect', 10, 13)
+    await flushFrames()
+    expect(record()?.lastUpdateMs).toBe(3)
+    expect(document.getElementById(UPDATE_FLASH_CONTAINER_ID)?.childElementCount).toBe(1)
+    runtime.dispose()
+  })
+
   it('clears flashes when highlighting is disabled', async () => {
     const { runtime, instance } = createHighlightedFixture()
     attachBounds(instance, { left: 0, top: 0, width: 20, height: 20 })

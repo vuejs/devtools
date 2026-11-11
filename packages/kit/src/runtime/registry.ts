@@ -28,6 +28,9 @@ export interface ComponentRecord {
   isFragment?: boolean
   hidden?: boolean
   tags?: ComponentTreeNodeTag[]
+  // Tags from the parent's tree walk (teleport, suspense branch). Hook updates
+  // carry no walk context, so they reuse these.
+  walkTags?: ComponentTreeNodeTag[]
   domOrder?: number[]
   consoleId?: number
   autoOpen?: boolean
@@ -241,7 +244,8 @@ export class RuntimeRegistry {
       existing.inactive = overrides.inactive ?? isComponentInactive(instance)
       existing.isFragment = isFragmentComponent(instance, app)
       existing.hidden = isComponentHidden(instance)
-      existing.tags = readComponentTags(instance, overrides.tags)
+      if (overrides.tags) existing.walkTags = overrides.tags
+      existing.tags = readComponentTags(instance, existing.walkTags)
       existing.domOrder = domOrder
       existing.consoleId = overrides.consoleId
       existing.autoOpen = overrides.autoOpen
@@ -262,6 +266,7 @@ export class RuntimeRegistry {
       isFragment: isFragmentComponent(instance, app),
       hidden: isComponentHidden(instance),
       tags: readComponentTags(instance, overrides.tags),
+      walkTags: overrides.tags,
       domOrder,
       consoleId: overrides.consoleId,
       autoOpen: overrides.autoOpen,

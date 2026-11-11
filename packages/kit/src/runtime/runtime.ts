@@ -30,6 +30,7 @@ import type {
   RuntimeQuery,
 } from './types'
 import { createComponentUpdateHighlight } from './update-highlight'
+import { isVaporUpdateMeasure } from './vapor'
 
 export type RuntimeQueryHandler<T = unknown> = (
   query: RuntimeQuery,
@@ -219,6 +220,17 @@ export function createDevtoolsRuntime(options: CreateDevtoolsRuntimeOptions = {}
       }
 
       processEvent(event)
+
+      if (event.type === 'perf:end' && isVaporUpdateMeasure(event.instance, event.phase)) {
+        runtime.dispatch({
+          type: 'component:update',
+          appId: event.appId,
+          app: event.app,
+          instance: event.instance,
+          parent: (event.instance as { parent?: object | null }).parent ?? undefined,
+          time: event.time,
+        })
+      }
     },
     isCollectionActive() {
       return collectionActive
