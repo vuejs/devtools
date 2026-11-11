@@ -227,7 +227,7 @@ function walkComputedSubscriber(
   ) {
     seenLinks.add(link)
     const dep = readObject(link, 'dep')
-    const computed = dep ? readUnknownProperty(dep, 'computed') : undefined
+    const computed = dep && (isComputedRef(dep) ? dep : readUnknownProperty(dep, 'computed'))
     if (isComputedRef(computed)) found.add(computed)
   }
 }
