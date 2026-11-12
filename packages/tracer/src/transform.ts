@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite'
+import type { VueTracerOptions } from './options'
 import type { RawSourceMap } from 'source-map-js'
 import { dirname, isAbsolute, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -18,18 +19,25 @@ const functions = [
 const testRe = new RegExp(`\\b(?:${functions.join('|')})\\(`)
 
 /** Record source locations after Vue has compiled the template. */
-export function tracerTransform(): Plugin {
+export function tracerTransform(options: VueTracerOptions = {}): Plugin {
+  const { enabled = 'dev', resolveRecordEntryPath = true } = options
+  let tracingEnabled = enabled === true
   let workspaceRoot: string
   const recordPath = fileURLToPath(import.meta.resolve('@vue/devtools-tracer/client'))
 
   return {
     name: 'vue-devtools:tracer-transform',
     enforce: 'post',
-    apply: 'serve',
     configResolved(config) {
+      // The mode gates instrumentation, not the Vite DevTools picker.
+      tracingEnabled =
+        enabled === true ||
+        (enabled === 'dev' && config.command === 'serve') ||
+        (enabled === 'prod' && config.command === 'build')
       workspaceRoot = searchForWorkspaceRoot(config.root)
     },
     transform(code, id) {
+      if (!tracingEnabled) return
       if (this.environment.name !== 'client') return
       if (!code.includes('_sfc_render(') || !testRe.test(code)) return
       if (code.includes('_tracer(')) return
@@ -62,8 +70,10 @@ export function tracerTransform(): Plugin {
 
       // Virtual modules have no filesystem directory to resolve a relative import from.
       const filename = id.split('?')[0]!
-      let recordImport = normalizePath(recordPath)
-      if (isAbsolute(filename)) {
+      let recordImport = resolveRecordEntryPath
+        ? normalizePath(recordPath)
+        : '@vue/devtools-tracer/client/record'
+      if (resolveRecordEntryPath && isAbsolute(filename)) {
         recordImport = normalizePath(relative(dirname(filename), recordPath))
         if (!recordImport.startsWith('.')) recordImport = `./${recordImport}`
       }

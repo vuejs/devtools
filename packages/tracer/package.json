@@ -26,11 +26,23 @@
       "types": "./dist/client.d.mts",
       "default": "./dist/client.mjs"
     },
-    "./client/devtools": {
-      "types": "./dist/devtools-client.d.mts",
-      "default": "./dist/devtools-client.mjs"
+    "./package.json": "./package.json",
+    "./client/record": {
+      "types": "./dist/client.d.mts",
+      "default": "./dist/client.mjs"
     },
-    "./package.json": "./package.json"
+    "./client/listeners": {
+      "types": "./dist/listeners.d.mts",
+      "default": "./dist/listeners.mjs"
+    },
+    "./client/overlay": {
+      "types": "./dist/overlay.d.mts",
+      "default": "./dist/overlay.mjs"
+    },
+    "./client/vite-devtools": {
+      "types": "./dist/vite-devtools.d.mts",
+      "default": "./dist/vite-devtools.mjs"
+    }
   },
   "scripts": {
     "build": "tsdown",

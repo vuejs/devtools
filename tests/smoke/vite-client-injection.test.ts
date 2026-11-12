@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createServer } from 'vite'
-import { vueDevtools } from '../../packages/vite/src'
+import { vueDevtools } from '../../packages/vite/dist/index.mjs'
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const fixtureRoot = resolve(repositoryRoot, 'tests/fixtures/vite-smoke')
@@ -20,10 +20,12 @@ interface ViteMatrixScenario {
   middlewareMode?: boolean
   name: string
   optionsApi?: boolean
+  tracer?: false
 }
 
 const scenarios: ViteMatrixScenario[] = [
   { name: 'latest Vite 8 SPA' },
+  { name: 'Vite 8 without tracer', tracer: false },
   { bundledDev: true, name: 'Vite 8 bundled dev' },
   { name: 'Vite 8 without Options API', optionsApi: false },
   { base: '/nested/', name: 'Vite 8 custom root and base' },
@@ -82,7 +84,7 @@ describe('Vite client injection', () => {
           root: fixtureRoot,
           logLevel: 'silent',
           devtools: true,
-          plugins: [vue(), vueDevtools()],
+          plugins: [vue(), vueDevtools({ tracer: scenario.tracer })],
           optimizeDeps: {
             exclude: ['@vue/devtools-api', 'pinia'],
           },
@@ -170,6 +172,36 @@ describe('Vite client injection', () => {
               message.includes('Error executing client script'),
           ),
         ).toEqual([])
+
+        if (scenario.name === 'latest Vite 8 SPA' || scenario.tracer === false) {
+          // Use the installed kit and real DOM click: no mocked tracer bridge or query result.
+          await page.evaluate(() => {
+            const target = window as unknown as TracerSmokeWindow
+            target.inspection = target.__VUE_DEVTOOLS_VITE_RUNTIME__.kit.runtime.query({
+              type: 'components:inspect',
+            })
+          })
+          await page.locator('#count').click()
+          const result = await page.evaluate(
+            () => (window as unknown as TracerSmokeWindow).inspection,
+          )
+          expect(result?.appId).toBeTruthy()
+          expect(result?.componentId).toBeTruthy()
+          if (scenario.tracer === false) {
+            expect(result).not.toHaveProperty('source')
+            expect(await page.evaluate(() => '__VUE_DEVTOOLS_TRACER__' in globalThis)).toBe(false)
+          } else {
+            const source = await readFile(resolve(fixtureRoot, 'App.vue'), 'utf8')
+            const offset = source.indexOf('<output id="count">')
+            expect(offset).toBeGreaterThanOrEqual(0)
+            const lines = source.slice(0, offset).split('\n')
+            expect(result?.source).toEqual({
+              file: 'tests/fixtures/vite-smoke/App.vue',
+              line: lines.length,
+              column: lines.at(-1)!.length,
+            })
+          }
+        }
 
         if (scenario.name === 'latest Vite 8 SPA') {
           // Exercise the built client over its real iframe transport, not just the runtime API.
@@ -263,4 +295,21 @@ function close(server: HttpServer | undefined): Promise<void> {
   return new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()))
   })
+}
+
+interface TracerSmokeWindow {
+  __VUE_DEVTOOLS_VITE_RUNTIME__: {
+    kit: {
+      runtime: {
+        query(request: { type: 'components:inspect' }): Promise<InspectionResult | undefined>
+      }
+    }
+  }
+  inspection?: Promise<InspectionResult | undefined>
+}
+
+interface InspectionResult {
+  appId: string
+  componentId: string
+  source?: { file: string; line: number; column: number }
 }

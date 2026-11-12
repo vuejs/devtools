@@ -64,6 +64,12 @@ import {
 import { CLIENT_RUNTIME_KEY } from '../../../packages/vite/src/constants'
 
 describe('Vite client inspector lifecycle', () => {
+  it('does not load a tracer bridge when installing the base runtime', () => {
+    installVueDevTools({ enabled: true })
+    expect(Object.hasOwn(globalThis, '__VUE_DEVTOOLS_TRACER__')).toBe(false)
+    expect(Object.hasOwn(globalThis, '__vue_tracer__')).toBe(false)
+  })
+
   afterEach(() => {
     disposeVueDevTools()
     delete (window as unknown as Record<string, unknown>)[CLIENT_RUNTIME_KEY]

@@ -17,15 +17,15 @@ Monorepo (`pnpm` workspaces). ESM TypeScript. Library packages bundle with tsdow
 
 ### Packages
 
-| Package                 | npm                        | Description                                                                                                                                                                                                                           |
-| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/kit`          | `@vue/devtools-kit`        | Runtime, codec, RPC, plugin registry. Exports only `dist`.                                                                                                                                                                            |
-| `packages/devtools-api` | `@vue/devtools-api`        | Public plugin API surface over the kit.                                                                                                                                                                                               |
-| `packages/client`       | `@vue/devtools-client`     | Vue 3 + UnoCSS UI shared by both hosts. Private. Vite plugin copies the build into `packages/vite/client`; the extension loads the same client in its panel.                                                                          |
-| `packages/vite`         | `vite-plugin-vue-devtools` | Vite host. Serves the static client and registers an iframe dock with `@vitejs/devtools`.                                                                                                                                             |
-| `packages/tracer`       | `@vue/devtools-tracer`     | Template element-to-source line and column mapping ported from `vite-plugin-vue-tracer`. Exports the `tracerTransform()` instrumentation plugin and `./client` queries, composed internally by the Vite host. Vapor is not supported. |
-| `packages/agent`        | `@vue/devtools-agent`      | Agent tools over the kit runtime, Devframe page/host adapters, and the `vue-devtools-agent` stdio MCP CLI. Used by the Vite host only.                                                                                                |
-| `packages/chrome`       | `@vue/devtools-chrome`     | Chromium MV3 host (background, content backend, DevTools panel). Private. Zip via `pnpm zip:chrome`.                                                                                                                                  |
+| Package                 | npm                        | Description                                                                                                                                                                                                                                                                                       |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/kit`          | `@vue/devtools-kit`        | Runtime, codec, RPC, plugin registry. Exports only `dist`.                                                                                                                                                                                                                                        |
+| `packages/devtools-api` | `@vue/devtools-api`        | Public plugin API surface over the kit.                                                                                                                                                                                                                                                           |
+| `packages/client`       | `@vue/devtools-client`     | Vue 3 + UnoCSS UI shared by both hosts. Private. Vite plugin copies the build into `packages/vite/client`; the extension loads the same client in its panel.                                                                                                                                      |
+| `packages/vite`         | `vite-plugin-vue-devtools` | Vite host. Serves the static client and registers an iframe dock with `@vitejs/devtools`.                                                                                                                                                                                                         |
+| `packages/tracer`       | `@vue/devtools-tracer`     | Template element-to-source line and column mapping ported from `vite-plugin-vue-tracer`. Use standalone `VueTracer(options)` or configure it through `vueDevTools({ tracer })`; both share the same factory. Exports headless client queries, listeners, and the overlay. Vapor is not supported. |
+| `packages/agent`        | `@vue/devtools-agent`      | Agent tools over the kit runtime, Devframe page/host adapters, and the `vue-devtools-agent` stdio MCP CLI. Used by the Vite host only.                                                                                                                                                            |
+| `packages/chrome`       | `@vue/devtools-chrome`     | Chromium MV3 host (background, content backend, DevTools panel). Private. Zip via `pnpm zip:chrome`.                                                                                                                                                                                              |
 
 Other top-level directories:
 
@@ -54,7 +54,9 @@ flowchart TD
 
 On the Vite host, docks, commands, terminals, and open-in-editor stay in `@vitejs/devtools`. Open-in-editor is forwarded as `vite:core:open-in-editor`, gated by `capabilities.openInEditor`. The extension panel does not offer open-in-editor; that action exists only in the Vite dock.
 
-`vueDevTools()` options are `enabled` and `appendTo`. Dock layout, built-in integrations, and open-in-editor stay on Vite's `devtools` config. Runtime `budget` is a kit option.
+`vueDevTools()` options are `enabled`, `appendTo`, and `tracer`. Dock layout, built-in integrations, and open-in-editor stay on Vite's `devtools` config. Runtime `budget` is a kit option.
+
+Tracing uses the Vite DevTools host. Both `VueTracer()` and the default `vueDevTools()` integration register the **Inspect Vue component** picker and **Mod+Shift+X** command when the host is available. `VueTracer({ onPick: 'none' })` or `vueDevTools({ tracer: { onPick: 'none' } })` leaves picked elements to client listeners; the default action opens their source in the editor. `vueDevTools({ tracer: false })` disables both tracing and its picker.
 
 ## Architecture
 
@@ -132,7 +134,7 @@ pnpm docs           # VitePress
 After kit, client, or plugin changes that the playground must see:
 
 ```sh
-pnpm --filter @vue/devtools-kit --filter @vue/devtools-client --filter vite-plugin-vue-devtools build
+pnpm --filter @vue/devtools-kit --filter @vue/devtools-client --filter @vue/devtools-tracer --filter vite-plugin-vue-devtools build
 ```
 
 `pnpm test:smoke:vite` and `pnpm test:smoke:chrome` build the packages they need. `pnpm dep:up` bumps the catalog.
