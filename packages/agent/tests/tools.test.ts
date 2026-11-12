@@ -144,3 +144,22 @@ describe('Vue agent tools', () => {
     })
   })
 })
+
+it('exposes trace-element as a page-scoped read query with source coordinates', async () => {
+  const source = { file: 'src/App.vue', line: 4, column: 0 }
+  const { tools, query } = setup(source)
+  const result = await tools['trace-element'].handler({ selector: 'button' })
+  expect(query).toHaveBeenCalledExactlyOnceWith({
+    type: 'elements:trace',
+    payload: { selector: 'button' },
+  })
+  expect(result.result).toEqual(source)
+  expect(tools['trace-element'].returns.safeParse(result).success).toBe(true)
+  expect(tools['trace-element'].agent.safety).toBe('read')
+  query.mockResolvedValue(null)
+  expect((await tools['trace-element'].handler({ selector: '.missing' })).result).toBeNull()
+  await expect(tools['trace-element'].handler({ selector: '' })).rejects.toThrow()
+  await expect(
+    tools['trace-element'].handler({ selector: 'div', appId: 'a' } as never),
+  ).rejects.toThrow()
+})

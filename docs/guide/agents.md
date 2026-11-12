@@ -68,12 +68,15 @@ Each browser document has its own tools. Use `list-apps` to identify the page be
 | ------------------------------------------ | ----------------------------------------------------------------------------- |
 | Identify apps and check runtime health     | `list-apps`, `list-plugins`, `runtime-health`                                 |
 | Browse the component tree                  | `component-tree`, `component-children`, `cancel-component-children`           |
+| Trace a DOM element to its template source | `trace-element`                                                               |
 | Read component state and render code       | `component-state`, `component-value`, `expand-value`, `component-render-code` |
 | Inspect Pinia stores and other plugin data | `list-inspectors`, `inspector-tree`, `inspector-state`, `inspector-value`     |
 | Check routes                               | `router-state`, `router-matches`                                              |
 | Edit a state field                         | `edit-component-state`, `edit-inspector-state`                                |
 
 Tools that target an app require an `appId`. Each tool declares an output schema. Successful calls return `{ page, capturedAt, result }`; failed calls use the MCP tool error channel.
+
+`trace-element` takes a CSS selector and looks up the first matching element in the page document. It returns the source file, one-based line, and zero-based column for the element or its nearest traced ancestor, or `null` when no element matches or no source is available.
 
 The component tree loads incrementally. Without a filter, `component-tree` returns the initially expanded nodes. With a filter, it searches the whole app by component name or source file and returns up to 100 matches. To walk the tree without a filter, use `component-children` and pass the returned cursor to read the next page. Cancel unfinished reads with `cancel-component-children`. If a cursor expires, restart `component-children` without it.
 

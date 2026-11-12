@@ -98,7 +98,7 @@ export function inspectComponentInPage(
 
       event.preventDefault()
       event.stopPropagation()
-      const source = getElementSource(event)
+      const source = getEventElementSource(event)
       void finish({ appId: record.appId, componentId: record.id, ...(source ? { source } : {}) })
     }
 
@@ -303,13 +303,15 @@ function getOwnNodesFromBlock(block: unknown): Node[] {
   return getOwnNodesFromBlock(block.nodes)
 }
 
-function getElementSource(event: MouseEvent): ComponentInspectionResult['source'] {
+function getEventElementSource(event: MouseEvent): ComponentInspectionResult['source'] {
   const targets = typeof event.composedPath === 'function' ? event.composedPath() : [event.target]
   const element = targets.find(
     (target): target is Element => isNode(target) && target.nodeType === Node.ELEMENT_NODE,
   )
-  if (!element) return
+  return element ? getElementSource(element) : undefined
+}
 
+export function getElementSource(element: Element): ComponentInspectionResult['source'] {
   const tracer = (
     globalThis as typeof globalThis & {
       __VUE_DEVTOOLS_TRACER__?: {

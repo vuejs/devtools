@@ -88,6 +88,17 @@ it('discovers Vue tools and reads component state through the CLI connector', as
   const apps = await call<{ apps: { id: string }[] }>('list-apps')
   expect(apps.page.url).toBe(`${origin}/?agent`)
   expect(apps.result.apps.length).toBeGreaterThan(0)
+  const traced = await call<{ file: string; line: number; column: number }>('trace-element', {
+    arg0: { selector: '#count' },
+  })
+  expect(traced.result).toEqual({
+    file: expect.stringMatching(/tests\/fixtures\/vite-smoke\/App\.vue$/),
+    line: 17,
+    column: 2,
+  })
+  expect(
+    (await call<null>('trace-element', { arg0: { selector: '#missing-element' } })).result,
+  ).toBeNull()
   const appId = apps.result.apps[0].id
   const tree = await call<{ nodes: { id: string; name: string }[] }>('component-tree', {
     arg0: { appId },

@@ -78,6 +78,10 @@ export interface RuntimeQueryMap {
     } & StatePageOptions
     result: StateValueMessage
   }
+  'elements:trace': {
+    payload: { selector: string }
+    result: NonNullable<ComponentInspectionResultMessage['source']> | null
+  }
   'components:inspect': { payload: undefined; result: ComponentInspectionResultMessage | undefined }
   'components:getBounds': { payload: ComponentTarget; result: ComponentBounds | undefined }
   'components:getName': { payload: ComponentTarget; result: string | undefined }

@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite'
+import type { VueTracerOptions } from './options'
 import type { RawSourceMap } from 'source-map-js'
 import { dirname, isAbsolute, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -6,6 +7,7 @@ import { walk } from 'estree-walker'
 import MagicString from 'magic-string'
 import { SourceMapConsumer } from 'source-map-js'
 import { normalizePath, searchForWorkspaceRoot } from 'vite'
+import { vaporTransform } from './vapor'
 
 const functions = [
   'h',
@@ -18,7 +20,17 @@ const functions = [
 const testRe = new RegExp(`\\b(?:${functions.join('|')})\\(`)
 
 /** Record source locations after Vue has compiled the template. */
-export function tracerTransform(): Plugin {
+export function tracerTransform(options: VueTracerOptions = {}): Plugin {
+  return createPostTransform(options)
+}
+
+export function createTracerTransforms(options: VueTracerOptions): [Plugin, Plugin] {
+  const vaporFiles = new Set<string>()
+  return [vaporTransform(options, vaporFiles), createPostTransform(options, vaporFiles)]
+}
+
+function createPostTransform(options: VueTracerOptions, vaporFiles?: Set<string>): Plugin {
+  const { resolveRecordEntryPath = true } = options
   let workspaceRoot: string
   const recordPath = fileURLToPath(import.meta.resolve('@vue/devtools-tracer/client'))
 
@@ -30,6 +42,24 @@ export function tracerTransform(): Plugin {
       workspaceRoot = searchForWorkspaceRoot(config.root)
     },
     transform(code, id) {
+      if (options.enabled === false) return
+      // Virtual modules have no filesystem directory to resolve a relative import from.
+      const filename = id.split('?')[0]!
+      let recordImport = resolveRecordEntryPath
+        ? normalizePath(recordPath)
+        : '@vue/devtools-tracer/client/record'
+      if (resolveRecordEntryPath && isAbsolute(filename)) {
+        recordImport = normalizePath(relative(dirname(filename), recordPath))
+        if (!recordImport.startsWith('.')) recordImport = `./${recordImport}`
+      }
+      const query = new URLSearchParams(id.split('?')[1])
+      if (query.has('raw') || query.has('url')) return
+      if (vaporFiles?.has(filename) && !query.has('type')) {
+        if (code.includes('/* vue-devtools:vapor-runtime */')) return
+        const s = new MagicString(code)
+        s.prepend(`/* vue-devtools:vapor-runtime */\nimport ${JSON.stringify(recordImport)};\n`)
+        return { code: s.toString(), map: s.generateMap({ hires: true }) }
+      }
       if (this.environment.name !== 'client') return
       if (!code.includes('_sfc_render(') || !testRe.test(code)) return
       if (code.includes('_tracer(')) return
@@ -60,13 +90,6 @@ export function tracerTransform(): Plugin {
       })
       if (!hit) return
 
-      // Virtual modules have no filesystem directory to resolve a relative import from.
-      const filename = id.split('?')[0]!
-      let recordImport = normalizePath(recordPath)
-      if (isAbsolute(filename)) {
-        recordImport = normalizePath(relative(dirname(filename), recordPath))
-        if (!recordImport.startsWith('.')) recordImport = `./${recordImport}`
-      }
       const source = normalizePath(relative(workspaceRoot, filename))
       s.prepend(
         `import { recordPosition as _tracerRecordPosition } from ${JSON.stringify(recordImport)}\n`,

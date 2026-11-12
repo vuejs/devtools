@@ -8,6 +8,7 @@ import {
   exposeValueAsGlobal,
   getComponentRecordBounds,
   getComponentRenderCode,
+  getElementSource,
   highlightComponentRecord,
   inspectComponentInPage,
   scrollToComponentRecord,
@@ -148,6 +149,19 @@ export function registerComponentHandlers(
       path,
       readStatePageOptions(query.payload),
     )
+  })
+
+  runtime.registerQuery('elements:trace', (query) => {
+    const selector = readString(query.payload, 'selector')
+    if (!selector?.trim() || selector.length > 2000) throw new Error('Invalid CSS selector')
+    if (typeof document === 'undefined') return null
+    let element: Element | null
+    try {
+      element = document.querySelector(selector)
+    } catch {
+      throw new Error('Invalid CSS selector')
+    }
+    return element ? (getElementSource(element) ?? null) : null
   })
 
   runtime.registerQuery('components:inspect', async () => {

@@ -135,6 +135,9 @@ interface VitePluginVueDevToolsOptions {
    * @default undefined
    */
   appendTo?: string | RegExp | Array<string | RegExp>
+
+  /** Configure template source tracing during development. @default true */
+  tracer?: boolean | VueTracerOptions
 }
 ```
 
@@ -157,6 +160,12 @@ VueDevTools({
 
 Only matching client modules are modified. SSR transforms are skipped, and the same module is never
 injected more than once.
+
+### `tracer`
+
+Template source tracing and its element picker are enabled by default during development. Set
+`tracer` to `false` to disable both, or pass an options object to configure
+[element source tracing](/guide/tracer#options).
 
 :::info Changed in v9
 Component inspection is now integrated into the Vue DevTools dock. Open-in-editor requests are

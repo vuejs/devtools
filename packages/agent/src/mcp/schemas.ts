@@ -130,6 +130,13 @@ const stateValueSchema = z.discriminatedUnion('found', [
   }),
 ])
 export const resultSchemas = {
+  elementSource: z
+    .object({
+      file: z.string(),
+      line: z.number().int().min(1),
+      column: z.number().int().min(0),
+    })
+    .nullable(),
   apps: z.object({
     apps: z.array(
       z.object({

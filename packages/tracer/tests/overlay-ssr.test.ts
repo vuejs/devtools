@@ -1,9 +1,9 @@
-import { expect, it, vi } from 'vitest'
-import { createTracerOverlay } from '../src/overlay'
+import { expect, it } from 'vitest'
+import { isEnabled, state } from '../src/overlay'
 
-it('can be imported, enabled, and disposed without a DOM', () => {
+it('can be imported and toggled without a DOM', () => {
   expect(typeof document).toBe('undefined')
-  const overlay = createTracerOverlay({ onPick: vi.fn(), onCancel: vi.fn() })
-  expect(() => overlay.enable()).not.toThrow()
-  expect(() => overlay.dispose()).not.toThrow()
+  state.isEnabled = true
+  expect(isEnabled.value).toBe(true)
+  state.isEnabled = false
 })

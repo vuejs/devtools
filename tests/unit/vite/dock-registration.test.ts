@@ -2,9 +2,38 @@ import type { Plugin, ResolvedConfig } from 'vite'
 import { describe, expect, it, vi } from 'vitest'
 import { resolveConfig } from 'vite'
 import vueDevtools from '../../../packages/vite/src'
+import VueTracer from '../../../packages/tracer/src'
 import { createVueDevToolsDockRegistrationPlugin } from '../../../packages/vite/src/utils/dock/registration'
 
 describe('Vue DevTools dock registration', () => {
+  it.each([true, false])(
+    'orders the standalone picker after Vue when tracer-first is %s',
+    async (tracerFirst) => {
+      const vuePlugin = createVueDevToolsDockRegistrationPlugin()
+      const tracerPlugin = VueTracer()![1]!
+      await callHook(vuePlugin.configResolved, {
+        base: '/',
+        devtools: { config: { mcp: false } },
+      } as ResolvedConfig)
+      const register = vi.fn()
+      const ctx = {
+        docks: { register },
+        commands: { register: vi.fn() },
+        views: { hostStatic: vi.fn() },
+      }
+      const plugins = tracerFirst ? [tracerPlugin, vuePlugin] : [vuePlugin, tracerPlugin]
+      for (const plugin of plugins) await plugin.devtools!.setup(ctx as never)
+      const entries = register.mock.calls.map(([entry]) => entry)
+      expect(entries).toHaveLength(2)
+      expect(entries.every((entry) => entry.category === 'framework' && !entry.groupId)).toBe(true)
+      expect(entries.some((entry) => entry.type === 'group')).toBe(false)
+      expect(entries.filter((entry) => entry.icon === 'logos:vue')).toHaveLength(1)
+      expect(
+        entries.sort((a, b) => a.defaultOrder - b.defaultOrder).map((entry) => entry.id),
+      ).toEqual(['vue-devtools', 'vue-tracer'])
+    },
+  )
+
   it.each([
     ['/', '/__devtools__/', '/__devtools__/dock-client.js'],
     ['/nested/', '/nested/__devtools__/', '/nested/__devtools__/dock-client.js'],
@@ -28,8 +57,10 @@ describe('Vue DevTools dock registration', () => {
       clientUrl,
       expect.stringMatching(/packages[/\\]vite[/\\]client$/),
     )
+    expect(register).toHaveBeenCalledOnce()
     expect(register).toHaveBeenCalledWith({
       category: 'framework',
+      defaultOrder: -2,
       clientScript: { importFrom: clientScriptUrl, eager: true },
       icon: 'logos:vue',
       id: 'vue-devtools',
@@ -77,9 +108,12 @@ describe('Vue DevTools dock registration', () => {
       views: { hostStatic: vi.fn() },
     } as never)
     expect(registerTool).not.toHaveBeenCalled()
-    expect(register.mock.calls[0][0].clientScript).toEqual({
-      importFrom: '/__devtools__/dock-client.js',
-    })
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'vue-devtools',
+        clientScript: { importFrom: '/__devtools__/dock-client.js' },
+      }),
+    )
   })
 
   it.each([undefined, false, { enabled: false }, { apply: 'build' as const }])(

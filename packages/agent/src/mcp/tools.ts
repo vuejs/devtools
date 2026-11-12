@@ -126,6 +126,12 @@ export function createVueDevtoolsAgentTools(
     'list-apps': listApps,
     'list-plugins': listPlugins,
     'runtime-health': runtimeHealth,
+    'trace-element': tool(
+      'Read the template source position for the first document element matching a CSS selector (document order). Page-scoped; does not enter shadow roots or iframes. Tracer may fall back to an ancestor. Returns file, line (1-based), column (0-based), or null when no element/source exists or tracer is unavailable. Invalid CSS selectors fail. Does not select, highlight, or open the editor.',
+      z.strictObject({ selector: z.string().trim().min(1).max(2000) }),
+      ({ selector }) => connection.query({ type: 'elements:trace', payload: { selector } }),
+      resultSchemas.elementSource,
+    ),
     'component-tree': tool(
       'List the initially expanded Vue component tree and source files. With filter, search every component in the app by name or source file (up to 100 matches, each with its parentId) instead. The tree can be partial; use component-children for childCount and cursors. If a cursor expires, restart component-children for that component.',
       target.extend({ filter: z.string().max(200).optional() }),

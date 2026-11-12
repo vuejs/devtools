@@ -5,7 +5,8 @@ Select a component to open its source file in your code editor.
 ## Vite plugin
 
 The Vite plugin supports this feature out of the box when the connected Vite DevTools host exposes
-its open-in-editor capability.
+its open-in-editor capability. With [element source tracing](/guide/tracer), picking a template
+element opens its source at the recorded line and column.
 
 Starting with Vue DevTools v9, Vue DevTools only forwards the component source path to
 `vite:core:open-in-editor`. `@vitejs/devtools` handles workspace path validation, editor launching,

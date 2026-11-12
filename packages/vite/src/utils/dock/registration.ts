@@ -37,6 +37,7 @@ export function createVueDevToolsDockRegistrationPlugin(): PluginWithDevTools {
           id: DOCK_ENTRY_ID,
           title: 'Vue DevTools',
           category: 'framework',
+          defaultOrder: -2,
           icon: 'logos:vue',
           type: 'iframe',
           url: clientUrl,

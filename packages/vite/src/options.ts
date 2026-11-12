@@ -1,4 +1,9 @@
+import type { VueTracerOptions } from '@vue/devtools-tracer'
+
 export interface VitePluginVueDevToolsOptions {
+  /** Configure template source tracing and its Vite DevTools picker, or disable both with false. @default true */
+  tracer?: boolean | VueTracerOptions
+
   /**
    * Whether to install Vue Devtools and register its Vite DevTools dock entry.
    *
