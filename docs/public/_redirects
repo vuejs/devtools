@@ -1,0 +1,17 @@
+# The v6 docs used to live on this domain. The v6 extension, its console hints and other projects
+# still link to these pages, which now live on devtools-v6.vuejs.org.
+/guide/installation.html                   https://devtools-v6.vuejs.org/guide/installation.html                   301
+/guide/open-in-editor.html                 https://devtools-v6.vuejs.org/guide/open-in-editor.html                 301
+/guide/faq.html                            https://devtools-v6.vuejs.org/guide/faq.html                            301
+/guide/contributing.html                   https://devtools-v6.vuejs.org/guide/contributing.html                   301
+/guide/devtools-perf.html                  https://devtools-v6.vuejs.org/guide/devtools-perf.html                  301
+/guide/custom-vue2-app-scan-selector.html  https://devtools-v6.vuejs.org/guide/custom-vue2-app-scan-selector.html  301
+/plugin/*                                  https://devtools-v6.vuejs.org/plugin/:splat                             301
+
+# Pages of the early v7 docs that moved.
+/guide/installation     /getting-started/installation    301
+/guide/getting-started  /getting-started/installation    301
+/guide/features         /getting-started/features        301
+/guide/open-in-editor   /getting-started/open-in-editor  301
+/guide/contributing     /help/contributing               301
+/guide/faq              /help/faq                        301
