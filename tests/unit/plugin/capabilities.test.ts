@@ -18,6 +18,7 @@ describe('versioned plugin capabilities', () => {
       hook: { install: false },
     })
     created.install()
+    created.runtime.setCollectionActive(true, 1)
     return created
   }
 

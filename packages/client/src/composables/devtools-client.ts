@@ -12,7 +12,7 @@ import type {
 } from '@vue/devtools-kit'
 import { supportsReactivityGraphVueVersion } from '@vue/devtools-kit'
 import type { DevToolsRpcClient } from '@vitejs/devtools-kit/client'
-import type { DevtoolsRpcClient } from '@vue/devtools-kit/client'
+import type { DevtoolsRpcClient, DevtoolsRpcEvent } from '@vue/devtools-kit/client'
 import { computed, ref, shallowRef, watch } from 'vue'
 import { applyComponentTreePatches as patchComponentTree } from '../utils/component-tree-patches'
 import { createDevtoolsConnection } from './devtools-connection'
@@ -65,10 +65,17 @@ const reactivityGraphEnabled = computed(() =>
 const totalComponents = computed(() => apps.value.reduce((sum, app) => sum + app.componentCount, 0))
 const openInEditorAvailable = computed(() => capabilities.value.openInEditor)
 
+let runtimeEventsReady = false
+let refreshAfterInitialSnapshot = false
+const initialTimelineLayers = new Map<string, DevtoolsRpcEvent>()
+
 const connection = createDevtoolsConnection({
   refresh: refreshData,
   onRuntimeChanged: resetFrameScopedState,
   onDisconnect() {
+    runtimeEventsReady = false
+    refreshAfterInitialSnapshot = false
+    initialTimelineLayers.clear()
     invalidateRefresh()
     discardPendingTimelineEvents()
     capabilities.value = { openInEditor: false }
@@ -286,6 +293,7 @@ async function refreshData() {
     return
   }
 
+  attachRuntimeEvents(client)
   loading.value = true
   try {
     const [appSnapshot, nextCapabilities, pluginSnapshot] = await Promise.all([
@@ -315,7 +323,15 @@ async function refreshData() {
     connected.value = true
     error.value = undefined
     lastUpdatedAt.value = Date.now()
-    attachRuntimeEvents(client)
+    runtimeEventsReady = true
+    for (const event of initialTimelineLayers.values()) handleTimelineEvent(event)
+    initialTimelineLayers.clear()
+    if (refreshAfterInitialSnapshot) {
+      refreshAfterInitialSnapshot = false
+      queueMicrotask(() => {
+        if (runtimeEventsReady && getRpcClient() === client) void refreshData()
+      })
+    }
     void syncTimelineSettings(client)
     clearConnectionRetryTimer()
     scheduleConnectionHealthCheck()
@@ -392,6 +408,9 @@ async function navigateRoute(path: string) {
 }
 
 function resetFrameScopedState() {
+  runtimeEventsReady = false
+  refreshAfterInitialSnapshot = false
+  initialTimelineLayers.clear()
   invalidateRefresh()
   apps.value = []
   components.value = []
@@ -406,6 +425,19 @@ function resetFrameScopedState() {
 
 function attachRuntimeEvents(client: DevtoolsRpcClient) {
   listenRuntimeEvents(client, (event) => {
+    if (!runtimeEventsReady) {
+      // Before the first snapshot, retain only plugin discovery notifications.
+      // Tree patches remain ignored, matching the previous late subscription.
+      if (
+        event.type === 'apps:changed' ||
+        event.type === 'plugin:setup' ||
+        event.type === 'inspectors:changed'
+      )
+        refreshAfterInitialSnapshot = true
+      if (event.type === 'timeline:layerAdded' && event.layerId)
+        initialTimelineLayers.set(event.layerId, event)
+      return
+    }
     handleTimelineEvent(event)
 
     if (event.type === 'components:treePatched') {

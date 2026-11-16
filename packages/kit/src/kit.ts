@@ -58,6 +58,37 @@ export function createDevtoolsKit(options: DevtoolsKitOptions): DevtoolsKit {
   })
   const rpc = createDevtoolsRpcServer(runtime)
   const plugins = createPluginController(runtime)
+  // A transport can exist before any panel or agent consumes it. Keep plugin
+  // watchers dormant until a real connection or external request needs them.
+  const setCollectionActive = runtime.setCollectionActive.bind(runtime)
+  runtime.setCollectionActive = (active, attachedClients) => {
+    setCollectionActive(active, attachedClients)
+    if (active) void plugins.activate()
+  }
+  // Setup may reenter these public methods, even after an await. During the
+  // activation window preserve the old non-waiting request behavior.
+  // Internal kit work must use captured raw requests (as the plugin adapter
+  // does), or it could activate Pinia watchers before any external consumer.
+  const query = runtime.query.bind(runtime)
+  runtime.query = async (request) => {
+    if (!plugins.isActivating()) await plugins.activate()
+    return query(request)
+  }
+  const command = runtime.command.bind(runtime)
+  runtime.command = async (request) => {
+    if (!plugins.isActivating()) await plugins.activate()
+    return command(request)
+  }
+  const queryCustom = runtime.queryCustom.bind(runtime)
+  runtime.queryCustom = async (query) => {
+    if (!plugins.isActivating()) await plugins.activate()
+    return queryCustom(query)
+  }
+  const commandCustom = runtime.commandCustom.bind(runtime)
+  runtime.commandCustom = async (command) => {
+    if (!plugins.isActivating()) await plugins.activate()
+    return commandCustom(command)
+  }
   const capabilities = Object.freeze<DevtoolsCapabilitiesMessage>({
     openInEditor: options.capabilities?.openInEditor ?? false,
     pagedComponentTree: true,

@@ -210,6 +210,7 @@ export function createPluginApiAdapter(
   runtime: DevtoolsRuntime,
   resolvePluginSettings?: (pluginId: string) => Record<string, unknown> | undefined,
   settings: PluginSettings = new PluginSettings(descriptor),
+  requests: Pick<DevtoolsRuntime, 'query' | 'command'> = runtime,
 ): PluginApiAdapter {
   const handlers = new Map<keyof DevToolsPluginAPIHooks, Set<Function>>()
   settings.subscribe(async ({ key, value, oldValue, settings: snapshot }) => {
@@ -249,25 +250,25 @@ export function createPluginApiAdapter(
     capabilities: PLUGIN_API_CAPABILITIES,
     on: createHookRegistrarProxy(descriptor.id, hookRegistrars),
     addInspector(options) {
-      void runtime.command({
+      void requests.command({
         type: 'inspectors:add',
         payload: { pluginId: descriptor.id, app: scopedApp(descriptor), options },
       })
     },
     sendInspectorTree(inspectorId) {
-      void runtime.command({
+      void requests.command({
         type: 'inspectors:invalidateTree',
         payload: { pluginId: descriptor.id, app: scopedApp(descriptor), inspectorId },
       })
     },
     sendInspectorState(inspectorId) {
-      void runtime.command({
+      void requests.command({
         type: 'inspectors:invalidateState',
         payload: { pluginId: descriptor.id, app: scopedApp(descriptor), inspectorId },
       })
     },
     selectInspectorNode(inspectorId, nodeId) {
-      void runtime.command({
+      void requests.command({
         type: 'inspectors:selectNode',
         payload: { pluginId: descriptor.id, app: scopedApp(descriptor), inspectorId, nodeId },
       })
@@ -275,7 +276,7 @@ export function createPluginApiAdapter(
     notifyComponentUpdate(instance) {
       const componentId = instance ? runtime.registry.getComponentId(instance) : undefined
       if (!componentId) return
-      void runtime.command({
+      void requests.command({
         type: 'components:invalidate',
         payload: { componentId } satisfies { componentId?: ComponentId },
       })
@@ -284,13 +285,13 @@ export function createPluginApiAdapter(
       await callHook('visitComponentTree', payload)
     },
     addTimelineLayer(options) {
-      void runtime.command({
+      void requests.command({
         type: 'timeline:addLayer',
         payload: { pluginId: descriptor.id, app: scopedApp(descriptor), options },
       })
     },
     addTimelineEvent(options) {
-      void runtime.command({
+      void requests.command({
         type: 'timeline:addEvent',
         payload: { pluginId: descriptor.id, app: scopedApp(descriptor), options },
       })
@@ -300,22 +301,22 @@ export function createPluginApiAdapter(
       return record ? [...record.components.values()].map((component) => component.instance) : []
     },
     async getComponentBounds(instance) {
-      return await runtime.query({ type: 'components:getBounds', payload: { instance } })
+      return await requests.query({ type: 'components:getBounds', payload: { instance } })
     },
     async getComponentName(instance) {
-      return await runtime.query({ type: 'components:getName', payload: { instance } })
+      return await requests.query({ type: 'components:getName', payload: { instance } })
     },
     getSettings(pluginId) {
       return getSettingsSnapshot(pluginId)
     },
     async highlightElement(instance) {
-      await runtime.command({ type: 'components:highlight', payload: { instance } })
+      await requests.command({ type: 'components:highlight', payload: { instance } })
     },
     now() {
       return Date.now()
     },
     async unhighlightElement() {
-      await runtime.command({ type: 'components:unhighlight' })
+      await requests.command({ type: 'components:unhighlight' })
     },
   }
 
