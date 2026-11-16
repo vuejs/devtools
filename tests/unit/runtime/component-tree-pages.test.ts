@@ -580,3 +580,206 @@ it.each(['Fragment', 'Teleport', 'KeepAlive', 'Vapor'] as const)(
     expect(actual).toEqual(await run())
   },
 )
+
+describe('budget-aware initial component snapshots', () => {
+  const messageLimit = 2 * 1024 * 1024
+  function fixtureRuntime(count: number, branching: number, limit = messageLimit) {
+    const fixture = createComponentTreeFixture(count, { branching })
+    for (const instance of fixture.instances)
+      instance.type.__file = `/workspace/${'directory/'.repeat(12)}Component.vue`
+    runtime = createDevtoolsRuntime({ budget: { transport: { maxMessageBytes: limit } } })
+    runtime.dispatch({
+      type: 'app:init',
+      app: fixture.app,
+      version: '3.5.0',
+      vueTypes: {},
+      time: 1,
+    })
+    return fixture
+  }
+
+  it.each([1000, 5000])(
+    'preserves the legacy snapshot byte for byte for %i nodes',
+    async (count) => {
+      vi.spyOn(Date, 'now').mockReturnValue(100)
+      fixtureRuntime(count, 100)
+      const legacy = JSON.stringify(runtime.components.snapshot('app:0'))
+      runtime.dispose()
+      fixtureRuntime(count, 100)
+      const bounded = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+      expect(measureRuntimeMessageBytes(bounded)).toBeLessThan(messageLimit)
+      expect(JSON.stringify(bounded)).toBe(legacy)
+    },
+  )
+
+  it.each([1000, 5000])(
+    'preserves hook-decorated snapshots byte for byte for %i nodes',
+    async (count) => {
+      vi.spyOn(Date, 'now').mockReturnValue(100)
+      fixtureRuntime(count, 100)
+      const legacy = runtime.components.snapshot('app:0')
+      for (const node of legacy.nodes) node.tags = [{ label: 'plugin' }]
+      runtime.dispose()
+      fixtureRuntime(count, 100)
+      runtime.setPluginHookRunner(async (_key, payload) => {
+        const node = (payload as { treeNode: { tags?: Array<{ label: string }> } }).treeNode
+        node.tags = [{ label: 'plugin' }]
+      })
+      const actual = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+      expect(measureRuntimeMessageBytes(actual)).toBeLessThan(messageLimit)
+      expect(JSON.stringify(actual)).toBe(JSON.stringify(legacy))
+    },
+  )
+
+  it.each([100, 10000])(
+    'returns a connected skeleton and pages every node with branching %i',
+    async (branching) => {
+      const fixture = fixtureRuntime(10001, branching)
+      const toSnapshot = vi.spyOn(runtime.registry, 'toComponentSnapshot')
+      const snapshot = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+      expect(measureRuntimeMessageBytes(snapshot)).toBeLessThanOrEqual(messageLimit)
+      expect(snapshot.truncated).toBe(true)
+      expect(snapshot.nodes).toHaveLength(branching === 100 ? 101 : 1)
+      expect(snapshot.nodes[0]!.childCount).toBe(branching)
+      expect(toSnapshot.mock.calls.length).toBeLessThan(10001)
+      const ids = new Set(snapshot.nodes.map((node) => node.id))
+      for (const node of snapshot.nodes) {
+        expect(!node.parentId || ids.has(node.parentId)).toBe(true)
+        expect(runtime.components.isVisible('app:0', node.id)).toBe(true)
+      }
+      const hidden = fixture.instances.at(-1)!
+      const changed = vi.fn()
+      runtime.subscribe('components:treePatched', changed)
+      runtime.dispatch({
+        type: 'component:update',
+        appId: 'app:0',
+        instance: hidden,
+        parent: hidden.parent,
+        time: 2,
+      })
+      await runtime.scheduler.flush()
+      expect(changed).not.toHaveBeenCalled()
+
+      const parents = snapshot.nodes.filter((node) => (node.childCount ?? 0) > 0)
+      const expanded = new Set<string>()
+      for (const parent of parents) {
+        if (expanded.has(parent.id)) continue
+        expanded.add(parent.id)
+        let cursor: string | undefined
+        do {
+          const page = await runtime.query({
+            type: 'components:treeChildren',
+            appId: 'app:0',
+            payload: { componentId: parent.id, cursor },
+          })
+          expect(measureRuntimeMessageBytes(page)).toBeLessThanOrEqual(messageLimit)
+          for (const node of page.nodes) {
+            ids.add(node.id)
+            if ((node.childCount ?? 0) > 0 && !expanded.has(node.id)) parents.push(node)
+          }
+          cursor = page.cursor
+        } while (cursor)
+      }
+      expect(ids.size).toBe(10001)
+    },
+  )
+
+  it('keeps hooks that shrink an oversized raw tree and never reruns hooks on fallback', async () => {
+    fixtureRuntime(101, 100, 10000)
+    const visited: string[] = []
+    const patched = vi.fn()
+    runtime.subscribe('components:treePatched', patched)
+    runtime.setPluginHookRunner(async (_key, payload) => {
+      const node = (payload as { treeNode: { id: string; file?: string; name: string } }).treeNode
+      visited.push(node.id)
+      delete node.file
+      node.name = ''
+    })
+    // Shrunk output is still deliberately over this budget: retain only the root.
+    const reduced = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+    expect(visited).toEqual([
+      'app:0:root',
+      ...Array.from({ length: 100 }, (_, index) => `app:0:${index + 1}`).sort(),
+    ])
+    await runtime.scheduler.flush()
+    expect(patched).not.toHaveBeenCalled()
+    expect(reduced.truncated).toBe(true)
+    expect(reduced.nodes).toHaveLength(1)
+    expect(reduced.nodes[0]!.childCount).toBe(100)
+    expect(reduced.nodes[0]!.name).toBe('')
+    expect(reduced.nodes[0]!.file).toBeUndefined()
+    expect(runtime.components.isVisible('app:0', 'app:0:1')).toBe(false)
+    expect(measureRuntimeMessageBytes(reduced)).toBeLessThanOrEqual(10000)
+  })
+
+  it('skips post-hook fitting entirely when no hooks are installed', async () => {
+    fixtureRuntime(101, 100)
+    const fit = vi.spyOn(runtime.components, 'fitSnapshot')
+    const snapshot = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+    expect(snapshot).not.toHaveProperty('truncated')
+    expect(fit).not.toHaveBeenCalled()
+  })
+
+  it('marks only the reduced result when the initial depth is greater than two', async () => {
+    const fixture = createComponentTreeFixture(63, { branching: 2 })
+    runtime = createDevtoolsRuntime({
+      budget: { components: { maxInitialDepth: 5 }, transport: { maxMessageBytes: 2000 } },
+    })
+    runtime.dispatch({
+      type: 'app:init',
+      app: fixture.app,
+      version: '3.5.0',
+      vueTypes: {},
+      time: 1,
+    })
+    const snapshot = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+    expect(snapshot.truncated).toBe(true)
+    expect(measureRuntimeMessageBytes(snapshot)).toBeLessThanOrEqual(2000)
+    expect(snapshot.nodes.length).toBeGreaterThan(1)
+    expect(snapshot.nodes.length).toBeLessThan(63)
+    const ids = new Set(snapshot.nodes.map((node) => node.id))
+    expect(snapshot.nodes.every((node) => !node.parentId || ids.has(node.parentId))).toBe(true)
+  })
+
+  it('keeps the exact message boundary and only falls back one byte below it', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(100)
+    fixtureRuntime(101, 100)
+    const original = runtime.components.snapshot('app:0')
+    const bytes = measureRuntimeMessageBytes(original)
+    runtime.dispose()
+    fixtureRuntime(101, 100, bytes)
+    expect(
+      JSON.stringify(await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })),
+    ).toBe(JSON.stringify(original))
+    runtime.dispose()
+    fixtureRuntime(101, 100, bytes - 1)
+    expect(
+      (await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })).nodes,
+    ).toHaveLength(1)
+  })
+
+  it('preserves true child counts when an unloaded child is removed before expansion', async () => {
+    const fixture = fixtureRuntime(101, 100, 10000)
+    const snapshot = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+    const child = fixture.instances[1]!
+    const root = fixture.instances[0]!
+    root.subTree.children = root.subTree.children.filter((entry) => entry.component !== child)
+    const events: unknown[] = []
+    runtime.subscribe('components:treePatched', (event) => events.push(event.patches))
+    runtime.dispatch({ type: 'component:remove', appId: 'app:0', instance: child, time: 2 })
+    expect(snapshot.nodes[0]!.childCount).toBe(99)
+    expect(events).toEqual([[{ op: 'update', id: 'app:0:root', changes: { childCount: 99 } }]])
+  })
+
+  it('retains the full hook output when it fits although the original metadata did not', async () => {
+    fixtureRuntime(101, 100, 18000)
+    runtime.setPluginHookRunner(async (_key, payload) => {
+      const node = (payload as { treeNode: { file?: string; name: string } }).treeNode
+      delete node.file
+      node.name = ''
+    })
+    const snapshot = await runtime.query({ type: 'components:treeSnapshot', appId: 'app:0' })
+    expect(snapshot.nodes).toHaveLength(101)
+    expect(measureRuntimeMessageBytes(snapshot)).toBeLessThanOrEqual(18000)
+  })
+})

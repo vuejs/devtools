@@ -1,4 +1,8 @@
-import { invalidateRuntimeTreeNode, markRuntimeTreePatches } from '../rpc/event-buffer'
+import {
+  invalidateRuntimeTreeNode,
+  markRuntimeTreePatches,
+  measureRuntimeMessageBytes,
+} from '../rpc/event-buffer'
 import type { ComponentTreePatch, ComponentTreePageMessage } from '../protocol'
 import type { AppId, ComponentId, InstanceRef, RuntimeEvent } from './types'
 import type { RuntimeBudget } from './budget'
@@ -15,6 +19,7 @@ interface ComponentExpansion {
 }
 
 export interface ComponentTreeSnapshot {
+  truncated?: true
   appId?: AppId
   version: number
   nodes: ComponentSnapshot[]
@@ -78,7 +83,7 @@ export class ComponentTreeStore {
       }
       case 'component:remove': {
         const pendingParent = event.instance ? this.removePendingChild(event.instance) : undefined
-        if (!record && pendingParent) {
+        if (pendingParent && (!record || !this.getNodes(event.appId).has(record.id))) {
           const patch = this.createChildCountPatch(event.appId, pendingParent)
           return patch && this.isPatchVisible(event.appId, patch)
             ? this.commit(event.appId, [patch])
@@ -129,35 +134,117 @@ export class ComponentTreeStore {
     return { appId: app.id, version: this.appVersions.get(app.id) ?? 0, nodes }
   }
 
-  snapshot(appId?: AppId): ComponentTreeSnapshot {
+  snapshot(appId?: AppId, maxMessageBytes = Number.POSITIVE_INFINITY): ComponentTreeSnapshot {
     const app = appId ? this.registry.getApp(appId) : this.registry.listApps()[0]
     if (!app) return { appId, version: 0, nodes: [] }
 
-    const records = this.registry.refreshComponentTree(app.id, {
-      maxDepth: this.budget.maxInitialDepth,
-    })
-    const visible = this.getVisibleNodes(app.id)
-    const expanded = this.getExpandedNodes(app.id)
+    let maxDepth = this.budget.maxInitialDepth
+    const time = Date.now()
+    for (;;) {
+      let bytes = 0
+      let exceeded = false
+      let overflowDepth = maxDepth
+      const records = this.registry.refreshComponentTree(app.id, {
+        maxDepth,
+        time,
+        continueAfter: Number.isFinite(maxMessageBytes)
+          ? (record) => {
+              // Child counts can shrink while upserting hidden children. Excluding
+              // them and the envelope gives a lower bound, never a false overflow.
+              const node = this.toSnapshot(record)
+              bytes += measureRuntimeMessageBytes({ ...node, childCount: undefined })
+              exceeded = bytes > maxMessageBytes
+              if (exceeded) overflowDepth = this.registry.getComponentDepth(record)
+              return !exceeded
+            }
+          : undefined,
+      })
+      if (!exceeded || maxDepth === 0) {
+        const snapshot = this.materializeSnapshot(app.id, records, maxDepth)
+        if (maxDepth < this.budget.maxInitialDepth) snapshot.truncated = true
+        if (
+          !Number.isFinite(maxMessageBytes) ||
+          measureRuntimeMessageBytes(snapshot) <= maxMessageBytes ||
+          maxDepth === 0
+        )
+          return snapshot
+      }
+      maxDepth = Math.max(0, Math.min(maxDepth - 1, overflowDepth - 1))
+    }
+  }
+
+  private materializeSnapshot(
+    appId: AppId,
+    records: ComponentRecord[],
+    maxDepth: number,
+  ): ComponentTreeSnapshot {
+    const visible = this.getVisibleNodes(appId)
+    const expanded = this.getExpandedNodes(appId)
     visible.clear()
     expanded.clear()
-    this.clearPendingChildren(app.id)
+    this.clearPendingChildren(appId)
 
     const patches: ComponentTreePatch[] = []
     for (const record of records) {
       visible.add(record.id)
-      if (this.registry.getComponentDepth(record) < this.budget.maxInitialDepth)
-        expanded.add(record.id)
+      if (this.registry.getComponentDepth(record) < maxDepth) expanded.add(record.id)
       patches.push(...this.upsert(record))
     }
-    this.pruneToVisible(app.id)
-    this.commit(app.id, patches)
+    this.pruneToVisible(appId)
+    if (maxDepth < this.budget.maxInitialDepth) this.trackUnloadedChildren(appId)
+    this.commit(appId, patches)
 
     return {
-      appId: app.id,
-      version: this.appVersions.get(app.id) ?? 0,
-      nodes: this.readOrderedNodes(app.id).filter((node) =>
-        this.getVisibleNodes(app.id).has(node.id),
+      appId,
+      version: this.appVersions.get(appId) ?? 0,
+      nodes: this.readOrderedNodes(appId).filter((node) =>
+        this.getVisibleNodes(appId).has(node.id),
       ),
+    }
+  }
+
+  fitSnapshot(snapshot: ComponentTreeSnapshot, maxMessageBytes: number): ComponentTreeSnapshot {
+    if (!snapshot.appId || measureRuntimeMessageBytes(snapshot) <= maxMessageBytes) return snapshot
+    const appId = snapshot.appId
+    snapshot.truncated = true
+    let maxDepth = this.budget.maxInitialDepth
+    while (maxDepth > 0 && measureRuntimeMessageBytes(snapshot) > maxMessageBytes) {
+      maxDepth--
+      snapshot.nodes = snapshot.nodes.filter((node) => {
+        const record = this.registry.getComponent(node.id, appId)
+        return record && this.registry.getComponentDepth(record) <= maxDepth
+      })
+    }
+    const visible = this.getVisibleNodes(appId)
+    const expanded = this.getExpandedNodes(appId)
+    visible.clear()
+    expanded.clear()
+    for (const node of snapshot.nodes) {
+      visible.add(node.id)
+      const record = this.registry.getComponent(node.id, appId)
+      if (record && this.registry.getComponentDepth(record) < maxDepth) expanded.add(node.id)
+    }
+    this.clearPendingChildren(appId)
+    this.pruneToVisible(appId)
+    this.trackUnloadedChildren(appId)
+    return snapshot
+  }
+
+  private trackUnloadedChildren(appId: AppId): void {
+    for (const id of this.getVisibleNodes(appId)) {
+      if (this.getExpandedNodes(appId).has(id)) continue
+      const record = this.registry.getComponent(id, appId)
+      if (!record) continue
+      const known = this.getChildren(appId).get(id)
+      const instances = new Set(
+        this.registry
+          .getComponentChildren(record)
+          .map((child) => child.instance)
+          .filter((instance) => !known?.has(this.registry.getComponentId(instance)!)),
+      )
+      if (!instances.size) continue
+      this.pendingChildren.set(id, { appId, instances })
+      for (const instance of instances) this.pendingParents.set(instance, id)
     }
   }
 

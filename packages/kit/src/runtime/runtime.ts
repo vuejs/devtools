@@ -61,7 +61,9 @@ export interface DevtoolsRuntime extends RuntimeRequests {
   ): () => void
   setPluginHookRunner(
     runner: ((key: string, payload: unknown, pluginId?: string) => Promise<void>) | undefined,
+    hasHook?: (key: string) => boolean,
   ): void
+  hasPluginHook(key: string): boolean
   callPluginHook(key: string, payload: unknown, pluginId?: string): Promise<void>
   subscribe(type: '*', handler: RuntimeEventHandler): () => void
   subscribe<Type extends RuntimeDomainEventType>(
@@ -91,6 +93,7 @@ export function createDevtoolsRuntime(options: CreateDevtoolsRuntimeOptions = {}
   const scheduler = createRuntimeScheduler()
   let timeline: RuntimeTimelineController | undefined
   let highlight: ReturnType<typeof createComponentUpdateHighlight> | undefined
+  let hasPluginHook: ((key: string) => boolean) | undefined
   let pluginHookRunner:
     | ((key: string, payload: unknown, pluginId?: string) => Promise<void>)
     | undefined
@@ -264,8 +267,12 @@ export function createDevtoolsRuntime(options: CreateDevtoolsRuntimeOptions = {}
         commandHandlers.delete(type)
       }
     },
-    setPluginHookRunner(runner) {
+    setPluginHookRunner(runner, hasHook) {
       pluginHookRunner = runner
+      hasPluginHook = hasHook
+    },
+    hasPluginHook(key) {
+      return !!pluginHookRunner && (hasPluginHook?.(key) ?? true)
     },
     async callPluginHook(key, payload, pluginId) {
       await pluginHookRunner?.(key, payload, pluginId)
@@ -279,6 +286,7 @@ export function createDevtoolsRuntime(options: CreateDevtoolsRuntimeOptions = {}
       cancelComponentInspection()
       setComponentInspectorDockController(undefined)
       pluginHookRunner = undefined
+      hasPluginHook = undefined
       timeline?.dispose()
       timeline = undefined
       queryHandlers.clear()

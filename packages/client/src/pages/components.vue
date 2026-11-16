@@ -31,6 +31,7 @@ const {
   cancelComponentInspection,
   cancelComponentTreeExpansion,
   components,
+  componentTreeTruncated,
   componentInspecting,
   componentState,
   componentStateLoading,
@@ -303,6 +304,7 @@ onUnmounted(() => {
           v-model:filter="filterComponentName"
           :actions="componentTreeActions"
           component-labels
+          :collapse-unloaded="componentTreeTruncated"
           :default-expand-depth="2"
           :empty-text="error ?? 'No components'"
           :nodes="componentTreeNodes"

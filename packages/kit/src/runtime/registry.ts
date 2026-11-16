@@ -43,6 +43,7 @@ export interface RefreshComponentTreeOptions {
   maxDepth?: number
   rootComponentId?: ComponentId
   time?: number
+  continueAfter?: (record: ComponentRecord) => boolean
 }
 
 export interface AppRecord {
@@ -320,6 +321,7 @@ export class RuntimeRegistry {
     const seen = new Set<InstanceRef>()
     const records: ComponentRecord[] = []
     const domOrder = new ComponentDomOrderCache()
+    let stopped = false
 
     const walk = (
       instance: InstanceRef,
@@ -327,7 +329,7 @@ export class RuntimeRegistry {
       depth: number,
       overrides: ComponentRecordOverrides = {},
     ) => {
-      if (seen.has(instance) || isBeingDestroyed(instance)) return
+      if (stopped || seen.has(instance) || isBeingDestroyed(instance)) return
       seen.add(instance)
 
       const record = this.ensureComponent(app.id, instance, parent, time, undefined, {
@@ -336,12 +338,17 @@ export class RuntimeRegistry {
       })
       if (!record || record.hidden) return
       records.push(record)
+      if (options.continueAfter?.(record) === false) {
+        stopped = true
+        return
+      }
       if (depth >= maxDepth) return
 
       const children = this.getInstanceChildren(instance)
       const activeChildren = new Set(children.map((child) => child.instance))
 
       for (const child of children) {
+        if (stopped) break
         walk(child.instance, instance, depth + 1, {
           inactive: overrides.inactive || child.inactive,
           tags: child.tags,

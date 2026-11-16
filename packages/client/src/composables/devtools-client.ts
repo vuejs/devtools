@@ -39,6 +39,7 @@ const emptyRouterSnapshot: RouterSnapshotMessage = { routes: [] }
 
 const apps = shallowRef<AppSnapshot[]>([])
 const components = shallowRef<ComponentSnapshot[]>([])
+const componentTreeTruncated = ref(false)
 const inspectors = shallowRef<CustomInspectorSnapshot[]>([])
 const plugins = shallowRef<PluginSnapshot[]>([])
 const routerSnapshot = ref<RouterSnapshotMessage>(emptyRouterSnapshot)
@@ -184,6 +185,7 @@ export function useDevtoolsClient() {
   return {
     apps,
     components,
+    componentTreeTruncated,
     componentState,
     componentStateLoading,
     componentInspecting,
@@ -283,6 +285,7 @@ async function refreshData() {
     connected.value = false
     apps.value = []
     components.value = []
+    componentTreeTruncated.value = false
     inspectors.value = []
     plugins.value = []
     routerSnapshot.value = emptyRouterSnapshot
@@ -316,6 +319,7 @@ async function refreshData() {
     apps.value = appSnapshot.apps
     selectedAppId.value = appId
     components.value = componentSnapshot.nodes
+    componentTreeTruncated.value = componentSnapshot.truncated === true
     capabilities.value = nextCapabilities
     routerSnapshot.value = nextRouter
     plugins.value = pluginSnapshot.plugins
@@ -414,6 +418,7 @@ function resetFrameScopedState() {
   invalidateRefresh()
   apps.value = []
   components.value = []
+  componentTreeTruncated.value = false
   inspectors.value = []
   inspectorInvalidations.value = {}
   plugins.value = []
@@ -729,6 +734,7 @@ function selectApp(appId: string) {
   selectedAppId.value = appId
   selectedComponentId.value = undefined
   components.value = []
+  componentTreeTruncated.value = false
   inspectors.value = []
   routerSnapshot.value = emptyRouterSnapshot
   clearTimelineEvents()

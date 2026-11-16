@@ -36,6 +36,7 @@ export interface PluginController {
   register(descriptor: PluginDescriptor, setupFn: PluginSetupFunction): Promise<PluginApiAdapter>
   activate(): Promise<void>
   isActivating(): boolean
+  hasHook(key: string): boolean
   callHook(key: string, payload: unknown): Promise<void>
   callHookFor(pluginId: string, key: string, payload: unknown): Promise<void>
   dispose(): void
@@ -169,6 +170,11 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
     register,
     activate,
     isActivating: () => activating,
+    hasHook(key) {
+      return [...plugins.values()].some((plugin) =>
+        plugin.adapters.some((adapter) => adapter.hasHook(key)),
+      )
+    },
     async callHook(key, payload) {
       const all = [...plugins.values()].flatMap((plugin) => plugin.adapters)
       await Promise.all(all.map((adapter) => callAdapterHook(adapter, key, payload)))

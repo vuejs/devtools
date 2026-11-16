@@ -93,8 +93,10 @@ export function createDevtoolsKit(options: DevtoolsKitOptions): DevtoolsKit {
     openInEditor: options.capabilities?.openInEditor ?? false,
     pagedComponentTree: true,
   })
-  runtime.setPluginHookRunner((key, payload, pluginId) =>
-    pluginId ? plugins.callHookFor(pluginId, key, payload) : plugins.callHook(key, payload),
+  runtime.setPluginHookRunner(
+    (key, payload, pluginId) =>
+      pluginId ? plugins.callHookFor(pluginId, key, payload) : plugins.callHook(key, payload),
+    (key) => plugins.hasHook(key),
   )
   const disposers: Array<() => void> = []
   let installedHook: InstalledDevtoolsHook | undefined

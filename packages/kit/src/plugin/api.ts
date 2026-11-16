@@ -199,6 +199,7 @@ export interface PluginApiAdapter {
   syncSettings(): void
   updateSetting(key: string, value: unknown): Promise<void>
   clearHooks(): void
+  hasHook(key: string): boolean
   callHook<K extends keyof DevToolsPluginAPIHooks>(
     key: K,
     payload: Parameters<DevToolsPluginAPIHooks[K]>[0],
@@ -356,6 +357,9 @@ export function createPluginApiAdapter(
     getSettings: getSettingsSnapshot,
     syncSettings,
     updateSetting,
+    hasHook(key) {
+      return !!handlers.get(key as keyof DevToolsPluginAPIHooks)?.size
+    },
     clearHooks() {
       handlers.clear()
     },

@@ -68,6 +68,21 @@ function tree(appId: string, name = appId) {
 }
 
 describe('app refresh races', () => {
+  it('only enables unloaded collapse for the committed truncated snapshot', async () => {
+    const c = module.useDevtoolsClient()
+    c.selectApp('a')
+    await flushPromises()
+    requests[0]!.resolve({ ...tree('a'), truncated: true })
+    await flushPromises()
+    expect(c.componentTreeTruncated.value).toBe(true)
+    c.selectApp('b')
+    await flushPromises()
+    expect(c.componentTreeTruncated.value).toBe(false)
+    requests[1]!.resolve(tree('b'))
+    await flushPromises()
+    expect(c.componentTreeTruncated.value).toBe(false)
+  })
+
   it('keeps app B after the older app A tree resolves', async () => {
     const c = module.useDevtoolsClient()
     c.selectApp('a')

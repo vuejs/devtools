@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, it } from 'vitest'
+import { resultSchemas } from '../src/mcp/schemas'
 import { createDevtoolsKit } from '../../kit/src/kit'
 import type { DevtoolsKit } from '../../kit/src/kit'
 import { createComponentTreeFixture } from '../../../tests/fixtures/runtime'
@@ -55,4 +56,13 @@ it('caps search results and matches source files case-insensitively', async () =
     payload: { filter: 'no-such-thing' },
   })
   expect(none.nodes).toEqual([])
+})
+
+it('accepts and retains the optional truncated snapshot marker in the agent result schema', () => {
+  const original = { version: 1, nodes: [] }
+  expect(resultSchemas.tree.parse(original)).toEqual(original)
+  expect(resultSchemas.tree.parse({ ...original, truncated: true })).toEqual({
+    ...original,
+    truncated: true,
+  })
 })
