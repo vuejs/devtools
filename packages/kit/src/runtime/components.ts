@@ -1,3 +1,4 @@
+import { invalidateRuntimeTreeNode, markRuntimeTreePatches } from '../rpc/event-buffer'
 import type { ComponentTreePatch, ComponentTreePageMessage } from '../protocol'
 import type { AppId, ComponentId, InstanceRef, RuntimeEvent } from './types'
 import type { RuntimeBudget } from './budget'
@@ -28,6 +29,7 @@ export interface ComponentTreePatchBatch {
 export class ComponentTreeStore {
   includePerfMetrics = false
   private appVersions = new Map<AppId, number>()
+  // Published snapshots only mutate childCount in place; invalidateRuntimeTreeNode keeps event-buffer byte caches valid.
   private nodesByApp = new Map<AppId, Map<ComponentId, ComponentSnapshot>>()
   private childrenByApp = new Map<AppId, Map<ComponentId | undefined, Set<ComponentId>>>()
   private visibleNodesByApp = new Map<AppId, Set<ComponentId>>()
@@ -441,6 +443,7 @@ export class ComponentTreeStore {
     const version = (this.appVersions.get(appId) ?? 0) + 1
     this.appVersions.set(appId, version)
 
+    markRuntimeTreePatches(patches)
     return { appId, version, patches }
   }
 
@@ -511,6 +514,7 @@ export class ComponentTreeStore {
     if (parent.childCount === childCount) return
 
     parent.childCount = childCount
+    invalidateRuntimeTreeNode(parent)
     return { op: 'update', id: parentId, changes: { childCount } }
   }
 

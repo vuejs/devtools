@@ -1,10 +1,136 @@
 import type { RuntimeBudget, RuntimeDomainEvent, RuntimePerformanceMonitor } from '../runtime'
 import { toDevtoolsRpcEvent, type DevtoolsRpcEvent } from './types'
+import type { ComponentTreePatch } from '../protocol'
 
 interface BufferedRuntimeEvent {
   bytes: number
   event: DevtoolsRpcEvent
   key?: string
+  tree?: TreeAccumulator
+}
+
+interface PatchMeasurement {
+  trusted: boolean
+  listeners: Set<(trusted: boolean) => void>
+}
+
+const runtimePatches = new WeakMap<ComponentTreePatch, PatchMeasurement>()
+const patchDependencies = new WeakMap<object, Set<PatchMeasurement>>()
+const exposedObjects = new WeakSet<object>()
+
+// Only the tree store can opt in. Custom events retain the full serialization path.
+export function markRuntimeTreePatches(patches: ComponentTreePatch[]): void {
+  for (const patch of patches) {
+    if (runtimePatches.has(patch)) continue
+    const objects = new Set<object>()
+    if (!collectPlainObjects(patch, objects)) continue
+    const measurement: PatchMeasurement = { trusted: true, listeners: new Set() }
+    runtimePatches.set(patch, measurement)
+    for (const object of objects) {
+      const dependencies = patchDependencies.get(object) ?? new Set()
+      dependencies.add(measurement)
+      patchDependencies.set(object, dependencies)
+    }
+  }
+}
+
+function collectPlainObjects(value: unknown, objects: Set<object>): boolean {
+  if (value === null || typeof value !== 'object')
+    return typeof value !== 'function' && typeof value !== 'bigint' && typeof value !== 'symbol'
+  if (objects.has(value) || exposedObjects.has(value)) return false
+  if (Object.getPrototypeOf(value) !== (Array.isArray(value) ? Array.prototype : Object.prototype))
+    return false
+  objects.add(value)
+  for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
+    if (key === 'toJSON' || !('value' in descriptor)) return false
+    if (!collectPlainObjects(descriptor.value, objects)) return false
+  }
+  return true
+}
+
+export function invalidateRuntimeTreeNode(node: object): void {
+  for (const measurement of patchDependencies.get(node) ?? [])
+    for (const listener of measurement.listeners) listener(measurement.trusted)
+}
+
+// Plugins can retain any nested reference, so revocation survives the hook call.
+export function exposeRuntimeTreeNode(node: object, seen = new Set<object>()): void {
+  if (seen.has(node)) return
+  seen.add(node)
+  exposedObjects.add(node)
+  for (const measurement of patchDependencies.get(node) ?? []) {
+    measurement.trusted = false
+    for (const listener of measurement.listeners) listener(false)
+  }
+  for (const descriptor of Object.values(Object.getOwnPropertyDescriptors(node))) {
+    if ('value' in descriptor && descriptor.value && typeof descriptor.value === 'object')
+      exposeRuntimeTreeNode(descriptor.value, seen)
+  }
+}
+
+class TreeAccumulator {
+  readonly patches: ComponentTreePatch[] = []
+  private measurements = new Map<ComponentTreePatch, { bytes: number; count: number }>()
+  private dirty = new Set<ComponentTreePatch>()
+  private disposers: Array<() => void> = []
+  private bytes = 0
+  trusted = true
+
+  constructor(event: DevtoolsRpcEvent) {
+    this.append(event.patches ?? [])
+  }
+
+  append(patches: ComponentTreePatch[]): void {
+    for (const patch of patches) {
+      let cached = this.measurements.get(patch)
+      if (!cached) {
+        cached = { bytes: measureRuntimeMessageBytes(patch), count: 0 }
+        this.measurements.set(patch, cached)
+        const measurement = runtimePatches.get(patch)!
+        const listener = (trusted: boolean) => {
+          this.trusted &&= trusted
+          this.dirty.add(patch)
+        }
+        measurement.listeners.add(listener)
+        this.disposers.push(() => measurement.listeners.delete(listener))
+      }
+      cached.count++
+      this.bytes += cached.bytes
+      this.patches.push(patch)
+    }
+  }
+
+  mergedBytes(next: DevtoolsRpcEvent): number {
+    for (const patch of this.dirty) {
+      const cached = this.measurements.get(patch)!
+      const bytes = measureRuntimeMessageBytes(patch)
+      this.bytes += (bytes - cached.bytes) * cached.count
+      cached.bytes = bytes
+    }
+    this.dirty.clear()
+    const patches = next.patches ?? []
+    const separatorBytes = typeof TextEncoder === 'undefined' ? 2 : 1
+    return (
+      measureRuntimeMessageBytes({ ...next, patches: [] }) +
+      this.bytes +
+      patches.reduce((sum, patch) => sum + measureRuntimeMessageBytes(patch), 0) +
+      Math.max(0, this.patches.length + patches.length - 1) * separatorBytes
+    )
+  }
+
+  dispose(): void {
+    for (const dispose of this.disposers) dispose()
+  }
+}
+
+function canAccumulateTree(event: DevtoolsRpcEvent): boolean {
+  return (
+    event.type === 'components:treePatched' &&
+    Object.keys(event).every((key) =>
+      ['type', 'time', 'appId', 'version', 'patches'].includes(key),
+    ) &&
+    (event.patches ?? []).every((patch) => runtimePatches.get(patch)?.trusted)
+  )
 }
 
 export interface RuntimeEventBuffer {
@@ -55,11 +181,19 @@ export function createRuntimeEventBuffer(
     const key = getCoalescingKey(event)
     const existing = key ? keyedEntries.get(key) : undefined
     if (existing) {
-      const mergedEvent = mergeRuntimeEvents(existing.event, event)
-      const mergedBytes = measureRuntimeMessageBytes(mergedEvent)
+      const tree = existing.tree?.trusted && canAccumulateTree(event) ? existing.tree : undefined
+      const mergedEvent = tree ? undefined : mergeRuntimeEvents(existing.event, event)
+      const mergedBytes = tree ? tree.mergedBytes(event) : measureRuntimeMessageBytes(mergedEvent)
       if (mergedBytes <= options.budget.transport.maxMessageBytes) {
         bufferedBytes -= existing.bytes
-        existing.event = mergedEvent
+        if (tree) {
+          tree.append(event.patches ?? [])
+          existing.event = { ...event, patches: tree.patches }
+        } else {
+          existing.tree?.dispose()
+          existing.tree = undefined
+          existing.event = mergedEvent!
+        }
         existing.bytes = mergedBytes
         bufferedBytes += existing.bytes
         options.performance.recordCoalesced()
@@ -89,7 +223,12 @@ export function createRuntimeEventBuffer(
       dropOldest()
     }
 
-    const entry = { bytes, event, key }
+    const entry: BufferedRuntimeEvent = {
+      bytes,
+      event,
+      key,
+      tree: canAccumulateTree(event) ? new TreeAccumulator(event) : undefined,
+    }
     entries.push(entry)
     if (key) keyedEntries.set(key, entry)
     bufferedBytes += bytes
@@ -105,6 +244,7 @@ export function createRuntimeEventBuffer(
     }
 
     const batch = entries.splice(0, entries.length)
+    for (const entry of batch) entry.tree?.dispose()
     const limits = [...timelineLimits.entries()]
     timelineLimits.clear()
     keyedEntries.clear()
@@ -140,6 +280,7 @@ export function createRuntimeEventBuffer(
   }
 
   function clear(): void {
+    for (const entry of entries) entry.tree?.dispose()
     entries.splice(0, entries.length)
     keyedEntries.clear()
     timelineEventTimes.splice(0, timelineEventTimes.length)
@@ -165,6 +306,7 @@ export function createRuntimeEventBuffer(
   function dropOldest(): void {
     const dropped = entries.shift()
     if (!dropped) return
+    dropped.tree?.dispose()
     if (dropped.key) keyedEntries.delete(dropped.key)
     bufferedBytes -= dropped.bytes
     options.performance.recordDropped()

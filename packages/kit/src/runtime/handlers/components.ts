@@ -1,3 +1,4 @@
+import { exposeRuntimeTreeNode } from '../../rpc/event-buffer'
 import type { ValueHandleRegistry } from '../../codec'
 import type { ComponentStateSnapshotMessage, ComponentTreeSnapshotMessage } from '../../protocol'
 import {
@@ -480,6 +481,7 @@ async function applyVisitComponentTreeHooks(
     const record = runtime.registry.getComponent(node.id, node.appId)
     if (!record) continue
 
+    exposeRuntimeTreeNode(node)
     node.tags ??= []
     await runtime.callPluginHook('visitComponentTree', {
       app: runtime.registry.getApp(record.appId)?.app,

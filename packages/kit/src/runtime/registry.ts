@@ -81,7 +81,7 @@ export interface WalkedComponentChild {
 // Cross-task caches must observe child-list mutations, including equal-length
 // reorders. Synchronous traversals can use the cheaper unobserved cache.
 export class ComponentDomOrderCache {
-  private parents = new WeakMap<Element, Map<Node, number>>()
+  private parents = new WeakMap<Element, { indices: Map<Node, number>; validPrefix: number }>()
   private observer?: MutationObserver
 
   constructor(observe = false) {
@@ -91,7 +91,16 @@ export class ComponentDomOrderCache {
   }
 
   private invalidate(records: MutationRecord[]): void {
-    for (const record of records) this.parents.delete(record.target as Element)
+    for (const record of records) {
+      const cached = this.parents.get(record.target as Element)
+      if (!cached) continue
+      const previous = record.previousSibling
+      const index = previous ? cached.indices.get(previous) : -1
+      // Everything before the mutation remains in the same position. Unknown
+      // anchors conservatively invalidate the whole prefix (e.g. batched moves).
+      cached.validPrefix = Math.min(cached.validPrefix, index === undefined ? 0 : index + 1)
+      for (const removed of record.removedNodes) cached.indices.delete(removed)
+    }
   }
 
   preparePage(): void {
@@ -105,17 +114,34 @@ export class ComponentDomOrderCache {
   }
 
   indexOf(parent: Element, node: Node): number {
-    let indices = this.parents.get(parent)
-    if (!indices) {
-      indices = new Map()
+    let cached = this.parents.get(parent)
+    if (!cached) {
+      const indices = new Map<Node, number>()
       const children = parent.childNodes
       for (let index = 0; index < children.length; index++) {
         indices.set(children[index]!, index)
       }
-      this.parents.set(parent, indices)
+      cached = { indices, validPrefix: children.length }
+      this.parents.set(parent, cached)
       this.observer?.observe(parent, { childList: true })
     }
-    return indices.get(node) ?? -1
+    const index = cached.indices.get(node)
+    if (!this.observer) return index ?? -1
+    if (index !== undefined && index < cached.validPrefix) {
+      if (parent.childNodes[index] === node) return index
+      cached.validPrefix = index
+    }
+
+    // Rebuild only as far as this lookup needs. A burst of insertions at one
+    // anchor no longer rescans all the untouched siblings after that anchor.
+    const children = parent.childNodes
+    while (cached.validPrefix < children.length) {
+      const index = cached.validPrefix++
+      const child = children[index]!
+      cached.indices.set(child, index)
+      if (child === node) return index
+    }
+    return -1
   }
 }
 
