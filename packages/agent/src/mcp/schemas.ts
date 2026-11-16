@@ -159,6 +159,7 @@ export const resultSchemas = {
     }),
   }),
   tree: z.object({
+    truncated: z.literal(true).optional(),
     appId: z.string().optional(),
     version: z.number().optional(),
     nodes: z.array(treeNode),

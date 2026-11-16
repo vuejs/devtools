@@ -203,6 +203,29 @@ it('starts all pending setups before registrations during an asynchronous setup'
   await activation
 })
 
+it('detects visitComponentTree hooks installed by delayed setup before planning a snapshot', async () => {
+  const kit = createKit()
+  const { app } = createComponentTreeFixture(2)
+  kit.runtime.dispatch({ type: 'app:init', app, time: 1, version: '3.5.0', vueTypes: {} })
+  const visited = vi.fn()
+  await kit.plugins.register({ id: 'late-tree', app }, async (api) => {
+    await Promise.resolve()
+    api.on.visitComponentTree((payload) => {
+      const node = payload.treeNode as { id: string; name: string }
+      visited(node.id)
+      node.name = 'Decorated'
+    })
+  })
+  expect(kit.runtime.hasPluginHook('visitComponentTree')).toBe(false)
+  const snapshot = await kit.runtime.queryCustom<{ nodes: Array<{ name: string }> }>({
+    type: 'components:treeSnapshot',
+    appId: 'app:0',
+  })
+  expect(kit.runtime.hasPluginHook('visitComponentTree')).toBe(true)
+  expect(visited).toHaveBeenCalledTimes(2)
+  expect(snapshot.nodes.map((node) => node.name)).toEqual(['Decorated', 'Decorated'])
+})
+
 it('allows setup API requests and public typed/custom reentry across await boundaries', async () => {
   const kit = createKit()
   const { app, instances } = createComponentTreeFixture(1)

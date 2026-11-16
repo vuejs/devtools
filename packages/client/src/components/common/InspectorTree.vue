@@ -53,6 +53,7 @@ const props = withDefaults(
     refreshVisible?: boolean
     actions?: InspectorTreeAction[]
     defaultExpandDepth?: number
+    collapseUnloaded?: boolean
     componentLabels?: boolean
     stateKey?: string
   }>(),
@@ -68,6 +69,7 @@ const props = withDefaults(
     refreshVisible: true,
     actions: () => [],
     defaultExpandDepth: 2,
+    collapseUnloaded: false,
     componentLabels: false,
     stateKey: 'default',
   },
@@ -107,7 +109,7 @@ const treeRows = computed<InspectorTreeRow[]>(() => {
 
   const visit = (node: InspectorTreeNode, depth: number, parentId?: string) => {
     const hasChildren = node.hasChildren ?? !!node.children?.length
-    const isCollapsed = hasChildren && isTreeNodeCollapsed(node.id, depth)
+    const isCollapsed = hasChildren && isTreeNodeCollapsed(node, depth)
     rows.push({ ...node, depth, parentId, hasChildren, isCollapsed })
 
     if (!hasChildren || isCollapsed) return
@@ -235,7 +237,8 @@ function setNodeCollapsed(node: InspectorTreeRow, collapsedValue: boolean) {
   }
 }
 
-function isTreeNodeCollapsed(nodeId: string, depth: number): boolean {
+function isTreeNodeCollapsed(node: InspectorTreeNode, depth: number): boolean {
+  const nodeId = node.id
   if (props.filter.trim()) {
     if (filteredCollapsedNodeIds.value.has(nodeId)) return true
     if (filteredExpandedNodeIds.value.has(nodeId)) return false
@@ -243,7 +246,10 @@ function isTreeNodeCollapsed(nodeId: string, depth: number): boolean {
   }
   if (collapsedNodeIds.value.has(nodeId)) return true
   if (expandedNodeIds.value.has(nodeId)) return false
-  return depth >= props.defaultExpandDepth
+  return (
+    (props.collapseUnloaded && !!node.hasChildren && !node.children?.length) ||
+    depth >= props.defaultExpandDepth
+  )
 }
 
 function expandNodeAncestors(nodeId: string) {

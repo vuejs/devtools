@@ -6,6 +6,74 @@ import { describe, expect, it } from 'vitest'
 import InspectorTree from '../../../packages/client/src/components/common/InspectorTree.vue'
 
 describe('InspectorTree', () => {
+  it.each([false, true])(
+    'preserves the old default for an unloaded frontier beyond depth two unless truncated: %s',
+    (truncated) => {
+      const frontier = { id: 'unloaded', label: 'Unloaded', hasChildren: true, children: [] }
+      const wrapper = mountTree({
+        collapseUnloaded: truncated,
+        defaultExpandDepth: 5,
+        nodes: [
+          {
+            id: 'root',
+            label: 'Root',
+            children: [
+              {
+                id: 'one',
+                label: 'One',
+                children: [{ id: 'two', label: 'Two', children: [frontier] }],
+              },
+            ],
+          },
+        ],
+      })
+      const row = wrapper.findAll('[role="treeitem"]').find((row) => row.text() === 'Unloaded')!
+      expect(row.attributes('aria-expanded')).toBe(String(!truncated))
+      wrapper.unmount()
+    },
+  )
+
+  it.each([false, true])(
+    'only collapses unloaded children when opted in: %s',
+    async (collapseUnloaded) => {
+      const wrapper = mountTree({
+        collapseUnloaded,
+        nodes: [{ id: 'root', label: 'Root', hasChildren: true, children: [] }],
+      })
+      expect(wrapper.get('[role="treeitem"]').attributes('aria-expanded')).toBe(
+        String(!collapseUnloaded),
+      )
+      if (collapseUnloaded) {
+        await wrapper.get('[aria-label="Expand"]').trigger('click')
+        expect(wrapper.emitted('expand')).toEqual([['root']])
+        // Loading keeps the explicit expansion visible, even before a page arrives.
+        expect(wrapper.get('[role="treeitem"]').attributes('aria-expanded')).toBe('true')
+        await wrapper.setProps({
+          nodes: [
+            {
+              id: 'root',
+              label: 'Root',
+              hasChildren: true,
+              children: [{ id: 'child', label: 'Child' }],
+            },
+          ],
+        })
+        expect(wrapper.findAll('[role="treeitem"]')).toHaveLength(2)
+      } else {
+        await wrapper.get('[aria-label="Collapse"]').trigger('click')
+        expect(wrapper.emitted('collapse')).toEqual([['root']])
+      }
+      wrapper.unmount()
+    },
+  )
+
+  it('preserves default expansion of loaded component children when opted in', () => {
+    const wrapper = mountTree({ collapseUnloaded: true })
+    expect(wrapper.findAll('[role="treeitem"]')).toHaveLength(2)
+    expect(wrapper.get('[role="treeitem"]').attributes('aria-expanded')).toBe('true')
+    wrapper.unmount()
+  })
+
   it('renders tree rows and emits selection through user interaction', async () => {
     const wrapper = mountTree()
 

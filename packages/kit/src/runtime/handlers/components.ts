@@ -50,10 +50,17 @@ export function registerComponentHandlers(
   })
 
   runtime.registerQuery<ComponentTreeSnapshotMessage>('components:treeSnapshot', async (query) => {
-    const snapshot = runtime.components.snapshot(query.appId)
+    const maxBytes = runtime.budget.transport.maxMessageBytes
+    const hasHooks = runtime.hasPluginHook('visitComponentTree')
+    const snapshot = runtime.components.snapshot(
+      query.appId,
+      hasHooks ? Number.POSITIVE_INFINITY : maxBytes,
+    )
     const filter = readString(query.payload, 'filter') ?? ''
     await applyVisitComponentTreeHooks(runtime, snapshot.nodes, filter)
-    return snapshot
+    // Hooks run once, in the original order. Oversized results retain their
+    // already-decorated shallow nodes instead of invoking plugins again.
+    return hasHooks ? runtime.components.fitSnapshot(snapshot, maxBytes) : snapshot
   })
 
   runtime.registerQuery<ComponentTreeSnapshotMessage>('components:search', async (query) => {

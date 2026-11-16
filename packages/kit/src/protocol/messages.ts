@@ -50,6 +50,7 @@ export interface ComponentTreeNodeSnapshot {
 }
 
 export interface ComponentTreeSnapshotMessage {
+  truncated?: true
   appId?: AppId
   version?: number
   nodes: ComponentTreeNodeSnapshot[]
