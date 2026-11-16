@@ -40,6 +40,7 @@ it('does not replay plugin setups for an unmounted app into a later kit', async 
   })
   const setup = vi.fn()
   setupDevToolsPlugin({ id: 'plugin:replay', app: fixture.app }, setup)
+  await first.runtime.queryCustom({ type: 'plugins:snapshot' })
   await vi.waitFor(() => expect(setup).toHaveBeenCalledOnce())
 
   first.runtime.dispatch({ type: 'app:unmount', app: fixture.app, time: 2 })
@@ -62,9 +63,10 @@ it('still replays plugin setups for a mounted app into a later kit', async () =>
   })
   const setup = vi.fn()
   setupDevToolsPlugin({ id: 'plugin:kept', app: fixture.app }, setup)
+  await first.runtime.queryCustom({ type: 'plugins:snapshot' })
   await vi.waitFor(() => expect(setup).toHaveBeenCalledOnce())
 
   await first.dispose()
-  createKit()
+  await createKit().runtime.queryCustom({ type: 'plugins:snapshot' })
   await vi.waitFor(() => expect(setup).toHaveBeenCalledTimes(2))
 })

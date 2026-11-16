@@ -73,6 +73,7 @@ describe('plugin API stability', () => {
         })
       })
 
+      await kit.runtime.queryCustom({ type: 'plugins:snapshot' })
       await kit.runtime.callPluginHook('getInspectorState', { inspectorId: 'x', state: {} })
 
       expect(seen).toEqual(['second'])
@@ -390,6 +391,7 @@ describe('plugin API stability', () => {
       kit = createKit()
       await vi.waitFor(() => expect(kit?.plugins.adapters.has('plugin:hmr')).toBe(true))
 
+      await kit.runtime.queryCustom({ type: 'plugins:snapshot' })
       await kit.runtime.callPluginHook('getInspectorState', { inspectorId: 'x', state: {} })
 
       expect(calls).toEqual(['old', 'new'])

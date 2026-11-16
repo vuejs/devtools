@@ -34,6 +34,8 @@ export function setupDevToolsPlugin(
 export interface PluginController {
   readonly adapters: ReadonlyMap<string, PluginApiAdapter>
   register(descriptor: PluginDescriptor, setupFn: PluginSetupFunction): Promise<PluginApiAdapter>
+  activate(): Promise<void>
+  isActivating(): boolean
   callHook(key: string, payload: unknown): Promise<void>
   callHookFor(pluginId: string, key: string, payload: unknown): Promise<void>
   dispose(): void
@@ -51,6 +53,7 @@ class RegisteredPlugin {
   constructor(
     descriptor: PluginDescriptor,
     private readonly runtime: DevtoolsRuntime,
+    private readonly requests: Pick<DevtoolsRuntime, 'query' | 'command'>,
     private readonly resolvePluginSettings: (
       pluginId: string,
     ) => Record<string, unknown> | undefined,
@@ -75,6 +78,7 @@ class RegisteredPlugin {
       this.runtime,
       this.resolvePluginSettings,
       this.settings,
+      this.requests,
     )
     this.adapters.push(adapter)
     return adapter
@@ -82,11 +86,43 @@ class RegisteredPlugin {
 }
 
 export function createPluginController(runtime: DevtoolsRuntime): PluginController {
+  const requests = { query: runtime.query.bind(runtime), command: runtime.command.bind(runtime) }
   const state = getPluginRegistryState()
   const plugins = new Map<string, RegisteredPlugin>()
   // First adapter per plugin id: what the plugin snapshot and settings commands use.
   const adapters = new Map<string, PluginApiAdapter>()
+  let pending: Array<{
+    descriptor: PluginDescriptor
+    setupFn: PluginSetupFunction
+    adapter: PluginApiAdapter
+  }> = []
+  let active = false
+  let disposed = false
+  let flushing: Promise<void> | undefined
+  let activating = false
   const resolvePluginSettings = (pluginId: string) => adapters.get(pluginId)?.getSettings()
+
+  function activate(): Promise<void> {
+    if (disposed) return Promise.resolve()
+    active = true
+    if (!flushing) {
+      activating = true
+      const entries = pending.splice(0)
+      flushing = Promise.all(
+        entries.map((entry) =>
+          runPluginSetup(entry.descriptor.id, entry.setupFn, entry.adapter.api),
+        ),
+      )
+        .then(() => {})
+        .finally(() => {
+          flushing = undefined
+          activating = false
+          if (!disposed && entries.length)
+            runtime.events.dispatch({ type: 'apps:changed', time: Date.now() })
+        })
+    }
+    return flushing
+  }
 
   async function register(
     descriptor: PluginDescriptor,
@@ -94,12 +130,14 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
   ): Promise<PluginApiAdapter> {
     let plugin = plugins.get(descriptor.id)
     if (!plugin) {
-      plugin = new RegisteredPlugin(descriptor, runtime, resolvePluginSettings)
+      plugin = new RegisteredPlugin(descriptor, runtime, requests, resolvePluginSettings)
       plugins.set(descriptor.id, plugin)
     }
     const adapter = plugin.adapterFor(descriptor)
     if (!adapters.has(descriptor.id)) adapters.set(descriptor.id, adapter)
-    await runPluginSetup(descriptor.id, setupFn, adapter.api)
+    if (active) {
+      await runPluginSetup(descriptor.id, setupFn, adapter.api)
+    } else pending.push({ descriptor, setupFn, adapter })
     return adapter
   }
 
@@ -114,6 +152,7 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
     state.bufferedPlugins = state.bufferedPlugins.filter(
       ([descriptor]) => descriptor.app !== event.app,
     )
+    pending = pending.filter(({ descriptor }) => descriptor.app !== event.app)
   })
 
   async function callAdapterHook(adapter: PluginApiAdapter, key: string, payload: unknown) {
@@ -128,6 +167,8 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
   return {
     adapters,
     register,
+    activate,
+    isActivating: () => activating,
     async callHook(key, payload) {
       const all = [...plugins.values()].flatMap((plugin) => plugin.adapters)
       await Promise.all(all.map((adapter) => callAdapterHook(adapter, key, payload)))
@@ -137,6 +178,8 @@ export function createPluginController(runtime: DevtoolsRuntime): PluginControll
       await Promise.all(all.map((adapter) => callAdapterHook(adapter, key, payload)))
     },
     dispose() {
+      disposed = true
+      pending = []
       state.listeners.delete(listener)
       disposeUnmount()
       plugins.clear()

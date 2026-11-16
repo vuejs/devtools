@@ -32,6 +32,7 @@ describe('@vue/devtools-api compatibility entry', () => {
       api.addInspector({ id: 'public-entry', label: 'Public entry' })
     })
 
+    await kit.runtime.queryCustom({ type: 'plugins:snapshot' })
     await vi.waitFor(() => {
       expect(kit!.plugins.adapters.has('plugin:public-entry')).toBe(true)
       expect(kit!.runtime.inspectors.getInfo('public-entry')).toMatchObject({
