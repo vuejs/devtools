@@ -15,8 +15,14 @@ export function createRuntimeEventLog(): RuntimeEventLog {
 
   return {
     dispatch(event) {
-      listeners.get(event.type)?.forEach((handler) => handler(event))
-      listeners.get('*')?.forEach((handler) => handler(event))
+      const handlers = listeners.get(event.type)
+      if (handlers) {
+        for (const handler of handlers) handler(event)
+      }
+      const wildcardHandlers = listeners.get('*')
+      if (wildcardHandlers) {
+        for (const handler of wildcardHandlers) handler(event)
+      }
     },
     subscribe(type: RuntimeDomainEventType | '*', handler: RuntimeEventHandler) {
       const key = type as string
