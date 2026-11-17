@@ -245,18 +245,20 @@ function addPerformanceStart(
   if (!groups) state.perfGroups.set(event.instance, (groups = new Map()))
   groups.set(groupKey, { groupId, startTime: event.timestamp })
 
-  dispatchTimelineEvent(runtime, handles, state, {
-    appId: event.appId,
-    layerId: 'performance',
-    title: componentName,
-    subtitle: event.phase,
-    groupId,
-    data: {
-      component: componentName,
-      type: event.phase,
-      measure: 'start',
+  dispatchTimelineEvent(
+    runtime,
+    handles,
+    state,
+    {
+      appId: event.appId,
+      layerId: 'performance',
+      title: componentName,
+      subtitle: event.phase,
+      groupId,
     },
-  })
+    'start',
+    event.phase,
+  )
 
   const queuedEnds = state.perfEndQueue.get(event.instance)
   const queuedEnd = queuedEnds?.get(groupKey)
@@ -291,25 +293,21 @@ function addPerformanceEnd(
   const duration = Math.max(0, event.timestamp - group.startTime)
   groups!.delete(groupKey)
 
-  dispatchTimelineEvent(runtime, handles, state, {
-    appId: event.appId,
-    layerId: 'performance',
-    title: componentName,
-    subtitle: event.phase,
-    groupId: group.groupId,
-    data: {
-      component: componentName,
-      type: event.phase,
-      measure: 'end',
-      duration: {
-        _custom: {
-          type: 'Duration',
-          value: duration,
-          display: `${Number(duration.toFixed(3))} ms`,
-        },
-      },
+  dispatchTimelineEvent(
+    runtime,
+    handles,
+    state,
+    {
+      appId: event.appId,
+      layerId: 'performance',
+      title: componentName,
+      subtitle: event.phase,
+      groupId: group.groupId,
     },
-  })
+    'end',
+    event.phase,
+    duration,
+  )
 }
 
 function dispatchTimelineEvent(
@@ -317,6 +315,9 @@ function dispatchTimelineEvent(
   handles: ValueHandleRegistry,
   state: RuntimeTimelineState,
   event: TimelineEventInput,
+  performanceMeasure?: 'start' | 'end',
+  performanceType?: string,
+  performanceDuration?: number,
 ) {
   if (
     !runtime.budget.timeline.enabled ||
@@ -352,6 +353,27 @@ function dispatchTimelineEvent(
     return
   }
   state.eventTimes.push(now)
+
+  // Keep grouping and source property reads before admission. Only these pure
+  // built-in payload allocations and duration formatting can be skipped.
+  if (performanceMeasure) {
+    event.data = {
+      component: event.title,
+      type: performanceType,
+      measure: performanceMeasure,
+      ...(performanceMeasure === 'end'
+        ? {
+            duration: {
+              _custom: {
+                type: 'Duration',
+                value: performanceDuration!,
+                display: `${Number(performanceDuration!.toFixed(3))} ms`,
+              },
+            },
+          }
+        : {}),
+    }
+  }
 
   runtime.events.dispatch({
     type: 'timeline:eventAdded',

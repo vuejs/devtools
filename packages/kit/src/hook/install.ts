@@ -44,7 +44,10 @@ export function createDevtoolsGlobalHook(): DevtoolsGlobalHook {
       this.events.get(event)?.delete(handler)
     },
     emit(event, ...payload) {
-      this.events.get(event)?.forEach((handler) => handler(...payload))
+      const handlers = this.events.get(event)
+      if (handlers) {
+        for (const handler of handlers) handler(...payload)
+      }
     },
   }
 }
