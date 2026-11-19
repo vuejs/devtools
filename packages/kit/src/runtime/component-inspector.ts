@@ -282,6 +282,14 @@ class VaporNodeOwnerIndex {
       if (isVaporInstance(instance)) {
         for (const node of getOwnNodesFromBlock(readUnknownProperty(instance, 'block')))
           owners.set(node, instance)
+
+        // An element block's nested teleports are tracked separately on the instance.
+        const teleports = readUnknownProperty(instance, 'teleports')
+        if (teleports instanceof Set) {
+          for (const teleport of teleports) {
+            for (const node of getOwnNodesFromBlock(teleport)) owners.set(node, instance)
+          }
+        }
       }
       for (const child of this.runtime.registry.getInstanceChildren(instance))
         stack.push(child.instance)

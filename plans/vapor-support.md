@@ -1,6 +1,6 @@
 # Vue Vapor support plan
 
-Target: Vue `3.6.0-rc.14` (`@vue/runtime-vapor`; test alias and `playground/vapor`), devtools v9 (`feat/vapor-support`).
+Target: Vue `3.6.0-rc.15` (`@vue/runtime-vapor`; test alias and `playground/vapor`), devtools v9 (`feat/vapor-support`).
 Playground: `playground/vapor` (`pnpm play:vapor`) — a pure `createVaporApp` tree and a
 `createApp` + `vaporInteropPlugin` mixed tree.
 
@@ -91,8 +91,7 @@ Tick each item when it lands. Phase 0 landed in #1174.
       Do not import `@vue/runtime-vapor` — kit must keep working with Vue 3.5.
 - [x] Detect Vapor apps in `addApp` (`app.vapor === true`) and store `record.vapor`
       for UI badges and diagnostics.
-- [x] Add a `vue@3.6.0-rc.14` devDependency for tests only (alias, e.g. `vue-3.6`), so the
-      existing 3.5 tests are untouched.
+- [x] Add the `vue-3.6` test alias for Vue 3.6 integration tests alongside the Vue 3.5 suite.
 
 ### Phase 1 — Component tree (core feature)
 
@@ -184,18 +183,13 @@ Vapor nodes have no back-reference.
       on a large `v-for`. Test: `tests/integration/runtime/vapor-picker.test.ts`.
 - Slot content maps to the component rendering the slot outlet, same as VDOM
   (`__vueParentComponent` is the outlet owner).
-- [ ] Teleported content. It lives in the target, outside `block`, and nothing on the
-      instance points to the teleport (teleports emit no devtools hook), so it is not
-      indexed when the teleport is inserted into an element (`TeleportNotice.vue`).
-      [vuejs/core#16142](https://github.com/vuejs/core/pull/16142) merged on 2026-11-05,
-      adding `instance.teleports: Set<TeleportFragment>` in dev and production-devtools
-      builds. Await a Vue release containing it; the current test target is rc.14. Follow-up:
-  - In `VaporNodeOwnerIndex.build`, map each `instance.teleports` fragment's `nodes` to
-    the instance; skip when the field is missing (Vue before the fix).
-  - Bump the test alias and `playground/vapor` to the Vue release that includes it, and
-    add a picker test for a teleport inside an element.
-  - Consider reading `instance.teleports` for the `teleport` tree tag as well, which today
-    only appears when the teleport is a block root.
+- [x] Teleported content inside an element. `VaporNodeOwnerIndex` indexes each fragment's
+      rendered nodes through `instance.teleports`, available from Vue `3.6.0-rc.15` in dev
+      and production-devtools builds. Older Vue builds use the block index.
+      Upstream: [vuejs/core#16142](https://github.com/vuejs/core/pull/16142).
+      Test: `tests/integration/runtime/vapor-picker.test.ts`.
+- [ ] Consider reading `instance.teleports` for the `teleport` tree tag, which today only
+      appears when the teleport is a block root.
 
 ### Phase 5 — State inspector
 
@@ -256,7 +250,7 @@ Vapor nodes have no back-reference.
 - [ ] **Unit fixtures** (`tests/fixtures/runtime.ts`): add `createVaporTreeFixture` building
       fake `{ vapor: true, uid, type, parent, block }` instances with fragments
       (`__vf` bits), teleport, KeepAlive `__v_cache`, and interop fragments.
-- [x] **Integration** (happy-dom, real `vue@3.6.0-rc.14` via the test alias):
+- [x] **Integration** (happy-dom, real `vue@3.6.0-rc.15` via the test alias):
       `createVaporApp` and `createApp + vaporInteropPlugin` with `setDevtoolsHook`;
       assert tree shape, `v-if` toggle / `v-for` add/remove reflected after a refresh,
       DOM elements collected, picker resolves Vapor nodes, setup state readable, props read-only.
