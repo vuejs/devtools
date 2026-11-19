@@ -3,6 +3,7 @@ import type { VueDevtoolsDetectionPayload } from '../shared/detection'
 import { startExtensionPageRpcHost, createDevtoolsKit } from '@vue/devtools-kit'
 import {
   createVueDevtoolsDetectionMessage,
+  isNuxtPage,
   isVueDevtoolsDetectionRequestMessage,
 } from '../shared/detection'
 import { isSupportedDevtoolsDocument } from '../shared/document'
@@ -21,6 +22,7 @@ interface VueDevtoolsPageTarget extends Window, DevtoolsHookTarget {
   __VUE_DEVTOOLS_EXTENSION_BACKEND__?: VueDevtoolsExtensionBackend
   __VUE_DEVTOOLS_EXTENSION_STATE__?: VueDevtoolsDetectionPayload
   __VUE_DEVTOOLS_VITE_PLUGIN_DETECTED__?: boolean
+  useNuxtApp?: unknown
 }
 
 const target = window as VueDevtoolsPageTarget
@@ -120,7 +122,7 @@ function publishDetection(
 
 function readDetection(page: VueDevtoolsPageTarget, kit: DevtoolsKit): VueDevtoolsDetectionPayload {
   const appCount = kit.runtime.registry.listApps().length
-  const nuxtDetected = !!page.__NUXT__
+  const nuxtDetected = isNuxtPage(page)
   const vitePressDetected = !!page.__VITEPRESS__
   const vueDetected = appCount > 0 || !!page.__VUE__ || nuxtDetected || vitePressDetected
 
