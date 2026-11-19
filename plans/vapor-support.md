@@ -6,9 +6,10 @@ Playground: `playground/vapor` (`pnpm play:vapor`) — a pure `createVaporApp` t
 
 ## 1. Where we are
 
-Nothing in the devtools source handles Vapor. Every component-structure read in
-`packages/kit` goes through VDOM fields (`subTree`, `vnode`, `vnode.el`,
-`__vueParentComponent`). Vapor instances have none of these.
+The kit supports Vapor component trees, DOM bounds and picking, state inspection,
+update highlights, and the events timeline, including mixed VDOM / Vapor trees.
+Vapor paths read blocks and hook-maintained instance relationships instead of VDOM
+fields. Remaining gaps are tracked below.
 
 ### What Vue 3.6 gives us
 
@@ -186,8 +187,9 @@ Vapor nodes have no back-reference.
 - [ ] Teleported content. It lives in the target, outside `block`, and nothing on the
       instance points to the teleport (teleports emit no devtools hook), so it is not
       indexed when the teleport is inserted into an element (`TeleportNotice.vue`).
-      Waiting on [vuejs/core#16142](https://github.com/vuejs/core/pull/16142), which adds a
-      dev-only `instance.teleports: Set<TeleportFragment>`. Follow-up once it lands:
+      [vuejs/core#16142](https://github.com/vuejs/core/pull/16142) merged on 2026-11-05,
+      adding `instance.teleports: Set<TeleportFragment>` in dev and production-devtools
+      builds. Await a Vue release containing it; the current test target is rc.14. Follow-up:
   - In `VaporNodeOwnerIndex.build`, map each `instance.teleports` fragment's `nodes` to
     the instance; skip when the field is missing (Vue before the fix).
   - Bump the test alias and `playground/vapor` to the Vue release that includes it, and
@@ -213,10 +215,18 @@ Vapor nodes have no back-reference.
 - [x] `data`, options `computed`, `inject`: empty on Vapor, and empty sections are already
       dropped. No Vapor-specific code.
       Test: `tests/integration/runtime/vapor-state.test.ts`.
-- [ ] Reactivity graph: classify Vapor render effects (`RenderEffect` constructor; read
-      `effect.i` / owning instance). Already gated on `>= 3.6.0`.
-- [ ] Computed recompute: `collectLiveComputedRefs` should also scan
-      `instance.scope.effects` (already present) and `instance.renderEffects` (dev).
+- [x] Reactivity graph: classify `RenderEffect` as render and read its owner from `effect.i`,
+      retaining VDOM `SetupRenderEffect` / `effect.instance` support in
+      `runtime/state/reactivity-graph.ts`. Gated on `>= 3.6.0`.
+      Test: `tests/integration/runtime/reactivity-graph.test.ts`.
+- [x] Computed recompute: `runtime/state/computed.ts` accepts Vue 3.6's `link.dep` pointing
+      directly to a computed, alongside Vue 3.5's `link.dep.computed`.
+      Test: `tests/unit/runtime/computed-recompute.test.ts`.
+      In rc.14, neither `instance.renderEffects` nor `scope.effects` exists; Vapor render
+      effects are reachable through `scope.deps`. `collectLiveComputedRefs` only serves
+      Options API computed, which Vapor does not support, so no Vapor scan is needed.
+- [ ] Check computed refs used in setup but not read by rendering on Vue 3.6: the collector
+      does not traverse `scope.deps` and may miss them during Options API lookup.
 
 ### Phase 6 — Timeline & performance
 
@@ -237,7 +247,8 @@ Vapor nodes have no back-reference.
 ### Phase 7 — Client / UI
 
 - [ ] "Vapor" badge on app selector and component nodes (`record.vapor`).
-- [ ] Disable edit affordances for Vapor props; hide data/computed/inject sections.
+- [x] Vapor props have `editable: false`; the client respects it. Empty data/computed/inject
+      sections are omitted by the state inspector.
 - [ ] Docs: a Vapor section listing supported features and limitations.
 
 ## 4. Testing
@@ -245,10 +256,11 @@ Vapor nodes have no back-reference.
 - [ ] **Unit fixtures** (`tests/fixtures/runtime.ts`): add `createVaporTreeFixture` building
       fake `{ vapor: true, uid, type, parent, block }` instances with fragments
       (`__vf` bits), teleport, KeepAlive `__v_cache`, and interop fragments.
-- [ ] **Integration** (happy-dom, real `vue@3.6.0-rc.14` via the test alias):
+- [x] **Integration** (happy-dom, real `vue@3.6.0-rc.14` via the test alias):
       `createVaporApp` and `createApp + vaporInteropPlugin` with `setDevtoolsHook`;
       assert tree shape, `v-if` toggle / `v-for` add/remove reflected after a refresh,
-      bounds non-empty, picker resolves Vapor nodes, setup state readable, props read-only.
+      DOM elements collected, picker resolves Vapor nodes, setup state readable, props read-only.
+      Covered by `tests/integration/runtime/vapor-{component-tree,tree-hooks,dom,picker,state}.test.ts`.
 - [ ] **Manual**: `pnpm play:vapor` against every scenario in the playground.
 
 ## 5. Open questions

@@ -175,7 +175,9 @@ function createReactivityDependencyData(
 ): Record<string, unknown> {
   if (type === 'render') {
     return {
-      instanceName: readComponentDisplayName(readObject(reference, 'instance')),
+      instanceName: readComponentDisplayName(
+        readObject(reference, 'instance') ?? readObject(reference, 'i'),
+      ),
     }
   }
 
@@ -245,7 +247,7 @@ function getReactivityStateType(
 function getReactivityType(reference: object): ReactivityGraphNodeType {
   const constructorName = getConstructorName(reference)
 
-  if (constructorName === 'SetupRenderEffect') return 'render'
+  if (constructorName === 'SetupRenderEffect' || constructorName === 'RenderEffect') return 'render'
   if (constructorName === 'RenderWatcherEffect' || constructorName === 'WatcherEffect')
     return 'watch'
   if (constructorName === 'ReactiveEffect') return 'effect'

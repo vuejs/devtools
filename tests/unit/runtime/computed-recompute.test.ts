@@ -6,9 +6,14 @@ import type { ComponentStateSnapshotMessage } from '../../../packages/kit/src/pr
 import type { InstalledDevtoolsHook } from '../../../packages/kit/src/hook/install'
 import type { DevtoolsRuntime } from '../../../packages/kit/src/runtime/runtime'
 import { computed, createApp, defineComponent, h, nextTick, ref, setDevtoolsHook } from 'vue'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
+import * as Vue36 from 'vue-3.6/dist/vue.runtime-with-vapor.esm-browser.js'
 import { installDevtoolsHook } from '../../../packages/kit/src/hook/install'
 import { createDevtoolsRuntime } from '../../../packages/kit/src/runtime/runtime'
+import {
+  resolveComputedRef,
+  triggerComputedRef,
+} from '../../../packages/kit/src/runtime/state/computed'
 
 let app: App | undefined
 let runtime: DevtoolsRuntime | undefined
@@ -29,6 +34,30 @@ afterEach(() => {
 })
 
 describe('computed recompute', () => {
+  it('resolves and recomputes an Options API computed on Vue 3.6', () => {
+    const box = { n: 3 }
+    const vue36App = Vue36.createApp({
+      computed: {
+        doubled() {
+          return box.n * 2
+        },
+      },
+      render(this: { doubled: number }) {
+        return Vue36.h('div', String(this.doubled))
+      },
+    })
+    onTestFinished(() => vue36App.unmount())
+    container = document.createElement('div')
+    const vm = vue36App.mount(container)
+    const target = resolveComputedRef(vm.$, 'computed', ['doubled'])
+
+    expect(target).toBeDefined()
+    expect((target as { value: number }).value).toBe(6)
+    box.n = 9
+    triggerComputedRef(target!)
+    expect((target as { value: number }).value).toBe(18)
+  })
+
   it.each([1, undefined])(
     'keeps an unchanged result %s accessed after repeated recomputes',
     async (result) => {
