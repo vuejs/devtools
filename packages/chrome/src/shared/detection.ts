@@ -13,6 +13,15 @@ export interface VueDevtoolsDetectionPayload {
   vueDetected: boolean
 }
 
+/**
+ * Nuxt 5 deletes `window.__NUXT__` once the client payload is revived, which
+ * happens before the Vue app mounts. `window.useNuxtApp` is set on every Nuxt
+ * client (3, 4 and 5) and stays, so either global identifies a Nuxt page.
+ */
+export function isNuxtPage(page: { __NUXT__?: unknown; useNuxtApp?: unknown }): boolean {
+  return !!page.__NUXT__ || typeof page.useNuxtApp === 'function'
+}
+
 export interface VueDevtoolsDetectionMessage {
   source: typeof VUE_DEVTOOLS_EXTENSION_MESSAGE_SOURCE
   type: typeof VUE_DEVTOOLS_DETECTION_EVENT
