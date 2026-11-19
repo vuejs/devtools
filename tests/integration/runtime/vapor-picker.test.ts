@@ -64,6 +64,8 @@ async function mount(create: () => MountableApp) {
 async function pick(target: Element) {
   const inspection = inspectComponentInPage(runtime!)
   target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+  // Resolve a miss instead of leaving the inspector waiting for another click.
+  cancelComponentInspection()
   const result = await inspection
   return result && runtime!.registry.getComponent(result.componentId, result.appId)?.name
 }
@@ -195,6 +197,35 @@ describe('Vapor element picker', () => {
     )
 
     expect(await pick(query('section span'))).toBe('Root')
+  })
+
+  it('maps content from a Teleport nested inside an element to its owner', async () => {
+    const target = document.createElement('section')
+    document.body.append(target)
+    const TeleportOwner = defineVaporComponent({
+      name: 'TeleportOwner',
+      setup: () => {
+        const wrapper = template('<div></div>')() as Element
+        const teleport = createComponent(
+          VaporTeleport,
+          { to: () => target },
+          { default: () => template('<div><span>moved</span></div>')() },
+        )
+        insert(teleport as never, wrapper)
+        return wrapper
+      },
+    })
+
+    await mount(() =>
+      createVaporApp(
+        defineVaporComponent({
+          name: 'Root',
+          setup: () => [template('<p>root</p>')(), createComponent(TeleportOwner)],
+        }),
+      ),
+    )
+
+    expect(await pick(query('section span'))).toBe('TeleportOwner')
   })
 
   it('crosses the VDOM / Vapor boundary in both directions', async () => {
