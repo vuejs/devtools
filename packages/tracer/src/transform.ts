@@ -49,8 +49,12 @@ function createPostTransform(options: VueTracerOptions, vaporFiles?: Set<string>
         ? normalizePath(recordPath)
         : '@vue/devtools-tracer/client/record'
       if (resolveRecordEntryPath && isAbsolute(filename)) {
-        recordImport = normalizePath(relative(dirname(filename), recordPath))
-        if (!recordImport.startsWith('.')) recordImport = `./${recordImport}`
+        const relativePath = relative(dirname(filename), recordPath)
+        // Windows paths on different drives have no relative form; keep the absolute path.
+        if (!isAbsolute(relativePath)) {
+          recordImport = normalizePath(relativePath)
+          if (!recordImport.startsWith('.')) recordImport = `./${recordImport}`
+        }
       }
       const query = new URLSearchParams(id.split('?')[1])
       if (query.has('raw') || query.has('url')) return
@@ -68,6 +72,7 @@ function createPostTransform(options: VueTracerOptions, vaporFiles?: Set<string>
       const s = new MagicString(code)
       const ast = this.parse(code)
       let hit = false
+      const lineStarts = getLineStarts(code)
 
       // Vite 8's Oxc AST is ESTree-compatible for these call expressions.
       walk(ast as unknown as Parameters<typeof walk>[0], {
@@ -76,10 +81,10 @@ function createPostTransform(options: VueTracerOptions, vaporFiles?: Set<string>
           if (!functions.includes(node.callee.name)) return
 
           const { start, end } = node as typeof node & { start: number; end: number }
-          const lines = code.slice(0, start).split('\n')
+          const lineIndex = findLineIndex(lineStarts, start)
           const original = consumer.originalPositionFor({
-            line: lines.length,
-            column: lines.at(-1)!.length,
+            line: lineIndex + 1,
+            column: start - lineStarts[lineIndex]!,
           })
           if (original.source === null || original.line === null || original.column === null) return
 
@@ -100,4 +105,23 @@ function createPostTransform(options: VueTracerOptions, vaporFiles?: Set<string>
       return { code: s.toString(), map: s.generateMap({ hires: true }) }
     },
   }
+}
+
+/** Offsets of each line's first character, matching source map lines split on `\n`. */
+function getLineStarts(code: string): number[] {
+  const starts = [0]
+  for (let index = code.indexOf('\n'); index !== -1; index = code.indexOf('\n', index + 1))
+    starts.push(index + 1)
+  return starts
+}
+
+function findLineIndex(lineStarts: number[], offset: number): number {
+  let low = 0
+  let high = lineStarts.length - 1
+  while (low < high) {
+    const middle = (low + high + 1) >> 1
+    if (lineStarts[middle]! <= offset) low = middle
+    else high = middle - 1
+  }
+  return low
 }
