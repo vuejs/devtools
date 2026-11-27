@@ -19,6 +19,7 @@ import {
   VaporKeepAlive,
   VaporTeleport,
   renderEffect,
+  setInsertionState,
   setText,
   txt,
 } from 'vue-3.6/dist/vue.runtime-with-vapor.esm-browser.js'
@@ -110,6 +111,89 @@ describe('Vapor tree via devtools hooks', () => {
       }),
     )
     expect(tree.nodes().map((node) => node.name)).toEqual(['Root', 'Child'])
+  })
+
+  it('tags only the teleported child when a teleport is nested in an element', async () => {
+    const show = ref(true)
+    const Leaf = defineVaporComponent({ name: 'Leaf', setup: () => template('<i></i>')() })
+    const Sibling = defineVaporComponent({ name: 'Sibling', setup: () => template('<b></b>')() })
+    const tree = await mount(
+      defineVaporComponent({
+        name: 'Root',
+        setup: () => {
+          const div = template('<div></div>')() as Element
+          insert(createComponent(Sibling) as never, div)
+          const teleport = createComponent(
+            VaporTeleport,
+            { to: () => 'body' },
+            {
+              default: () =>
+                createIf(
+                  () => show.value,
+                  () => createComponent(Leaf),
+                ),
+            },
+          )
+          insert(teleport as never, div)
+          return div
+        },
+      }),
+    )
+    const tags = (name: string) =>
+      tree
+        .nodes()
+        .find((node) => node.name === name)
+        ?.tags?.map((tag) => tag.label)
+    expect(tree.nodes().filter((node) => node.parentId)).toHaveLength(2)
+    expect(tags('Leaf')).toEqual(['teleport'])
+    expect(tree.nodes().find((node) => node.name === 'Sibling')).toBeDefined()
+    expect(tags('Sibling')).toBeUndefined()
+    const { apps } = await runtime!.query({ type: 'apps:snapshot' })
+    expect(apps[0]?.vapor).toBe(true)
+
+    show.value = false
+    await settle()
+    expect(tags('Leaf')).toBeUndefined()
+    show.value = true
+    await settle()
+    expect(tags('Leaf')).toEqual(['teleport'])
+  })
+
+  it('includes the teleport tag in the insert patch when v-if mounts a nested teleport', async () => {
+    const show = ref(false)
+    const Leaf = defineVaporComponent({ name: 'Leaf', setup: () => template('<i></i>')() })
+    await mount(
+      defineVaporComponent({
+        name: 'Root',
+        setup: () =>
+          createIf(
+            () => show.value,
+            () => {
+              const div = template('<div></div>')() as Element
+              setInsertionState(div)
+              createComponent(
+                VaporTeleport,
+                { to: () => 'body' },
+                {
+                  default: () => createComponent(Leaf),
+                },
+              )
+              return div
+            },
+          ),
+      }),
+    )
+    const inserts: ComponentTreeNodeSnapshot[] = []
+    runtime!.subscribe('components:treePatched', ({ patches }) => {
+      for (const patch of patches) {
+        if (patch.op === 'insert') inserts.push(patch.node)
+      }
+    })
+    show.value = true
+    await settle()
+    expect(inserts.find((node) => node.name === 'Leaf')?.tags?.map((tag) => tag.label)).toEqual([
+      'teleport',
+    ])
   })
 
   it('adds and removes v-if / v-for children', async () => {

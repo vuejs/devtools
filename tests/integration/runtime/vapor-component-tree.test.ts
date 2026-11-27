@@ -135,12 +135,15 @@ describe('Vapor component tree', () => {
     app.use(vaporInteropPlugin)
     mount(app)
 
-    expect(snapshot(app).tree).toEqual({
+    const { registry, record, tree } = snapshot(app)
+    expect(registry.toAppSnapshot(record).vapor).toBeUndefined()
+    expect(tree).toEqual({
       name: 'Root',
       children: [
         {
           name: 'VaporMiddle',
-          children: [{ name: 'VdomChild', children: [{ name: 'Leaf' }] }],
+          tags: ['vapor'],
+          children: [{ name: 'VdomChild', children: [{ name: 'Leaf', tags: ['vapor'] }] }],
         },
       ],
     })

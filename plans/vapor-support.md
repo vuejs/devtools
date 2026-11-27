@@ -188,8 +188,33 @@ Vapor nodes have no back-reference.
       and production-devtools builds. Older Vue builds use the block index.
       Upstream: [vuejs/core#16142](https://github.com/vuejs/core/pull/16142).
       Test: `tests/integration/runtime/vapor-picker.test.ts`.
-- [ ] Consider reading `instance.teleports` for the `teleport` tree tag, which today only
-      appears when the teleport is a block root.
+- [x] `teleport` tree tag for components inside a teleport nested in an element. The registry
+      reads `instance.teleports` (Vue `3.6.0-rc.15`+) for hook-tracked children and live
+      `component:add`; older Vue builds tag block-root teleports only.
+      Test: `tests/integration/runtime/vapor-tree-hooks.test.ts`.
+      Known limitation: each `component:add` under a Vapor parent with teleports walks those
+      teleports, so appending N items into a mounted teleport is O(N²). A lazy walker was
+      measured 126% slower on full tree walks and was not adopted.
+- [ ] O(1) teleport owner lookup (deferred). Vue `3.6.0-rc.15` has no child → `TeleportFragment`
+      link: `instance.teleports` only maps owner → fragments, `component:added` carries
+      `app`/`uid`/`parentUid`/`instance`, and effect scopes do not reliably match the fragment
+      (slot content never matches). Before acting, measure appending 1,000 / 10,000 components
+      into a mounted teleport to confirm the cost matters. Upstream idea, prototyped in memory
+      against rc.15 but not proposed:
+  - `runtime-vapor` `renderContext.ts`: optional devtools-only teleport field, kept when the
+    context is derived. `components/Teleport.ts`: set it on the fragment's own context.
+    `component.ts`: record the current fragment (or `null`) on each created instance, then
+    clear it for the inner context so it stops at the next component boundary. About 20–35
+    lines, guarded by `__DEV__ || __FEATURE_PROD_DEVTOOLS__`; production bundle size not
+    measured. Base the PR on vuejs/core `minor`.
+  - The prototype resolved the right fragment for appended `v-for` rows, `v-if` remounts,
+    components inside elements, deferred slot outlets, and the nearest of nested teleports.
+    Disabled teleports and `to` changes only move DOM and add no components.
+  - Kit: read the field when present and keep the current walk as the fallback for older Vue
+    and VDOM interop children. The walk also supplies `v-for` render keys, so it cannot be
+    removed outright.
+  - Open: a KeepAlive cache hit may need to reassign the field if a cached instance can move to
+    another owner; SSR / hydration, Suspense and production-devtools builds are untested.
 
 ### Phase 5 — State inspector
 
@@ -240,7 +265,9 @@ Vapor nodes have no back-reference.
 
 ### Phase 7 — Client / UI
 
-- [ ] "Vapor" badge on app selector and component nodes (`record.vapor`).
+- [x] Pure Vapor apps show a `vapor` badge in the app list and app selector (`AppSnapshot.vapor`).
+      Only non-Vapor apps show the `vapor` tag on Vapor components in mixed trees.
+      Test: `tests/integration/runtime/vapor-component-tree.test.ts`.
 - [x] Vapor props have `editable: false`; the client respects it. Empty data/computed/inject
       sections are omitted by the state inspector.
 - [ ] Docs: a Vapor section listing supported features and limitations.
