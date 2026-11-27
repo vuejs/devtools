@@ -6,6 +6,7 @@ export interface AppSnapshot {
   id: AppId
   name: string
   version?: string
+  vapor?: boolean
   componentCount: number
 }
 

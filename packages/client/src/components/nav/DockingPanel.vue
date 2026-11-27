@@ -66,7 +66,8 @@ function refreshPage() {
         aria-label="Toggle app"
       >
         <option v-for="app in apps" :key="app.id" :value="app.id">
-          {{ app.name }}{{ app.version ? ` (${app.version})` : '' }}
+          {{ app.name }}{{ app.version ? ` (${app.version})` : ''
+          }}{{ app.vapor ? ' · vapor' : '' }}
         </option>
       </select>
 

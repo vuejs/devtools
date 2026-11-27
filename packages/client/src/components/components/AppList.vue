@@ -47,6 +47,12 @@ function frameLabel(frame: DevtoolsExtensionFrameDescriptor): string {
           <span class="min-w-0 truncate">
             {{ app.name }}{{ app.version ? ` (${app.version})` : '' }}
           </span>
+          <span
+            v-if="app.vapor"
+            class="font-state-field ml-2 shrink-0 rounded-sm bg-teal-700 px-1 text-10px leading-4 text-white"
+          >
+            vapor
+          </span>
         </button>
       </li>
     </ul>

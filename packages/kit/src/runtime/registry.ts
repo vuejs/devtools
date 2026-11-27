@@ -179,6 +179,16 @@ export class RuntimeRegistry {
       case 'app:unmount':
         return this.removeApp(event.app)
       case 'component:add':
+        return this.ensureComponent(
+          event.appId,
+          event.instance,
+          event.parent,
+          event.time,
+          undefined,
+          getVaporTeleportChildren(event.parent)?.find(
+            (child) => child.instance === event.instance,
+          ),
+        )
       case 'component:update':
         return this.ensureComponent(event.appId, event.instance, event.parent, event.time)
       case 'component:remove':
@@ -272,7 +282,7 @@ export class RuntimeRegistry {
       existing.isFragment = isFragmentComponent(instance, app)
       existing.hidden = isComponentHidden(instance)
       if (overrides.tags) existing.walkTags = overrides.tags
-      existing.tags = readComponentTags(instance, existing.walkTags)
+      existing.tags = readComponentTags(instance, app, existing.walkTags)
       existing.domOrder = domOrder
       existing.consoleId = overrides.consoleId
       existing.autoOpen = overrides.autoOpen
@@ -292,7 +302,7 @@ export class RuntimeRegistry {
       inactive: overrides.inactive ?? isComponentInactive(instance),
       isFragment: isFragmentComponent(instance, app),
       hidden: isComponentHidden(instance),
-      tags: readComponentTags(instance, overrides.tags),
+      tags: readComponentTags(instance, app, overrides.tags),
       walkTags: overrides.tags,
       domOrder,
       consoleId: overrides.consoleId,
@@ -395,10 +405,17 @@ export class RuntimeRegistry {
     if (!tracked?.size) return children
 
     const walked = new Set(children.map((child) => child.instance))
+    // An element block hides its nested teleports. Vue rc.15+ also exposes
+    // those fragments on the owner, so hook-tracked children can recover their tags.
+    let teleportChildrenByInstance: Map<InstanceRef, WalkedComponentChild> | undefined
+    for (const child of getVaporTeleportChildren(instance) ?? []) {
+      teleportChildrenByInstance ??= new Map()
+      teleportChildrenByInstance.set(child.instance, child)
+    }
     for (const child of tracked) {
       if (walked.has(child) || isBeingDestroyed(child) || isComponentHidden(child)) continue
       if (readBooleanProperty(child, 'isDeactivated') === true) continue
-      children.push({ instance: child })
+      children.push(teleportChildrenByInstance?.get(child) ?? { instance: child })
     }
     return children
   }
@@ -516,6 +533,7 @@ export class RuntimeRegistry {
       id: record.id,
       name: record.name,
       version: record.version,
+      vapor: record.vapor,
       componentCount: record.components.size,
     }
   }
@@ -622,11 +640,13 @@ function isComponentHidden(instance: object): boolean {
 
 function readComponentTags(
   instance: object,
+  app: AppRecord,
   extraTags: ComponentTreeNodeTag[] = [],
 ): ComponentTreeNodeTag[] | undefined {
   const tags: ComponentTreeNodeTag[] = []
   const type = readComponentType(instance)
 
+  if (!app.vapor && isVaporInstance(instance)) tags.push(VAPOR_TAG)
   if (typeof type === 'function') {
     tags.push({
       label: 'functional',
@@ -704,10 +724,23 @@ function getInternalInstanceChildren(instance: object): WalkedComponentChild[] {
   return subtree ? getInternalInstanceChildrenFromVNode(subtree) : []
 }
 
+function getVaporTeleportChildren(instance?: object): WalkedComponentChild[] | undefined {
+  if (!instance || !isVaporInstance(instance)) return
+  const teleports = readUnknownProperty(instance, 'teleports')
+  if (teleports instanceof Set && teleports.size)
+    return [...teleports].flatMap((teleport) => getInternalInstanceChildrenFromBlock(teleport))
+}
+
 const TELEPORT_TAG: ComponentTreeNodeTag = {
   label: 'teleport',
   textColor: 0xffffff,
   backgroundColor: 0x8b5cf6,
+}
+
+const VAPOR_TAG: ComponentTreeNodeTag = {
+  label: 'vapor',
+  textColor: 0xffffff,
+  backgroundColor: 0x0f766e,
 }
 
 // Walks a Vapor `Block` (Node | VaporComponentInstance | VaporFragment | Block[]).
